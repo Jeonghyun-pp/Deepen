@@ -103,12 +103,29 @@ export const presets: Record<string, { name: string; config: Partial<DeepyConfig
   },
 };
 
+export const landingConfig: DeepyConfig = {
+  bodyColor: "#FFFFFF",
+  lensGlow: "#FF6B6B",
+  lensInner: "#FFF5F0",
+  handleColor: "#E8E0D8",
+  eyeColor: "#1A1A2E",
+  pupilColor: "#FFFFFF",
+  cheekColor: "#FF9E9E",
+  glowSpeed: 2.5,
+  glowIntensity: 0.5,
+  scale: 1,
+};
+
 interface DeepyProps {
   emotion: Emotion;
   config: DeepyConfig;
+  onClick?: () => void;
+  className?: string;
+  style?: React.CSSProperties;
+  softShadow?: boolean;
 }
 
-export default function Deepy({ emotion, config }: DeepyProps) {
+export default function Deepy({ emotion, config, onClick, className, style, softShadow }: DeepyProps) {
   const s = config.scale;
 
   const eyeVariants: Record<Emotion, React.ReactNode> = {
@@ -540,6 +557,8 @@ export default function Deepy({ emotion, config }: DeepyProps) {
   // Show cheeks for warm emotions
   const showCheeks = ["sparkle", "celebrate", "love", "surprised"].includes(emotion);
 
+  const shadowOpacity = softShadow ? 0.12 : 0.3;
+
   return (
     <motion.svg
       viewBox={`${-100 * s} ${-100 * s} ${200 * s} ${220 * s}`}
@@ -547,6 +566,9 @@ export default function Deepy({ emotion, config }: DeepyProps) {
       height={300 * s}
       animate={bodyFloat}
       transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+      onClick={onClick}
+      className={className}
+      style={{ ...style, cursor: onClick ? "pointer" : undefined }}
     >
       <defs>
         <filter id="lens-glow" x="-50%" y="-50%" width="200%" height="200%">
@@ -557,7 +579,7 @@ export default function Deepy({ emotion, config }: DeepyProps) {
           </feMerge>
         </filter>
         <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx={0} dy={4 * s} stdDeviation={6 * s} floodColor="#000" floodOpacity={0.3} />
+          <feDropShadow dx={0} dy={4 * s} stdDeviation={6 * s} floodColor="#000" floodOpacity={shadowOpacity} />
         </filter>
       </defs>
 

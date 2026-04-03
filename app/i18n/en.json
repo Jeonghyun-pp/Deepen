@@ -1,0 +1,101 @@
+{
+  "header": {
+    "logo": "Deepen",
+    "cta": "Join Beta"
+  },
+  "hero": {
+    "title": "Papers, deeply understood",
+    "subtitle": "Start your paper journey with a single keyword",
+    "keywords": ["deep learning", "transformer", "reinforcement learning", "LLM", "attention"],
+    "cta": "Start Exploring"
+  },
+  "problem": {
+    "title": "Don't know where to start reading papers?",
+    "cards": [
+      { "icon": "search", "title": "Too many papers", "desc": "Thousands of results. No idea which one to read first." },
+      { "icon": "puzzle", "title": "Reading without context", "desc": "Technical jargon blocks you before you even begin." },
+      { "icon": "door-open", "title": "Giving up", "desc": "You wanted to learn, but ended up closing the tab." }
+    ]
+  },
+  "steps": {
+    "title": "Three steps is all you need",
+    "items": [
+      { "step": "1", "icon": "text-cursor-input", "title": "Enter a keyword", "desc": "Type any topic you're curious about. One keyword is enough." },
+      { "step": "2", "icon": "sparkles", "title": "Get recommendations", "desc": "We pick papers matched to your level and interests." },
+      { "step": "3", "icon": "layers", "title": "Understand in 6 layers", "desc": "From prior work to open questions — context at a glance." }
+    ]
+  },
+  "solution": {
+    "title": "One paper, six directions",
+    "subtitle": "Deepen connects the context of every paper",
+    "layers": [
+      { "label": "Prior Work", "icon": "book-open", "desc": "Where this paper came from. What research it builds on." },
+      { "label": "Key Concepts", "icon": "lightbulb", "desc": "Background knowledge you need before reading." },
+      { "label": "Pipeline", "icon": "settings", "desc": "How the method works, broken down step by step." },
+      { "label": "Follow-ups", "icon": "git-branch", "desc": "What research came after this paper." },
+      { "label": "Industry Use", "icon": "building-2", "desc": "How it's being applied in the real world." },
+      { "label": "Open Questions", "icon": "help-circle", "desc": "Unsolved problems and future research directions." }
+    ]
+  },
+  "cards": {
+    "title": "Knowledge that stacks up",
+    "subtitle": "Every paper becomes part of your knowledge map",
+    "papers": [
+      { "title": "Attention Is All You Need", "authors": "Vaswani et al.", "tag": "NLP", "abstract": "Proposed the Transformer architecture. Self-attention replaces RNNs." },
+      { "title": "BERT: Pre-training of Deep Bidirectional Transformers", "authors": "Devlin et al.", "tag": "NLP", "abstract": "Bidirectional pre-training achieves SOTA across NLP benchmarks." },
+      { "title": "GPT-3: Language Models are Few-Shot Learners", "authors": "Brown et al.", "tag": "LLM", "abstract": "175B parameter model demonstrates remarkable few-shot capabilities." },
+      { "title": "Diffusion Models Beat GANs", "authors": "Dhariwal & Nichol", "tag": "CV", "abstract": "Diffusion models surpass GANs in image generation quality." },
+      { "title": "Chain-of-Thought Prompting", "authors": "Wei et al.", "tag": "LLM", "abstract": "Step-by-step reasoning dramatically improves model performance." }
+    ]
+  },
+  "persona": {
+    "title": "Built for curious minds",
+    "items": [
+      { "icon": "graduation-cap", "role": "Grad Students", "desc": "When reading papers feels like homework. Get the big picture with prior work maps." },
+      { "icon": "microscope", "role": "Researchers", "desc": "When you need to survey a new field fast. Six layers save you hours." },
+      { "icon": "code", "role": "Developers", "desc": "When you want to keep up with AI papers. Pipelines show you what matters." },
+      { "icon": "brain", "role": "Curious Professionals", "desc": "When you thought papers weren't for you. Ten minutes a day is enough." }
+    ]
+  },
+  "stats": {
+    "title": "Deepen in numbers",
+    "items": [
+      { "value": "160M+", "label": "Papers accessible" },
+      { "value": "20+", "label": "Fields covered" },
+      { "value": "6", "label": "Understanding layers" },
+      { "value": "10 min", "label": "Avg. learning time" }
+    ]
+  },
+  "cta": {
+    "title": "We'll build your personal paper map",
+    "subtitle": "Join as a beta tester and be the first to explore",
+    "emailPlaceholder": "Enter your email",
+    "interestLabel": "Select your interests",
+    "interests": ["AI/ML", "NLP", "Computer Vision", "Reinforcement Learning", "Neuroscience", "Economics", "Psychology", "Medicine", "Physics", "Other"],
+    "submit": "Start Exploring"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "items": [
+      { "q": "Is it free?", "a": "All features are free during the beta period." },
+      { "q": "Which papers are supported?", "a": "We start with arXiv and open-access papers, expanding over time." },
+      { "q": "English papers only?", "a": "Currently focused on English papers, but explanations are available in Korean too." },
+      { "q": "Can I upload my own PDFs?", "a": "PDF upload will be added after the beta phase." },
+      { "q": "How is my data handled?", "a": "Personal data is encrypted and only used to improve paper recommendations." }
+    ]
+  },
+  "postSignup": {
+    "counter": "You're explorer #{n}",
+    "share": "Share to move up the waitlist",
+    "copyLink": "Copy Link",
+    "shareTwitter": "Share on X",
+    "shareKakao": "Share on KakaoTalk"
+  },
+  "footer": {
+    "copyright": "© 2026 Deepen. All rights reserved.",
+    "hidden": "You scrolled all the way down... impressive"
+  },
+  "deepy": {
+    "bubbles": ["Let's dig in!", "What are you curious about?", "Papers are waiting!", "Shall we go deeper?", "Ready to explore?"]
+  }
+}
