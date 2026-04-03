@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s \"https://api.semanticscholar.org/api-docs\")",
+      "WebSearch",
+      "WebFetch(domain:copyrightlately.com)",
+      "WebFetch(domain:www.techpolicy.press)",
+      "WebFetch(domain:aire.lexxion.eu)",
+      "WebFetch(domain:www.copyright.or.kr)",
+      "WebFetch(domain:casenote.kr)",
+      "Bash(find:*)",
+      "Bash(xargs grep:*)",
+      "Bash(npx next:*)",
+      "WebFetch(domain:arxiv.org)",
+      "WebFetch(domain:dev.to)",
+      "WebFetch(domain:link.springer.com)",
+      "WebFetch(domain:docs.openalex.org)",
+      "WebFetch(domain:developers.openalex.org)",
+      "WebFetch(domain:pmc.ncbi.nlm.nih.gov)",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:www.researchgate.net)",
+      "WebFetch(domain:api.semanticscholar.org)",
+      "WebFetch(domain:skywork.ai)",
+      "WebFetch(domain:pys2.readthedocs.io)",
+      "Bash(curl -s \"http://localhost:3000/api/papers/search?q=transformer\")",
+      "Bash(curl:*)",
+      "Bash(taskkill //F //IM node.exe)",
+      "Bash(npm run:*)",
+      "Bash(taskkill:*)",
+      "Bash(cmd.exe:*)",
+      "Bash(node test_api.mjs \"attention is all you need\")",
+      "Bash(npx tsc:*)",
+      "Bash(npx eslint:*)"
+    ]
+  }
+}

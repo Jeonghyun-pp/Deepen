@@ -38,18 +38,19 @@ const HeroSection = forwardRef<HTMLElement>(function HeroSection(_, ref) {
             {t("hero.subtitle")}
           </motion.p>
 
-          {/* Auto typing search bar */}
-          <motion.div
+          {/* Auto typing search bar — links to /search */}
+          <motion.a
+            href="/search"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex items-center gap-3 bg-white border-2 border-coral-light rounded-2xl px-5 py-4 shadow-sm max-w-md"
+            className="flex items-center gap-3 bg-white border-2 border-coral-light rounded-2xl px-5 py-4 shadow-sm max-w-md hover:border-coral transition-colors cursor-pointer"
           >
             <Search size={22} className="text-coral" strokeWidth={1.8} />
             <span className="text-lg">
               <AutoTyping words={keywords} />
             </span>
-          </motion.div>
+          </motion.a>
 
           <motion.a
             href="#cta"

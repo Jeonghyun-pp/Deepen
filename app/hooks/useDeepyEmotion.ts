@@ -23,12 +23,13 @@ export function useDeepyEmotion(activeSection: SectionId): Emotion {
 
   useEffect(() => {
     if (activeSection === "problem") {
-      setEmotion("confused");
-      const timer = setTimeout(() => setEmotion("sad"), 2000);
-      return () => clearTimeout(timer);
+      const t1 = setTimeout(() => setEmotion("confused"), 0);
+      const t2 = setTimeout(() => setEmotion("sad"), 2000);
+      return () => { clearTimeout(t1); clearTimeout(t2); };
     }
 
-    setEmotion(sectionEmotionMap[activeSection]);
+    const timer = setTimeout(() => setEmotion(sectionEmotionMap[activeSection]), 0);
+    return () => clearTimeout(timer);
   }, [activeSection]);
 
   return emotion;

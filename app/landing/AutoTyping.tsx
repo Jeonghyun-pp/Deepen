@@ -28,9 +28,11 @@ export default function AutoTyping({
     }
 
     if (isDeleting && displayed === "") {
-      setIsDeleting(false);
-      setWordIndex((prev) => (prev + 1) % words.length);
-      return;
+      const timer = setTimeout(() => {
+        setIsDeleting(false);
+        setWordIndex((prev) => (prev + 1) % words.length);
+      }, 0);
+      return () => clearTimeout(timer);
     }
 
     const speed = isDeleting ? deletingSpeed : typingSpeed;
