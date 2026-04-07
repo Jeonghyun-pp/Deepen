@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deepen - Knowledge Graph</title>
+  <script src="https://unpkg.com/cytoscape@3.30.4/dist/cytoscape.min.js"></script>
+  <script src="https://unpkg.com/3d-force-graph@1.73.3/dist/3d-force-graph.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #FFFFFF; --bg-1: #F8F9FC; --bg-2: #EEF3FF; --bg-3: #E0EDFF;
+      --border: #E8E8F0; --border-2: #D8D8E8; --border-3: #C8C8D8;
+      --text: #1A1A2E; --text-2: #4A4A6A; --text-3: #8888A0; --text-4: #AAAABB;
+      --white: #1A1A2E;
+      --primary: #4A90FF; --primary-dark: #3570CC;
+      --paper: #8b5cf6; --concept: #10b981; --memo: #f59e0b; --document: #3b82f6;
+      --citation: #ef4444; --shared: #6366f1; --manual: #94a3b8;
+      --contains: #10b981; --similarity: #f59e0b;
+      --panel-w: 420px;
+    }
+    body { font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+
+    /* ═══ Layout ═══ */
+    .app { display: flex; height: 100vh; }
+
+    /* ═══ Left Sidebar ═══ */
+    .sidebar {
+      width: 52px; background: var(--bg-1); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; align-items: center; padding: 12px 0; gap: 4px; z-index: 20;
+    }
+    .sidebar-logo { width: 32px; height: 32px; border-radius: 10px; background: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; color: #fff; margin-bottom: 16px; cursor: default; }
+    .sidebar-btn { width: 36px; height: 36px; border: none; background: transparent; border-radius: 10px; color: var(--text-3); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; position: relative; }
+    .sidebar-btn:hover { background: var(--bg-2); color: var(--text-2); }
+    .sidebar-btn.active { background: var(--bg-3); color: var(--primary); }
+    .sidebar-btn .badge { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--primary); }
+    .sidebar-spacer { flex: 1; }
+
+    /* ═══ Graph Area ═══ */
+    .graph-area {
+      flex: 1; position: relative; overflow: hidden;
+      background: var(--bg);
+      background-image: radial-gradient(circle, #E8E8F0 0.8px, transparent 0.8px);
+      background-size: 20px 20px;
+    }
+    .graph-area.mode-3d {
+      background-image: none;
+      background-color: #F8F9FC;
+    }
+    #graph-2d, #graph-3d { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; overflow: hidden; }
+    #graph-3d { display: none; }
+
+    /* ── Top bar ── */
+    .topbar {
+      position: absolute; top: 0; left: 0; right: 0; height: 48px;
+      background: rgba(255,255,255,0.85); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; gap: 12px; z-index: 10;
+    }
+    .search-input {
+      flex: 1; max-width: 360px; padding: 8px 14px 8px 36px; background: var(--bg); border: 2px solid var(--border);
+      border-radius: 14px; color: var(--text); font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.2s;
+    }
+    .search-input:focus { border-color: var(--primary); }
+    .search-input::placeholder { color: var(--text-4); }
+    .search-icon { position: absolute; left: 26px; top: 13px; color: var(--text-4); pointer-events: none; display: flex; }
+    .topbar-sep { width: 1px; height: 24px; background: var(--border); }
+    .view-toggle { display: flex; background: var(--bg-1); border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+    .view-toggle button { padding: 5px 14px; border: none; background: transparent; color: var(--text-3); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+    .view-toggle button.active { background: var(--primary); color: #fff; }
+    .topbar-btn { padding: 5px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text-2); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+    .topbar-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .topbar-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .topbar-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+    /* ── Filter chips ── */
+    .filter-bar {
+      position: absolute; top: 60px; left: 16px; display: flex; gap: 6px; z-index: 10;
+    }
+    .chip {
+      padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg);
+      color: var(--text-3); font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .chip:hover { border-color: var(--border-3); }
+    .chip.active { border-color: var(--primary); color: var(--text); background: #EEF3FF; }
+    .chip .dot { width: 7px; height: 7px; border-radius: 50%; }
+
+    /* ── Minimap placeholder ── */
+    .minimap {
+      position: absolute; bottom: 16px; right: 16px; width: 140px; height: 100px;
+      background: var(--bg-1); border: 1px solid var(--border); border-radius: 10px; z-index: 10;
+      display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-4);
+    }
+
+    /* ═══ Right Panel ═══ */
+    .panel {
+      width: var(--panel-w); background: var(--bg-1); border-left: 1px solid var(--border);
+      display: flex; flex-direction: column; transition: width 0.3s; overflow: hidden;
+      z-index: 15; position: relative;
+    }
+    .panel.collapsed { width: 0; border: none; }
+
+    /* ── Panel Tabs ── */
+    .panel-tabs {
+      display: flex; gap: 4px; padding: 8px 12px; border-bottom: 1px solid var(--border); background: var(--bg-1); min-height: 44px; align-items: center;
+    }
+    .panel-tab {
+      flex: 1; padding: 6px 0; border: none; background: transparent; color: var(--text-3);
+      font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; border-radius: 10px; font-family: inherit;
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+    }
+    .panel-tab:hover { color: var(--text-2); background: var(--bg-2); }
+    .panel-tab.active { color: var(--primary); background: var(--bg-2); }
+
+    /* ── Panel Content ── */
+    .panel-body { flex: 1; overflow-y: auto; }
+    .panel-section { display: none; height: 100%; flex-direction: column; }
+    .panel-section.active { display: flex; }
+
+    /* ── Detail View ── */
+    .detail-inner { padding: 20px; flex: 1; overflow-y: auto; }
+    .detail-empty { color: var(--text-4); font-size: 14px; text-align: center; padding-top: 80px; line-height: 1.8; }
+    .detail-card { background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+    .detail-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+    .detail-title { font-size: 18px; font-weight: 800; color: var(--text); line-height: 1.4; margin-bottom: 8px; }
+    .detail-meta { font-size: 12px; color: var(--text-3); margin-bottom: 16px; line-height: 1.6; }
+    .detail-desc { font-size: 13px; color: var(--text-2); line-height: 1.8; margin-bottom: 0; }
+    .detail-section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-4); margin-bottom: 8px; margin-top: 4px; }
+    .conn-item {
+      padding: 10px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 4px;
+      font-size: 12px; font-weight: 600; color: var(--text); cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .conn-item:hover { border-color: var(--primary); box-shadow: 0 2px 8px rgba(74,144,255,0.06); }
+    .conn-type { font-size: 10px; color: var(--text-3); margin-left: auto; padding: 2px 8px; background: var(--bg-2); border-radius: 6px; }
+
+    /* ── Editor View ── */
+    .editor-inner { padding: 20px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+    .editor-title-input {
+      width: 100%; border: none; background: transparent; color: var(--text);
+      font-size: 20px; font-weight: 700; outline: none; margin-bottom: 4px; padding: 0; font-family: inherit;
+    }
+    .editor-title-input::placeholder { color: var(--text-4); }
+    .editor-type-select {
+      padding: 3px 8px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text-2); font-size: 11px; font-family: inherit; outline: none; margin-bottom: 16px; width: fit-content; cursor: pointer;
+    }
+    .editor-textarea {
+      flex: 1; width: 100%; min-height: 200px; border: none; background: transparent; color: var(--text);
+      font-size: 14px; line-height: 1.8; outline: none; resize: none; font-family: inherit;
+    }
+    .editor-textarea::placeholder { color: var(--text-4); }
+    .editor-toolbar {
+      display: flex; gap: 6px; padding: 12px 0; border-top: 1px solid var(--border); margin-top: auto;
+    }
+    .editor-toolbar button {
+      padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg);
+      color: var(--text-2); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; font-family: inherit;
+    }
+    .editor-toolbar button:hover { border-color: var(--primary); color: var(--primary); }
+    .editor-toolbar .btn-primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .editor-toolbar .btn-primary:hover { opacity: 0.9; }
+
+    /* ── Chat View ── */
+    .chat-inner { flex: 1; display: flex; flex-direction: column; }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .chat-msg { max-width: 90%; padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.6; }
+    .chat-msg.user { background: var(--primary); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .chat-msg.ai { background: var(--bg-2); color: var(--text); align-self: flex-start; border-bottom-left-radius: 4px; }
+    .chat-msg .node-suggestion {
+      margin-top: 8px; padding: 8px 12px; background: rgba(74,144,255,0.08); border: 1px solid rgba(74,144,255,0.2);
+      border-radius: 10px; font-size: 12px;
+    }
+    .chat-msg .node-suggestion button {
+      margin-top: 6px; padding: 4px 12px; background: var(--primary); border: none; border-radius: 8px;
+      color: #fff; font-size: 11px; font-weight: 600; cursor: pointer;
+    }
+    .chat-input-area { padding: 12px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
+    .chat-input {
+      flex: 1; padding: 10px 14px; background: var(--bg); border: 2px solid var(--border);
+      border-radius: 14px; color: var(--text); font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.2s;
+    }
+    .chat-input:focus { border-color: var(--primary); }
+    .chat-input::placeholder { color: var(--text-4); }
+    .chat-send {
+      padding: 10px 16px; background: var(--primary); border: none; border-radius: 12px;
+      color: #fff; font-size: 13px; cursor: pointer; font-weight: 700; font-family: inherit;
+    }
+
+    /* ── Upload View ── */
+    .upload-inner { padding: 20px; flex: 1; overflow-y: auto; }
+    .upload-zone {
+      border: 2px dashed var(--border-2); border-radius: 16px; padding: 40px 20px;
+      text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 20px;
+    }
+    .upload-zone:hover { border-color: var(--primary); background: var(--bg-2); }
+    .upload-zone .icon { margin-bottom: 10px; display: flex; justify-content: center; }
+    .upload-zone p { font-size: 13px; color: var(--text-2); }
+    .upload-zone .sub { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+    .upload-file-item {
+      padding: 12px; background: var(--bg-2); border-radius: 10px; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .upload-file-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--document); display: flex; align-items: center; justify-content: center; font-size: 14px; color: #fff; }
+    .upload-file-info { flex: 1; }
+    .upload-file-name { font-size: 13px; color: var(--text); font-weight: 600; }
+    .upload-file-status { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+    .upload-progress { width: 100%; height: 3px; background: var(--border); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+    .upload-progress-bar { height: 100%; background: var(--primary); border-radius: 2px; transition: width 0.3s; }
+
+    /* ═══ Add Node FAB ═══ */
+    .fab {
+      position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 8px; z-index: 10; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 16px; padding: 8px; box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+    .fab button {
+      padding: 8px 16px; border: 1px solid var(--border); background: var(--bg); border-radius: 10px;
+      color: var(--text-2); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; font-family: inherit;
+    }
+    .fab button:hover { border-color: var(--primary); color: var(--primary); background: var(--bg-2); }
+    .fab .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* ═══ Context Menu ═══ */
+    .ctx-menu {
+      display: none; position: absolute; z-index: 100; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 12px; padding: 6px; min-width: 180px; box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    }
+    .ctx-menu.show { display: block; }
+    .ctx-item {
+      padding: 8px 12px; border-radius: 8px; font-size: 12px; color: var(--text-2);
+      cursor: pointer; transition: all 0.1s; display: flex; align-items: center; gap: 8px;
+    }
+    .ctx-item:hover { background: var(--bg-2); color: var(--text); }
+    .ctx-sep { height: 1px; background: var(--border); margin: 4px 0; }
+    .ctx-item.danger { color: #ef4444; }
+    .ctx-item.danger:hover { background: #FFF5F5; }
+
+    /* ═══ Toast ═══ */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #0F1729; border: 1px solid #1A2540; color: #fff;
+      padding: 10px 20px; border-radius: 12px; font-size: 13px; font-weight: 600; z-index: 200;
+      opacity: 0; transition: opacity 0.3s; pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- ═══ Left Sidebar ═══ -->
+    <nav class="sidebar">
+      <div class="sidebar-logo">D</div>
+      <button class="sidebar-btn active" title="Graph" onclick="showSidebarView('graph')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="6" r="3"/><circle cx="19" cy="6" r="3"/><circle cx="12" cy="19" r="3"/><line x1="7.5" y1="7.5" x2="10.5" y2="17"/><line x1="16.5" y1="7.5" x2="13.5" y2="17"/></svg>
+      </button>
+      <button class="sidebar-btn" title="Editor" onclick="showSidebarView('editor'); switchTab('editor')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </button>
+      <button class="sidebar-btn" title="Chat" onclick="showSidebarView('chat'); switchTab('chat')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span class="badge"></span>
+      </button>
+      <button class="sidebar-btn" title="Upload" onclick="showSidebarView('upload'); switchTab('upload')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </button>
+      <div class="sidebar-spacer"></div>
+      <button class="sidebar-btn" title="Settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </nav>
+
+    <!-- ═══ Graph Area ═══ -->
+    <div class="graph-area">
+      <!-- Top Bar -->
+      <div class="topbar">
+        <span class="search-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
+        <input class="search-input" id="graphSearch" placeholder="노드 검색... (논문, 개념, 메모)" oninput="searchGraph(this.value)" />
+        <div class="topbar-sep"></div>
+        <div class="view-toggle">
+          <button class="active" id="btn2d" onclick="switchView('2d')">2D</button>
+          <button id="btn3d" onclick="switchView('3d')">3D</button>
+        </div>
+        <button class="topbar-btn" onclick="fitGraph()">Fit</button>
+        <button class="topbar-btn" id="btnLocal" onclick="toggleLocal()">Local</button>
+        <div class="topbar-right">
+          <button class="topbar-btn" id="btnPanel" onclick="togglePanel()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/></svg></button>
+        </div>
+      </div>
+
+      <!-- Filter Chips -->
+      <div class="filter-bar">
+        <div class="chip active" onclick="toggleFilter(this,'paper')"><span class="dot" style="background:var(--paper)"></span>논문</div>
+        <div class="chip active" onclick="toggleFilter(this,'concept')"><span class="dot" style="background:var(--concept)"></span>개념</div>
+        <div class="chip active" onclick="toggleFilter(this,'memo')"><span class="dot" style="background:var(--memo)"></span>메모</div>
+        <div class="chip active" onclick="toggleFilter(this,'document')"><span class="dot" style="background:var(--document)"></span>문서</div>
+      </div>
+
+      <!-- FAB -->
+      <div class="fab">
+        <button onclick="addNode('paper')"><span class="dot" style="background:var(--paper)"></span>논문</button>
+        <button onclick="addNode('concept')"><span class="dot" style="background:var(--concept)"></span>개념</button>
+        <button onclick="addNode('memo')"><span class="dot" style="background:var(--memo)"></span>메모</button>
+        <button onclick="addNode('document')"><span class="dot" style="background:var(--document)"></span>문서</button>
+      </div>
+
+      <!-- Minimap -->
+      <div class="minimap">minimap</div>
+
+      <div id="graph-2d"></div>
+      <div id="graph-3d"></div>
+    </div>
+
+    <!-- ═══ Right Panel ═══ -->
+    <div class="panel" id="panel">
+      <div class="panel-tabs">
+        <button class="panel-tab active" data-tab="detail" onclick="switchTab('detail')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>Detail</button>
+        <button class="panel-tab" data-tab="editor" onclick="switchTab('editor')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Editor</button>
+        <button class="panel-tab" data-tab="chat" onclick="switchTab('chat')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</button>
+        <button class="panel-tab" data-tab="upload" onclick="switchTab('upload')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Upload</button>
+      </div>
+      <div class="panel-body">
+        <!-- Detail -->
+        <div class="panel-section active" id="sec-detail">
+          <div class="detail-inner" id="nodeDetail">
+            <div class="detail-empty">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D8D8E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="3"/><circle cx="19" cy="6" r="3"/><circle cx="12" cy="19" r="3"/><line x1="7.5" y1="7.5" x2="10.5" y2="17"/><line x1="16.5" y1="7.5" x2="13.5" y2="17"/></svg><br><br>
+              노드를 클릭하여<br>상세 정보를 확인하세요
+            </div>
+          </div>
+        </div>
+
+        <!-- Editor -->
+        <div class="panel-section" id="sec-editor">
+          <div class="editor-inner">
+            <input class="editor-title-input" placeholder="제목을 입력하세요" id="editorTitle" />
+            <select class="editor-type-select" id="editorType">
+              <option value="paper">논문</option>
+              <option value="concept">개념</option>
+              <option value="memo" selected>메모</option>
+              <option value="document">문서</option>
+            </select>
+            <textarea class="editor-textarea" placeholder="여기에 자유롭게 내용을 작성하세요...&#10;&#10;다른 노드를 언급하려면 [[ 를 입력하세요" id="editorContent"></textarea>
+            <div class="editor-toolbar">
+              <button onclick="linkNode()">노드 연결</button>
+              <button class="btn-primary" onclick="saveEditorNode()">저장</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat -->
+        <div class="panel-section" id="sec-chat">
+          <div class="chat-inner">
+            <div class="chat-messages" id="chatMessages">
+              <div class="chat-msg ai">
+                안녕하세요! 논문이나 개념에 대해 질문하면 정리를 도와드립니다.<br><br>
+                예: "Transformer의 Self-Attention을 정리해줘"
+              </div>
+            </div>
+            <div class="chat-input-area">
+              <input class="chat-input" id="chatInput" placeholder="질문하거나 정리할 내용을 입력하세요..." onkeydown="if(event.key==='Enter')sendChat()" />
+              <button class="chat-send" onclick="sendChat()">전송</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upload -->
+        <div class="panel-section" id="sec-upload">
+          <div class="upload-inner">
+            <div class="upload-zone" onclick="simulateUpload()">
+              <div class="icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#4A90FF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+              <p>파일을 드래그하거나 클릭하여 업로드</p>
+              <div class="sub">PDF, DOCX, TXT, MD 지원</div>
+            </div>
+            <div id="uploadList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Context Menu -->
+  <div class="ctx-menu" id="ctxMenu">
+    <div class="ctx-item" onclick="ctxAction('detail')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> 상세 보기</div>
+    <div class="ctx-item" onclick="ctxAction('edit')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> 편집</div>
+    <div class="ctx-item" onclick="ctxAction('connect')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg> 노드 연결</div>
+    <div class="ctx-item" onclick="ctxAction('local')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg> 로컬 그래프</div>
+    <div class="ctx-sep"></div>
+    <div class="ctx-item danger" onclick="ctxAction('delete')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg> 삭제</div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ═══════════════════════════════════
+    // Data
+    // ═══════════════════════════════════
+    const COLORS = { paper:'#8b5cf6', concept:'#10b981', memo:'#f59e0b', document:'#3b82f6' };
+    const EDGE_COLORS = { citation:'#ef4444', shared_concept:'#6366f1', manual:'#64748b', contains:'#10b981', similarity:'#f59e0b' };
+    const TYPE_LABELS = { paper:'논문', concept:'개념', memo:'메모', document:'문서' };
+
+    const nodes = [
+      { id:'p1', label:'Attention Is All You Need', type:'paper', content:'Transformer 아키텍처를 제안한 논문. Self-attention 메커니즘만으로 seq2seq 모델을 구성하여 기존 RNN/CNN 기반 모델보다 뛰어난 성능을 달성.', meta:{authors:'Vaswani et al.',year:2017,citations:120000}},
+      { id:'p2', label:'BERT', type:'paper', content:'Bidirectional Encoder Representations from Transformers. 사전학습된 양방향 언어 모델로, 다양한 NLP 태스크에서 SOTA 달성.', meta:{authors:'Devlin et al.',year:2018,citations:90000}},
+      { id:'p3', label:'GPT-3', type:'paper', content:'175B 파라미터의 대규모 언어 모델. Few-shot learning으로 다양한 태스크 수행 가능함을 입증.', meta:{authors:'Brown et al.',year:2020,citations:35000}},
+      { id:'p4', label:'Vision Transformer (ViT)', type:'paper', content:'Transformer를 이미지 분류에 적용. 이미지를 패치로 분할하여 시퀀스로 처리.', meta:{authors:'Dosovitskiy et al.',year:2020,citations:25000}},
+      { id:'p5', label:'ResNet', type:'paper', content:'Residual Learning 프레임워크. Skip connection으로 매우 깊은 네트워크 학습 가능.', meta:{authors:'He et al.',year:2015,citations:200000}},
+      { id:'p6', label:'Diffusion Models Beat GANs', type:'paper', content:'Diffusion 모델이 이미지 생성에서 GAN을 능가할 수 있음을 입증.', meta:{authors:'Dhariwal & Nichol',year:2021,citations:8000}},
+      { id:'p7', label:'CLIP', type:'paper', content:'Contrastive Language-Image Pre-training. 텍스트와 이미지를 동일 임베딩 공간에서 학습.', meta:{authors:'Radford et al.',year:2021,citations:15000}},
+      { id:'c1', label:'Self-Attention', type:'concept', content:'시퀀스 내 각 위치가 다른 모든 위치를 참조하여 표현을 계산하는 메커니즘. Query, Key, Value 행렬의 내적으로 구현.'},
+      { id:'c2', label:'Transformer', type:'concept', content:'Self-attention 기반의 인코더-디코더 아키텍처. 병렬 처리가 가능하여 RNN 대비 학습 속도가 빠름.'},
+      { id:'c3', label:'Transfer Learning', type:'concept', content:'사전학습된 모델을 다른 태스크에 미세조정하는 학습 패러다임.'},
+      { id:'c4', label:'Pre-training', type:'concept', content:'대규모 비지도 데이터에서 언어/비전 모델을 사전학습하는 단계.'},
+      { id:'c5', label:'CNN', type:'concept', content:'Convolutional Neural Network. 합성곱 연산으로 지역적 특징 추출.'},
+      { id:'c6', label:'Residual Connection', type:'concept', content:'입력을 출력에 더하는 skip connection. 깊은 네트워크의 학습을 안정화.'},
+      { id:'c7', label:'Diffusion Process', type:'concept', content:'점진적으로 노이즈를 추가한 뒤 역으로 노이즈를 제거하며 데이터를 생성하는 확률적 과정.'},
+      { id:'c8', label:'Contrastive Learning', type:'concept', content:'유사한 쌍은 가깝게, 다른 쌍은 멀게 임베딩하는 학습 방법.'},
+      { id:'c9', label:'Multi-modal Learning', type:'concept', content:'텍스트, 이미지, 오디오 등 서로 다른 modality를 함께 학습.'},
+      { id:'m1', label:'Transformer가 NLP를 바꾼 이유', type:'memo', content:'RNN의 순차 처리 한계를 병렬 처리로 극복. Attention으로 장거리 의존성 문제 해결. 이후 BERT, GPT 등 모든 주요 모델의 기반이 됨.'},
+      { id:'m2', label:'ViT vs CNN 정리', type:'memo', content:'ViT는 대규모 데이터에서 CNN보다 우수하나, 소규모 데이터에서는 CNN의 inductive bias가 유리. 하이브리드 접근이 실용적.'},
+      { id:'m3', label:'Diffusion vs GAN 비교', type:'memo', content:'GAN: 빠른 생성, 모드 붕괴 문제. Diffusion: 느리지만 안정적, 다양성 높음. 최근 속도 개선 연구 활발.'},
+      { id:'d1', label:'NLP 세미나 발표자료.pdf', type:'document', content:'2024년 1월 연구실 세미나에서 발표한 Transformer 계열 모델 서베이 자료.'},
+      { id:'d2', label:'CV 프로젝트 제안서.pdf', type:'document', content:'ViT 기반 의료 이미지 분류 프로젝트 제안서. ResNet과 성능 비교 포함.'},
+    ];
+
+    const edges = [
+      {source:'p2',target:'p1',type:'citation'},{source:'p3',target:'p1',type:'citation'},
+      {source:'p4',target:'p1',type:'citation'},{source:'p4',target:'p5',type:'citation'},
+      {source:'p7',target:'p4',type:'citation'},{source:'p7',target:'p3',type:'citation'},
+      {source:'p2',target:'p3',type:'citation'},
+      {source:'p1',target:'c1',type:'contains'},{source:'p1',target:'c2',type:'contains'},
+      {source:'p2',target:'c2',type:'contains'},{source:'p2',target:'c3',type:'contains'},
+      {source:'p2',target:'c4',type:'contains'},{source:'p3',target:'c2',type:'contains'},
+      {source:'p3',target:'c4',type:'contains'},{source:'p4',target:'c1',type:'contains'},
+      {source:'p4',target:'c5',type:'contains'},{source:'p5',target:'c5',type:'contains'},
+      {source:'p5',target:'c6',type:'contains'},{source:'p1',target:'c6',type:'contains'},
+      {source:'p6',target:'c7',type:'contains'},{source:'p7',target:'c8',type:'contains'},
+      {source:'p7',target:'c9',type:'contains'},
+      {source:'p1',target:'p4',type:'shared_concept'},{source:'p5',target:'p4',type:'shared_concept'},
+      {source:'p2',target:'p3',type:'shared_concept'},
+      {source:'m1',target:'p1',type:'manual'},{source:'m1',target:'c2',type:'manual'},
+      {source:'m2',target:'p4',type:'manual'},{source:'m2',target:'p5',type:'manual'},
+      {source:'m3',target:'p6',type:'manual'},
+      {source:'d1',target:'p1',type:'manual'},{source:'d1',target:'p2',type:'manual'},
+      {source:'d1',target:'p3',type:'manual'},{source:'d2',target:'p4',type:'manual'},
+      {source:'d2',target:'p5',type:'manual'},{source:'p6',target:'p7',type:'similarity'},
+    ];
+
+    // ═══════════════════════════════════
+    // State
+    // ═══════════════════════════════════
+    let cy = null, graph3d = null, currentView = '2d', localMode = false;
+    const activeFilters = new Set(['paper','concept','memo','document']);
+    let ctxNodeId = null, nodeCounter = 100;
+
+    // Using built-in cose layout (no external dependencies)
+
+    // ═══════════════════════════════════
+    // Init 2D
+    // ═══════════════════════════════════
+    function init2D() {
+      const els = [];
+      nodes.forEach(n => {
+        const deg = edges.filter(e => e.source===n.id||e.target===n.id).length;
+        els.push({ data: { id:n.id, label:n.label, type:n.type, degree:deg, content:n.content, meta:n.meta||{} }});
+      });
+      edges.forEach((e,i) => {
+        els.push({ data: { id:'e'+i, source:e.source, target:e.target, type:e.type }});
+      });
+
+      cy = cytoscape({
+        container: document.getElementById('graph-2d'), elements: els, minZoom:0.15, maxZoom:3,
+        style: [
+          // ── Nodes ──
+          { selector:'node', style: {
+            'shape':'round-rectangle',
+            'label':'data(label)',
+            'text-valign':'center','text-halign':'center',
+            'font-family':'Nunito, sans-serif','font-size':10,'font-weight':'bold',
+            'color':'#fff','text-max-width':110,'text-wrap':'ellipsis',
+            'width':'mapData(degree,0,15,100,220)','height':'mapData(degree,0,15,36,52)',
+            'background-color':'#888','background-opacity':1,
+            'border-width':0,
+            'overlay-opacity':0,
+            'transition-property':'opacity,background-color,border-color,border-width','transition-duration':'0.2s',
+          }},
+          { selector:'node[type="paper"]', style:{'background-color':'#8b5cf6','color':'#fff'}},
+          { selector:'node[type="concept"]', style:{'background-color':'#10b981','color':'#fff'}},
+          { selector:'node[type="memo"]', style:{'background-color':'#f59e0b','color':'#fff'}},
+          { selector:'node[type="document"]', style:{'background-color':'#3b82f6','color':'#fff'}},
+          // ── Edges ──
+          { selector:'edge', style:{'width':1.2,'line-color':'#D0D0E0','curve-style':'bezier','opacity':0.45,'transition-property':'opacity,line-color,width','transition-duration':'0.2s'}},
+          { selector:'edge[type="citation"]', style:{'line-color':EDGE_COLORS.citation,'target-arrow-shape':'triangle','target-arrow-color':EDGE_COLORS.citation,'arrow-scale':0.7,'width':1.8,'opacity':0.55}},
+          { selector:'edge[type="shared_concept"]', style:{'line-color':EDGE_COLORS.shared_concept,'line-style':'dashed','opacity':0.4}},
+          { selector:'edge[type="contains"]', style:{'line-color':EDGE_COLORS.contains,'opacity':0.35,'width':1}},
+          { selector:'edge[type="manual"]', style:{'line-color':EDGE_COLORS.manual,'opacity':0.35}},
+          { selector:'edge[type="similarity"]', style:{'line-color':EDGE_COLORS.similarity,'line-style':'dotted','opacity':0.4}},
+          // ── States ──
+          { selector:'node.hl', style:{'border-color':'#4A90FF','border-width':2.5,'z-index':999}},
+          { selector:'node.fade', style:{'opacity':0.2}},
+          { selector:'edge.hl', style:{'opacity':0.85,'width':2.5,'z-index':999}},
+          { selector:'edge.fade', style:{'opacity':0.06}},
+          { selector:'node.hide', style:{'display':'none'}},
+          { selector:'edge.hide', style:{'display':'none'}},
+          { selector:'node.search-match', style:{'border-color':'#4A90FF','border-width':2.5}},
+        ],
+        layout: { name:'cose', animate:true, animationDuration:1200, nodeRepulsion:function(){return 20000;}, idealEdgeLength:function(){return 120;}, edgeElasticity:function(){return 80;}, gravity:0.3, numIter:2000, nodeDimensionsIncludeLabels:true, nodeOverlap:80, padding:50 }
+      });
+
+      cy.on('mouseover','node', e => {
+        const n = e.target, nb = n.neighborhood().add(n);
+        cy.elements().addClass('fade'); nb.removeClass('fade');
+        n.addClass('hl'); n.connectedEdges().addClass('hl'); nb.nodes().addClass('hl');
+      });
+      cy.on('mouseout','node', () => cy.elements().removeClass('fade hl'));
+      cy.on('tap','node', e => { showNodeDetail(e.target.data()); if(localMode){applyLocal(e.target.data().id);} });
+      cy.on('tap', e => { if(e.target===cy){clearDetail();hideCtx();if(localMode){localMode=false;cy.elements().removeClass('hide');document.getElementById('btnLocal').classList.remove('active');}} });
+      cy.on('cxttap','node', e => { ctxNodeId=e.target.data().id; showCtx(e.originalEvent); });
+      cy.on('zoom', () => {
+        const z=cy.zoom();
+        cy.style().selector('node').style({'text-opacity':z>0.3?Math.min(1,(z-0.3)*2):0}).selector('edge[type="contains"]').style({'opacity':z>0.7?0.35:0.18}).update();
+      });
+    }
+
+    // ═══════════════════════════════════
+    // Init 3D
+    // ═══════════════════════════════════
+    // ── Deepy-inspired 3D color palette (cosmic glow colors from Deepy presets) ──
+    const COLORS_3D = {
+      paper:   '#CE82FF',  // cosmic purple (Deepy purple preset lensGlow)
+      concept: '#00E5CC',  // teal cyan (Deepy default lensGlow)
+      memo:    '#FFB347',  // warm amber (Deepy sunset cheekColor)
+      document:'#4FC3F7',  // ocean blue (Deepy ocean preset lensGlow)
+    };
+
+    function init3D() {
+      const c = document.getElementById('graph-3d'); c.innerHTML='';
+      // Use .graph-area dimensions (excludes panel)
+      const area = document.querySelector('.graph-area');
+      const gd = {
+        nodes: nodes.map(n=>({...n, degree:edges.filter(e=>e.source===n.id||e.target===n.id).length})),
+        links: edges.map(e=>({...e}))
+      };
+
+      graph3d = ForceGraph3D()(c)
+        .width(area.clientWidth).height(area.clientHeight)
+        .graphData(gd)
+        .backgroundColor('#F8F9FC')
+        // ── Tooltip ──
+        .nodeLabel(n => {
+          const col = COLORS_3D[n.type]||'#888';
+          return `<div style="background:#fff;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:600;color:#1A1A2E;border:1px solid ${col}30;box-shadow:0 2px 12px ${col}18;font-family:Nunito,sans-serif"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${col};margin-right:6px;box-shadow:0 0 6px ${col}"></span>${n.label}</div>`;
+        })
+        // ── Nodes ──
+        .nodeColor(n => COLORS_3D[n.type] || '#888')
+        .nodeVal(n => Math.max(2.5, n.degree * 2))
+        .nodeOpacity(0.88)
+        .nodeResolution(24)
+        // ── Edges ──
+        .linkColor(l => (EDGE_COLORS[l.type] || '#ccc') + '55')
+        .linkWidth(l => l.type === 'citation' ? 1.2 : 0.35)
+        .linkOpacity(0.25)
+        .linkDirectionalArrowLength(l => l.type === 'citation' ? 3.5 : 0)
+        .linkDirectionalArrowRelPos(1)
+        // ── Flowing particles ──
+        .linkDirectionalParticles(l => l.type === 'citation' ? 4 : l.type === 'shared_concept' ? 2 : 1)
+        .linkDirectionalParticleWidth(l => l.type === 'citation' ? 2 : 1)
+        .linkDirectionalParticleSpeed(0.004)
+        .linkDirectionalParticleColor(l => {
+          if (l.type === 'citation') return COLORS_3D.paper;
+          if (l.type === 'shared_concept') return COLORS_3D.concept;
+          if (l.type === 'contains') return COLORS_3D.concept;
+          if (l.type === 'similarity') return COLORS_3D.memo;
+          return COLORS_3D.document;
+        })
+        // ── Make nodes bigger for easier clicking ──
+        .nodeRelSize(8)
+        // ── Click: show detail in panel ──
+        .onNodeClick(function(node) {
+          showNodeDetail({ id:node.id, label:node.label, type:node.type, content:node.content, meta:node.meta||{} });
+          var p = document.getElementById('panel');
+          if (p.classList.contains('collapsed')) togglePanel();
+          var d = 180, r = 1 + d / Math.hypot(node.x, node.y, node.z);
+          graph3d.cameraPosition({ x:node.x*r, y:node.y*r, z:node.z*r }, node, 1200);
+        });
+
+      // Ensure correct size after layout settles
+      setTimeout(resize3D, 200);
+    }
+
+    // ═══════════════════════════════════
+    // View / Panel
+    // ═══════════════════════════════════
+    function switchView(v) {
+      currentView=v;
+      document.getElementById('btn2d').classList.toggle('active',v==='2d');
+      document.getElementById('btn3d').classList.toggle('active',v==='3d');
+      document.getElementById('graph-2d').style.display=v==='2d'?'block':'none';
+      document.getElementById('graph-3d').style.display=v==='3d'?'block':'none';
+      // Toggle background for 3D (no dot grid)
+      document.querySelector('.graph-area').classList.toggle('mode-3d', v==='3d');
+      if(v==='3d') {
+        if(!graph3d) {
+          setTimeout(()=>init3D(), 100);
+        } else {
+          resize3D();
+        }
+      }
+    }
+    function resize3D() {
+      if(!graph3d) return;
+      const c = document.querySelector('.graph-area');
+      graph3d.width(c.clientWidth).height(c.clientHeight);
+    }
+    function togglePanel() {
+      const p=document.getElementById('panel'),b=document.getElementById('btnPanel');
+      p.classList.toggle('collapsed'); b.textContent=p.classList.contains('collapsed')?'◀ Panel':'Panel ▶';
+      // Re-fit 3D canvas after panel animation
+      if(currentView==='3d') setTimeout(resize3D, 350);
+    }
+    function switchTab(tab) {
+      document.querySelectorAll('.panel-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+      document.querySelectorAll('.panel-section').forEach(s=>s.classList.toggle('active',s.id==='sec-'+tab));
+    }
+    function showSidebarView(view) {
+      document.querySelectorAll('.sidebar-btn').forEach((b,i)=>b.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+    }
+    function fitGraph(){ if(currentView==='2d'&&cy) cy.fit(undefined,50); }
+
+    // ═══════════════════════════════════
+    // Local Graph
+    // ═══════════════════════════════════
+    function toggleLocal() {
+      localMode=!localMode;
+      document.getElementById('btnLocal').classList.toggle('active',localMode);
+      if(!localMode) cy.elements().removeClass('hide');
+    }
+    function applyLocal(id) {
+      const n=cy.$id(id), nb=n.neighborhood().add(n), hop2=nb.neighborhood().add(nb);
+      cy.elements().addClass('hide'); hop2.removeClass('hide');
+    }
+
+    // ═══════════════════════════════════
+    // Filter
+    // ═══════════════════════════════════
+    function toggleFilter(el,type) {
+      el.classList.toggle('active');
+      activeFilters.has(type)?activeFilters.delete(type):activeFilters.add(type);
+      cy.nodes().forEach(n=>{ n.toggleClass('hide',!activeFilters.has(n.data('type'))); });
+      cy.edges().forEach(e=>{ e.toggleClass('hide',e.source().hasClass('hide')||e.target().hasClass('hide')); });
+    }
+
+    // ═══════════════════════════════════
+    // Search
+    // ═══════════════════════════════════
+    function searchGraph(q) {
+      cy.nodes().removeClass('search-match fade');
+      if(!q.trim()) return;
+      const lq=q.toLowerCase();
+      cy.nodes().forEach(n=>{
+        if(n.data('label').toLowerCase().includes(lq)) n.addClass('search-match');
+        else n.addClass('fade');
+      });
+    }
+
+    // ═══════════════════════════════════
+    // Side Panel: Detail
+    // ═══════════════════════════════════
+    function showNodeDetail(data) {
+      switchTab('detail');
+      const conns = edges.filter(e=>e.source===data.id||e.target===data.id).map(e=>{
+        const oid=e.source===data.id?e.target:e.source;
+        const on=nodes.find(n=>n.id===oid);
+        return {id:oid, label:on?.label||oid, type:e.type, nodeType:on?.type||'unknown'};
+      });
+      let metaHtml='';
+      if(data.meta){
+        if(data.meta.authors) metaHtml+=data.meta.authors+'<br>';
+        if(data.meta.year) metaHtml+=data.meta.year;
+        if(data.meta.citations) metaHtml+=' &middot; cited '+data.meta.citations.toLocaleString();
+      }
+      const TYPE_ICONS = {
+        paper: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>',
+        concept: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 0 0-8 8c0 3.4 2.1 6.3 5 7.4V20h6v-2.6c2.9-1.1 5-4 5-7.4a8 8 0 0 0-8-8z"/><path d="M9 22h6"/></svg>',
+        memo: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg>',
+        document: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>',
+      };
+      document.getElementById('nodeDetail').innerHTML=`
+        <div class="detail-card">
+          <div class="detail-badge" style="background:${COLORS[data.type]}15;color:${COLORS[data.type]};border:1px solid ${COLORS[data.type]}30">${TYPE_ICONS[data.type]||''} ${TYPE_LABELS[data.type]||data.type}</div>
+          <div class="detail-title">${data.label}</div>
+          ${metaHtml?`<div class="detail-meta">${metaHtml}</div>`:''}
+          <div class="detail-desc">${data.content||''}</div>
+        </div>
+        <div class="detail-section-label">연결 (${conns.length})</div>
+        ${conns.map(c=>`<div class="conn-item" onclick="focusNode('${c.id}')"><span class="dot" style="background:${COLORS[c.nodeType]||'#C8C8D8'};width:8px;height:8px;border-radius:50%;flex-shrink:0"></span>${c.label}<span class="conn-type">${c.type}</span></div>`).join('')}
+      `;
+    }
+    function clearDetail() {
+      document.getElementById('nodeDetail').innerHTML='<div class="detail-empty"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#D8D8E8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="3"/><circle cx="19" cy="6" r="3"/><circle cx="12" cy="19" r="3"/><line x1="7.5" y1="7.5" x2="10.5" y2="17"/><line x1="16.5" y1="7.5" x2="13.5" y2="17"/></svg><br><br>노드를 클릭하여<br>상세 정보를 확인하세요</div>';
+    }
+    function focusNode(id) {
+      if(currentView==='2d'&&cy){
+        const n=cy.$id(id); cy.animate({center:{eles:n},zoom:1.5},{duration:400});
+        showNodeDetail(n.data()); if(localMode) applyLocal(id);
+      }
+    }
+
+    // ═══════════════════════════════════
+    // Add Node (FAB)
+    // ═══════════════════════════════════
+    function addNode(type) {
+      switchTab('editor');
+      document.getElementById('editorType').value=type;
+      document.getElementById('editorTitle').value='';
+      document.getElementById('editorContent').value='';
+      document.getElementById('editorTitle').focus();
+      toast(`새 ${TYPE_LABELS[type]} 노드를 작성하세요`);
+    }
+    function saveEditorNode() {
+      const title=document.getElementById('editorTitle').value.trim();
+      const type=document.getElementById('editorType').value;
+      const content=document.getElementById('editorContent').value.trim();
+      if(!title){toast('제목을 입력하세요');return;}
+      const id='n'+(++nodeCounter);
+      nodes.push({id,label:title,type,content,meta:{}});
+      cy.add({data:{id,label:title,type,degree:0,content,meta:{}}});
+      cy.layout({name:'cose',animate:true,animationDuration:600,nodeRepulsion:function(){return 20000;},idealEdgeLength:function(){return 120;},edgeElasticity:function(){return 80;},gravity:0.3,numIter:1000,nodeDimensionsIncludeLabels:true,nodeOverlap:80}).run();
+      toast(`"${title}" 노드가 추가되었습니다`);
+      document.getElementById('editorTitle').value='';
+      document.getElementById('editorContent').value='';
+    }
+    function linkNode() { toast('연결할 노드를 그래프에서 클릭하세요 (준비 중)'); }
+
+    // ═══════════════════════════════════
+    // Chat (Mock)
+    // ═══════════════════════════════════
+    function sendChat() {
+      const input=document.getElementById('chatInput'), msg=input.value.trim();
+      if(!msg) return;
+      const box=document.getElementById('chatMessages');
+      box.innerHTML+=`<div class="chat-msg user">${esc(msg)}</div>`;
+      input.value='';
+      setTimeout(()=>{
+        let reply='';
+        if(msg.includes('Self-Attention')||msg.includes('self-attention')||msg.includes('셀프어텐션')) {
+          reply=`<strong>Self-Attention</strong>은 시퀀스 내 각 토큰이 다른 모든 토큰과의 관계를 계산하는 메커니즘입니다.<br><br>
+          <b>핵심 구조:</b><br>
+          &bull; Query(Q), Key(K), Value(V) 세 행렬로 분리<br>
+          &bull; Attention(Q,K,V) = softmax(QK<sup>T</sup>/&radic;d<sub>k</sub>)V<br>
+          &bull; Multi-head로 확장하여 다양한 관계 포착<br><br>
+          <div class="node-suggestion">
+            <strong>노드 추가 제안:</strong> "Self-Attention 수식 정리" 메모 노드를 생성하고 [Self-Attention] 개념 노드와 연결할까요?
+            <br><button onclick="acceptSuggestion()">추가하기</button>
+          </div>`;
+        } else if(msg.includes('Transformer')||msg.includes('트랜스포머')) {
+          reply=`<strong>Transformer</strong>는 2017년 "Attention Is All You Need"에서 제안된 아키텍처입니다.<br><br>
+          <b>핵심 특징:</b><br>
+          &bull; RNN 없이 Self-Attention만으로 시퀀스 처리<br>
+          &bull; 병렬 처리 가능 → 학습 속도 대폭 향상<br>
+          &bull; Encoder-Decoder 구조 (BERT=Encoder, GPT=Decoder)<br><br>
+          현재 그래프에 Transformer 관련 논문 4개, 개념 2개가 연결되어 있습니다.`;
+        } else {
+          reply='해당 내용에 대해 정리해 드리겠습니다. 관련 논문이나 개념이 있다면 함께 알려주시면 더 정확한 정리가 가능합니다.';
+        }
+        box.innerHTML+=`<div class="chat-msg ai">${reply}</div>`;
+        box.scrollTop=box.scrollHeight;
+      }, 800);
+    }
+    function acceptSuggestion() {
+      const id='n'+(++nodeCounter);
+      nodes.push({id,label:'Self-Attention 수식 정리',type:'memo',content:'Attention(Q,K,V) = softmax(QK^T/sqrt(d_k))V\nMulti-head: 여러 head의 attention을 concat 후 linear projection',meta:{}});
+      cy.add({data:{id,label:'Self-Attention 수식 정리',type:'memo',degree:1,content:'',meta:{}}});
+      edges.push({source:id,target:'c1',type:'manual'});
+      cy.add({data:{id:'e_new_'+nodeCounter,source:id,target:'c1',type:'manual'}});
+      cy.layout({name:'cose',animate:true,animationDuration:600,nodeRepulsion:function(){return 20000;},idealEdgeLength:function(){return 120;},edgeElasticity:function(){return 80;},gravity:0.3,numIter:1000,nodeDimensionsIncludeLabels:true,nodeOverlap:80}).run();
+      toast('"Self-Attention 수식 정리" 노드가 추가되었습니다');
+    }
+
+    // ═══════════════════════════════════
+    // Upload (Mock)
+    // ═══════════════════════════════════
+    function simulateUpload() {
+      const list=document.getElementById('uploadList');
+      list.innerHTML=`
+        <div class="upload-file-item">
+          <div class="upload-file-icon">PDF</div>
+          <div class="upload-file-info">
+            <div class="upload-file-name">Transformer_Survey_2024.pdf</div>
+            <div class="upload-file-status" id="uploadStatus">분석 중...</div>
+            <div class="upload-progress"><div class="upload-progress-bar" id="uploadBar" style="width:0%"></div></div>
+          </div>
+        </div>
+      `;
+      let p=0;
+      const iv=setInterval(()=>{
+        p+=Math.random()*15+5;
+        if(p>=100){
+          p=100; clearInterval(iv);
+          document.getElementById('uploadStatus').textContent='분석 완료 — 키워드 8개, 개념 5개 추출됨';
+          document.getElementById('uploadStatus').style.color='#10b981';
+          toast('문서 분석 완료! 추출된 개념을 그래프에 추가할 수 있습니다');
+        } else {
+          const steps=['PDF 파싱 중...','텍스트 추출 중...','키워드 분석 중...','개념 구조화 중...','연결 관계 탐색 중...'];
+          document.getElementById('uploadStatus').textContent=steps[Math.min(Math.floor(p/20),steps.length-1)];
+        }
+        document.getElementById('uploadBar').style.width=p+'%';
+      },300);
+    }
+
+    // ═══════════════════════════════════
+    // Context Menu
+    // ═══════════════════════════════════
+    function showCtx(e) {
+      e.preventDefault();
+      const m=document.getElementById('ctxMenu');
+      m.style.left=e.clientX+'px'; m.style.top=e.clientY+'px'; m.classList.add('show');
+    }
+    function hideCtx() { document.getElementById('ctxMenu').classList.remove('show'); }
+    function ctxAction(action) {
+      hideCtx();
+      if(!ctxNodeId) return;
+      const n=nodes.find(x=>x.id===ctxNodeId);
+      if(action==='detail'&&n) showNodeDetail({...n,meta:n.meta||{}});
+      if(action==='edit'&&n){ switchTab('editor'); document.getElementById('editorTitle').value=n.label; document.getElementById('editorType').value=n.type; document.getElementById('editorContent').value=n.content||''; }
+      if(action==='local'){ localMode=true; document.getElementById('btnLocal').classList.add('active'); applyLocal(ctxNodeId); }
+      if(action==='delete'){ cy.remove(cy.$id(ctxNodeId)); const i=nodes.findIndex(x=>x.id===ctxNodeId); if(i>=0)nodes.splice(i,1); toast('노드가 삭제되었습니다'); }
+      if(action==='connect') toast('연결할 대상 노드를 클릭하세요 (준비 중)');
+    }
+    document.addEventListener('click', ()=>hideCtx());
+
+    // ═══════════════════════════════════
+    // Toast
+    // ═══════════════════════════════════
+    function toast(msg) {
+      const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+      setTimeout(()=>t.classList.remove('show'),2500);
+    }
+    function esc(s){ const d=document.createElement('div');d.textContent=s;return d.innerHTML; }
+
+    // ═══════════════════════════════════
+    // Init
+    // ═══════════════════════════════════
+    window.addEventListener('DOMContentLoaded', init2D);
+    window.addEventListener('resize', () => { if(currentView==='3d') resize3D(); });
+  </script>
+</body>
+</html>

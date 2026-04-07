@@ -61,6 +61,14 @@ export default function Header() {
             </button>
           </div>
 
+          {/* UIUX Prototype */}
+          <a
+            href="/graph.html"
+            className="px-4 py-2 rounded-xl border-2 border-coral text-coral text-sm font-bold transition-all hover:bg-coral hover:text-white"
+          >
+            UIUX 프로토타입
+          </a>
+
           {/* CTA */}
           <a
             href="#cta"
