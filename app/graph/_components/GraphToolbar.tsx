@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Search, Maximize2, Compass, ChevronDown, LayoutGrid } from "lucide-react";
+import { Search, Maximize2, Compass, ChevronDown, LayoutGrid, AlertTriangle, Download } from "lucide-react";
 import { type ViewMode, type LayoutId, LAYOUT_OPTIONS } from "../_hooks/useGraphData";
 
 interface Props {
@@ -14,6 +14,9 @@ interface Props {
   localMode: boolean;
   onLocalToggle: () => void;
   onFit: () => void;
+  gapMode: boolean;
+  onGapToggle: () => void;
+  onExport: () => void;
 }
 
 function ToolbarButton({
@@ -53,6 +56,9 @@ export default function GraphToolbar({
   localMode,
   onLocalToggle,
   onFit,
+  gapMode,
+  onGapToggle,
+  onExport,
 }: Props) {
   const [layoutOpen, setLayoutOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -153,6 +159,21 @@ export default function GraphToolbar({
       <div style={{ pointerEvents: "auto" }}>
         <ToolbarButton onClick={onFit} title="전체 보기">
           <Maximize2 size={14} />
+        </ToolbarButton>
+      </div>
+
+      {/* Gap Mode */}
+      <div style={{ pointerEvents: "auto" }}>
+        <ToolbarButton active={gapMode} onClick={onGapToggle} title="지식 갭">
+          <AlertTriangle size={14} />
+          <span>갭</span>
+        </ToolbarButton>
+      </div>
+
+      {/* Export */}
+      <div style={{ pointerEvents: "auto" }}>
+        <ToolbarButton onClick={onExport} title="내보내기">
+          <Download size={14} />
         </ToolbarButton>
       </div>
     </div>

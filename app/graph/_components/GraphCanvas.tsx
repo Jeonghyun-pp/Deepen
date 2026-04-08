@@ -55,7 +55,7 @@ const theme = {
   },
 };
 
-function toReagraphNodes(data: GraphData): RGNode[] {
+function toReagraphNodes(data: GraphData, gapNodeIds?: Set<string>): RGNode[] {
   const degreeMap = new Map<string, number>();
   for (const e of data.edges) {
     degreeMap.set(e.source, (degreeMap.get(e.source) || 0) + 1);
@@ -65,8 +65,8 @@ function toReagraphNodes(data: GraphData): RGNode[] {
   return data.nodes.map((n) => ({
     id: n.id,
     label: n.label,
-    fill: NODE_COLORS[n.type],
-    size: Math.max(3, (degreeMap.get(n.id) || 0) * 1.5),
+    fill: gapNodeIds?.has(n.id) ? "#f59e0b" : NODE_COLORS[n.type],
+    size: Math.max(8, (degreeMap.get(n.id) || 0) * 2.5 + 8),
     data: n,
   }));
 }
@@ -80,7 +80,7 @@ function toReagraphEdges(data: GraphData): RGEdge[] {
     size: e.type === "citation" ? 2 : 1,
     arrowPlacement: e.type === "citation" ? "end" as const : "none" as const,
     dashed: e.type === "shared_concept" || e.type === "similarity",
-    label: undefined,
+    label: e.label || undefined,
     data: e,
   }));
 }
@@ -96,12 +96,14 @@ interface Props {
   layoutId: LayoutId;
   selections: string[];
   actives: string[];
+  gapNodeIds?: Set<string>;
   onNodeClick: (id: string) => void;
+  onNodeDoubleClick?: (id: string) => void;
   onCanvasClick: () => void;
 }
 
 const GraphCanvasWrapper = forwardRef<GraphCanvasHandle, Props>(
-  function GraphCanvasWrapper({ data, viewMode, layoutId, selections, actives, onNodeClick, onCanvasClick }, ref) {
+  function GraphCanvasWrapper({ data, viewMode, layoutId, selections, actives, gapNodeIds, onNodeClick, onNodeDoubleClick, onCanvasClick }, ref) {
     const graphRef = useRef<GraphCanvasRef>(null);
 
     useImperativeHandle(ref, () => ({
@@ -117,7 +119,7 @@ const GraphCanvasWrapper = forwardRef<GraphCanvasHandle, Props>(
       },
     }));
 
-    const nodes = useMemo(() => toReagraphNodes(data), [data]);
+    const nodes = useMemo(() => toReagraphNodes(data, gapNodeIds), [data, gapNodeIds]);
     const edges = useMemo(() => toReagraphEdges(data), [data]);
 
     const layoutType = toReagraphLayoutType(layoutId, viewMode) as LayoutTypes;
@@ -137,13 +139,14 @@ const GraphCanvasWrapper = forwardRef<GraphCanvasHandle, Props>(
         edgeInterpolation="curved"
         edgeArrowPosition="end"
         sizingType="none"
-        defaultNodeSize={5}
-        minNodeSize={3}
-        maxNodeSize={15}
+        defaultNodeSize={12}
+        minNodeSize={8}
+        maxNodeSize={30}
         labelType="auto"
         draggable
         animated
         onNodeClick={(node) => onNodeClick(node.id)}
+        onNodeDoubleClick={(node) => onNodeDoubleClick?.(node.id)}
         onCanvasClick={onCanvasClick}
       />
       </div>

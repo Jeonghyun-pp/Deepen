@@ -10,6 +10,7 @@ export interface GraphNode {
     authors?: string;
     year?: number;
     citations?: number;
+    contexts?: { paperId: string; paperLabel: string; year: number; description: string }[];
   };
 }
 
@@ -18,9 +19,36 @@ export interface GraphEdge {
   source: string;
   target: string;
   type: EdgeType;
+  label?: string;
+}
+
+export interface RoadmapEntry {
+  nodeId: string;
+  order: number;
+  reason?: string;
+  difficulty?: "beginner" | "intermediate" | "advanced";
+  estimatedMinutes?: number;
+}
+
+export interface RoadmapModule {
+  id: string;
+  name: string;
+  entries: RoadmapEntry[];
 }
 
 export interface GraphData {
   nodes: GraphNode[];
   edges: GraphEdge[];
+  roadmaps: RoadmapModule[];
+}
+
+export type CanvasTabType = "graph" | "paper-detail" | "roadmap-timeline";
+
+export interface CanvasTab {
+  id: string;
+  type: CanvasTabType;
+  label: string;
+  closeable: boolean;
+  paperId?: string;
+  roadmapId?: string;
 }

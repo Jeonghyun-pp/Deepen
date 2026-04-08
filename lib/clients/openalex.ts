@@ -1,4 +1,4 @@
-import type { Paper, Author, PaperSearchResult } from "./types";
+import type { Paper, Author, PaperSearchResult } from "../types/paper";
 
 const BASE_URL = "https://api.openalex.org";
 const POLITE_EMAIL = process.env.OPENALEX_EMAIL || "";

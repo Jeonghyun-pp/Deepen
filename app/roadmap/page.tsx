@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function PaperDetailPage() {
+export default function RoadmapPage() {
   redirect("/graph");
 }

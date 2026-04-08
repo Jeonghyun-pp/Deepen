@@ -40,7 +40,7 @@ const HeroSection = forwardRef<HTMLElement>(function HeroSection(_, ref) {
 
           {/* Auto typing search bar — links to /search */}
           <motion.a
-            href="/search"
+            href="/graph"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
@@ -51,6 +51,21 @@ const HeroSection = forwardRef<HTMLElement>(function HeroSection(_, ref) {
               <AutoTyping words={keywords} />
             </span>
           </motion.a>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="flex items-center gap-2 text-sm text-text-muted"
+          >
+            <span>또는</span>
+            <a
+              href="/graph"
+              className="font-semibold text-coral hover:underline"
+            >
+              학습 로드맵 만들기 →
+            </a>
+          </motion.div>
 
           <motion.a
             href="#cta"

@@ -1,4 +1,4 @@
-import { getPaper } from "@/paper_test/lib/openalex";
+import { getPaper } from "@/lib/clients/openalex";
 
 export async function GET(
   _request: Request,

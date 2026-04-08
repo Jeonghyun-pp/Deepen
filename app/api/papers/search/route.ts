@@ -1,4 +1,4 @@
-import { searchPapers } from "@/paper_test/lib/openalex";
+import { searchPapers } from "@/lib/clients/openalex";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
