@@ -2,6 +2,8 @@ import { useState, useMemo, useCallback } from "react";
 import type { GraphNode, GraphData, NodeType, CanvasTab } from "../_data/types";
 
 export type ViewMode = "2d" | "3d";
+export type EdgeStyle = "curved" | "linear";
+export type RelevanceDensity = "compact" | "default" | "full";
 
 export type LayoutId =
   | "forceDirected"
@@ -52,6 +54,8 @@ export function useGraphData(initialData: GraphData) {
   const [localMode, setLocalMode] = useState(false);
   const [gapMode, setGapMode] = useState(false);
   const [panelOpen, setPanelOpen] = useState(true);
+  const [edgeStyle, setEdgeStyle] = useState<EdgeStyle>("curved");
+  const [relevanceDensity, setRelevanceDensity] = useState<RelevanceDensity>("default");
 
   // --- Roadmap ---
   const [activeRoadmapId, setActiveRoadmapIdRaw] = useState<string | null>(null);
@@ -204,11 +208,18 @@ export function useGraphData(initialData: GraphData) {
       nodes = nodes.filter((n) => localNodeIds.has(n.id));
     }
     const nodeIds = new Set(nodes.map((n) => n.id));
+
+    // Relevance density threshold
+    const threshold = relevanceDensity === "compact" ? 0.7
+      : relevanceDensity === "default" ? 0.4
+      : 0;
+
     const edges = data.edges.filter(
       (e) => nodeIds.has(e.source) && nodeIds.has(e.target)
+        && (e.weight ?? 0.5) >= threshold
     );
     return { nodes, edges, roadmaps: data.roadmaps };
-  }, [data, activeFilters, activeRoadmapNodeIds, localNodeIds]);
+  }, [data, activeFilters, activeRoadmapNodeIds, localNodeIds, relevanceDensity]);
 
   const selectedNode = useMemo(
     () => data.nodes.find((n) => n.id === selectedNodeId) ?? null,
@@ -356,7 +367,12 @@ export function useGraphData(initialData: GraphData) {
     gapNodes,
     gapNodeIds,
     // edge
+    edgeStyle,
+    setEdgeStyle,
     updateEdgeLabel,
+    // relevance
+    relevanceDensity,
+    setRelevanceDensity,
     // Q&A
     searchKnowledge,
     // export

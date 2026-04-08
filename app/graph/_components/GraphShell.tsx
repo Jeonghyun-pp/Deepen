@@ -118,6 +118,7 @@ export default function GraphShell() {
           filteredData={gd.filteredData}
           viewMode={gd.viewMode}
           layoutId={gd.layoutId}
+          edgeStyle={gd.edgeStyle}
           selections={selections}
           actives={actives}
           gapNodeIds={gd.gapMode ? gd.gapNodeIds : undefined}
@@ -137,6 +138,10 @@ export default function GraphShell() {
             onViewModeChange={gd.setViewMode}
             layoutId={gd.layoutId}
             onLayoutChange={gd.setLayoutId}
+            edgeStyle={gd.edgeStyle}
+            onEdgeStyleChange={gd.setEdgeStyle}
+            relevanceDensity={gd.relevanceDensity}
+            onRelevanceDensityChange={gd.setRelevanceDensity}
             localMode={gd.localMode}
             onLocalToggle={gd.toggleLocalMode}
             onFit={handleFit}

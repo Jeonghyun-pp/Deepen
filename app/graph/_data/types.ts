@@ -20,6 +20,7 @@ export interface GraphEdge {
   target: string;
   type: EdgeType;
   label?: string;
+  weight?: number; // 0~1, 연관성 강도. 미지정 시 0.5 취급
 }
 
 export interface RoadmapEntry {

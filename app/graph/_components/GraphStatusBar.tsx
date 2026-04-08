@@ -2,13 +2,17 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Maximize2, Compass, ChevronDown, LayoutGrid } from "lucide-react";
-import { type ViewMode, type LayoutId, LAYOUT_OPTIONS } from "../_hooks/useGraphData";
+import { type ViewMode, type LayoutId, type EdgeStyle, type RelevanceDensity, LAYOUT_OPTIONS } from "../_hooks/useGraphData";
 
 interface Props {
   viewMode: ViewMode;
   onViewModeChange: (mode: ViewMode) => void;
   layoutId: LayoutId;
   onLayoutChange: (id: LayoutId) => void;
+  edgeStyle: EdgeStyle;
+  onEdgeStyleChange: (style: EdgeStyle) => void;
+  relevanceDensity: RelevanceDensity;
+  onRelevanceDensityChange: (d: RelevanceDensity) => void;
   localMode: boolean;
   onLocalToggle: () => void;
   onFit: () => void;
@@ -21,6 +25,10 @@ export default function GraphStatusBar({
   onViewModeChange,
   layoutId,
   onLayoutChange,
+  edgeStyle,
+  onEdgeStyleChange,
+  relevanceDensity,
+  onRelevanceDensityChange,
   localMode,
   onLocalToggle,
   onFit,
@@ -98,6 +106,40 @@ export default function GraphStatusBar({
             }`}
           >
             {mode.toUpperCase()}
+          </button>
+        ))}
+      </div>
+
+      {/* Edge Style Toggle */}
+      <div className="flex rounded overflow-hidden border border-border">
+        {(["curved", "linear"] as EdgeStyle[]).map((style) => (
+          <button
+            key={style}
+            onClick={() => onEdgeStyleChange(style)}
+            className={`h-6 px-2 text-[11px] font-bold transition-all cursor-pointer ${
+              edgeStyle === style
+                ? "bg-coral text-white"
+                : "bg-white text-text-muted hover:text-text-secondary"
+            }`}
+          >
+            {style === "curved" ? "곡선" : "직선"}
+          </button>
+        ))}
+      </div>
+
+      {/* Relevance Density Toggle */}
+      <div className="flex rounded overflow-hidden border border-border">
+        {(["compact", "default", "full"] as RelevanceDensity[]).map((d) => (
+          <button
+            key={d}
+            onClick={() => onRelevanceDensityChange(d)}
+            className={`h-6 px-2 text-[11px] font-bold transition-all cursor-pointer ${
+              relevanceDensity === d
+                ? "bg-coral text-white"
+                : "bg-white text-text-muted hover:text-text-secondary"
+            }`}
+          >
+            {d === "compact" ? "간략" : d === "default" ? "기본" : "전체"}
           </button>
         ))}
       </div>

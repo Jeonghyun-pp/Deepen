@@ -2,7 +2,7 @@
 
 import { type RefObject } from "react";
 import type { CanvasTab, GraphData, GraphNode, RoadmapModule } from "../_data/types";
-import type { ViewMode, LayoutId } from "../_hooks/useGraphData";
+import type { ViewMode, LayoutId, EdgeStyle } from "../_hooks/useGraphData";
 import GraphCanvasWrapper, { type GraphCanvasHandle } from "./GraphCanvas";
 import PaperDetailView from "./PaperDetailView";
 import RoadmapTimelineView from "./RoadmapTimelineView";
@@ -14,6 +14,7 @@ interface Props {
   filteredData: GraphData;
   viewMode: ViewMode;
   layoutId: LayoutId;
+  edgeStyle: EdgeStyle;
   selections: string[];
   actives: string[];
   gapNodeIds?: Set<string>;
@@ -34,6 +35,7 @@ export default function CanvasArea({
   filteredData,
   viewMode,
   layoutId,
+  edgeStyle,
   selections,
   actives,
   gapNodeIds,
@@ -64,6 +66,7 @@ export default function CanvasArea({
           data={filteredData}
           viewMode={viewMode}
           layoutId={layoutId}
+          edgeStyle={edgeStyle}
           selections={selections}
           actives={actives}
           gapNodeIds={gapNodeIds}

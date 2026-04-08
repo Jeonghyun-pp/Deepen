@@ -11,7 +11,7 @@ import {
 } from "reagraph";
 import type { GraphData } from "../_data/types";
 import { NODE_COLORS, EDGE_COLORS } from "../_data/colors";
-import { type ViewMode, type LayoutId, toReagraphLayoutType } from "../_hooks/useGraphData";
+import { type ViewMode, type LayoutId, type EdgeStyle, toReagraphLayoutType } from "../_hooks/useGraphData";
 
 const theme = {
   ...lightTheme,
@@ -72,17 +72,20 @@ function toReagraphNodes(data: GraphData, gapNodeIds?: Set<string>): RGNode[] {
 }
 
 function toReagraphEdges(data: GraphData): RGEdge[] {
-  return data.edges.map((e) => ({
-    id: e.id,
-    source: e.source,
-    target: e.target,
-    fill: EDGE_COLORS[e.type],
-    size: e.type === "citation" ? 2 : 1,
-    arrowPlacement: e.type === "citation" ? "end" as const : "none" as const,
-    dashed: e.type === "shared_concept" || e.type === "similarity",
-    label: e.label || undefined,
-    data: e,
-  }));
+  return data.edges.map((e) => {
+    const w = e.weight ?? 0.5;
+    return {
+      id: e.id,
+      source: e.source,
+      target: e.target,
+      fill: EDGE_COLORS[e.type],
+      size: 0.5 + w * 3.5,
+      arrowPlacement: e.type === "citation" ? "end" as const : "none" as const,
+      dashed: e.type === "shared_concept" || e.type === "similarity",
+      label: e.label || undefined,
+      data: e,
+    };
+  });
 }
 
 export interface GraphCanvasHandle {
@@ -94,6 +97,7 @@ interface Props {
   data: GraphData;
   viewMode: ViewMode;
   layoutId: LayoutId;
+  edgeStyle: EdgeStyle;
   selections: string[];
   actives: string[];
   gapNodeIds?: Set<string>;
@@ -103,7 +107,7 @@ interface Props {
 }
 
 const GraphCanvasWrapper = forwardRef<GraphCanvasHandle, Props>(
-  function GraphCanvasWrapper({ data, viewMode, layoutId, selections, actives, gapNodeIds, onNodeClick, onNodeDoubleClick, onCanvasClick }, ref) {
+  function GraphCanvasWrapper({ data, viewMode, layoutId, edgeStyle, selections, actives, gapNodeIds, onNodeClick, onNodeDoubleClick, onCanvasClick }, ref) {
     const graphRef = useRef<GraphCanvasRef>(null);
 
     useImperativeHandle(ref, () => ({
@@ -125,6 +129,16 @@ const GraphCanvasWrapper = forwardRef<GraphCanvasHandle, Props>(
     const layoutType = toReagraphLayoutType(layoutId, viewMode) as LayoutTypes;
     const cameraMode = viewMode === "3d" ? "rotate" : ("pan" as const);
 
+    const layoutOverrides = useMemo(() => {
+      if (layoutId !== "forceDirected") return undefined;
+      return {
+        centerInertia: 3,
+        nodeStrength: -120,
+        linkDistance: 80,
+        clusterStrength: 0.5,
+      };
+    }, [layoutId]);
+
     return (
       <div style={{ width: "100%", height: "100%", position: "absolute", inset: 0 }}>
       <ReagraphCanvas
@@ -132,11 +146,13 @@ const GraphCanvasWrapper = forwardRef<GraphCanvasHandle, Props>(
         nodes={nodes}
         edges={edges}
         layoutType={layoutType}
+        layoutOverrides={layoutOverrides}
+        clusterAttribute="type"
         cameraMode={cameraMode}
         theme={theme}
         selections={selections}
         actives={actives}
-        edgeInterpolation="curved"
+        edgeInterpolation={edgeStyle}
         edgeArrowPosition="end"
         sizingType="none"
         defaultNodeSize={12}
