@@ -55,6 +55,14 @@ const theme = {
   },
 };
 
+// 타입별 기본 크기: paper(핵심, 크게) > memo/document(중간) > concept(위성, 작게)
+const NODE_BASE_SIZE: Record<string, number> = {
+  paper: 18,
+  concept: 8,
+  memo: 12,
+  document: 12,
+};
+
 function toReagraphNodes(data: GraphData, gapNodeIds?: Set<string>): RGNode[] {
   const degreeMap = new Map<string, number>();
   for (const e of data.edges) {
@@ -62,26 +70,58 @@ function toReagraphNodes(data: GraphData, gapNodeIds?: Set<string>): RGNode[] {
     degreeMap.set(e.target, (degreeMap.get(e.target) || 0) + 1);
   }
 
-  return data.nodes.map((n) => ({
-    id: n.id,
-    label: n.label,
-    fill: gapNodeIds?.has(n.id) ? "#f59e0b" : NODE_COLORS[n.type],
-    size: Math.max(8, (degreeMap.get(n.id) || 0) * 2.5 + 8),
-    data: n,
-  }));
+  return data.nodes.map((n) => {
+    const base = NODE_BASE_SIZE[n.type] ?? 10;
+    const degree = degreeMap.get(n.id) || 0;
+    // degree 보정: paper는 연결 많을수록 더 커짐, 나머지는 소폭 보정
+    const degreeBonus = n.type === "paper" ? degree * 1.5 : degree * 0.5;
+    return {
+      id: n.id,
+      label: n.label,
+      fill: gapNodeIds?.has(n.id) ? "#f59e0b" : NODE_COLORS[n.type],
+      size: Math.min(40, base + degreeBonus),
+      data: n,
+    };
+  });
 }
 
+// 엣지 3단계 시각 계층:
+//   1단계 — citation: 빨간 굵은 화살표 (논문 간 직접 인용)
+//   2단계 — shared_concept/similarity/manual: 회색 점선 (느슨한 연관)
+//   3단계 — contains: 연한 얇은 선 (개념↔논문 소속)
 function toReagraphEdges(data: GraphData): RGEdge[] {
   return data.edges.map((e) => {
     const w = e.weight ?? 0.5;
+
+    let size: number;
+    let dashed: boolean;
+    let arrowPlacement: "end" | "none";
+
+    if (e.type === "citation") {
+      // 1단계: 굵은 화살표, weight로 굵기 보정
+      size = 2 + w * 2.5;
+      dashed = false;
+      arrowPlacement = "end";
+    } else if (e.type === "contains") {
+      // 3단계: 연한 얇은 선
+      size = 0.3 + w * 0.5;
+      dashed = false;
+      arrowPlacement = "none";
+    } else {
+      // 2단계: 회색 점선 (shared_concept, similarity, manual)
+      size = 0.8 + w * 1.0;
+      dashed = true;
+      arrowPlacement = "none";
+    }
+
     return {
       id: e.id,
       source: e.source,
       target: e.target,
       fill: EDGE_COLORS[e.type],
-      size: 0.5 + w * 3.5,
-      arrowPlacement: e.type === "citation" ? "end" as const : "none" as const,
-      dashed: e.type === "shared_concept" || e.type === "similarity",
+      size,
+      arrowPlacement,
+      dashed,
       label: e.label || undefined,
       data: e,
     };
@@ -129,13 +169,14 @@ const GraphCanvasWrapper = forwardRef<GraphCanvasHandle, Props>(
     const layoutType = toReagraphLayoutType(layoutId, viewMode) as LayoutTypes;
     const cameraMode = viewMode === "3d" ? "rotate" : ("pan" as const);
 
+    // 중력장 레이아웃: 중요 노드가 중심, 위성은 자연스럽게 퍼짐
+    // clusterAttribute 없이 순수 중력+반발력으로 배치
     const layoutOverrides = useMemo(() => {
       if (layoutId !== "forceDirected") return undefined;
       return {
-        centerInertia: 3,
-        nodeStrength: -120,
-        linkDistance: 80,
-        clusterStrength: 0.5,
+        centerInertia: 5,      // 강한 중심 인력 → 고degree 노드가 중앙에 안착
+        nodeStrength: -150,    // 강한 반발력 → 위성 노드가 적절히 퍼짐
+        linkDistance: 100,     // 넉넉한 링크 거리 → 선 교차 감소
       };
     }, [layoutId]);
 
@@ -147,7 +188,6 @@ const GraphCanvasWrapper = forwardRef<GraphCanvasHandle, Props>(
         edges={edges}
         layoutType={layoutType}
         layoutOverrides={layoutOverrides}
-        clusterAttribute="type"
         cameraMode={cameraMode}
         theme={theme}
         selections={selections}

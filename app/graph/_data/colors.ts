@@ -8,11 +8,11 @@ export const NODE_COLORS: Record<NodeType, string> = {
 };
 
 export const EDGE_COLORS: Record<EdgeType, string> = {
-  citation: "#ef4444",
-  shared_concept: "#6366f1",
-  manual: "#94a3b8",
-  contains: "#10b981",
-  similarity: "#f59e0b",
+  citation: "#ef4444",       // 1단계: 빨간 굵은 화살표
+  shared_concept: "#9ca3af", // 2단계: 회색 점선
+  similarity: "#9ca3af",     // 2단계: 회색 점선
+  manual: "#9ca3af",         // 2단계: 회색 점선
+  contains: "#d1d5db",       // 3단계: 연한 얇은 선
 };
 
 export const TYPE_LABELS: Record<NodeType, string> = {
