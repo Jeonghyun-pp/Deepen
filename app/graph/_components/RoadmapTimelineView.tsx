@@ -14,11 +14,11 @@ const DIFFICULTY_STYLES = {
 interface Props {
   roadmap: RoadmapModule;
   nodes: GraphNode[];
-  onPaperClick: (paperId: string, label: string) => void;
+  onDocTabOpen: (nodeId: string, label: string) => void;
   onNodeSelect: (id: string) => void;
 }
 
-export default function RoadmapTimelineView({ roadmap, nodes, onPaperClick, onNodeSelect }: Props) {
+export default function RoadmapTimelineView({ roadmap, nodes, onDocTabOpen, onNodeSelect }: Props) {
   const getNode = (id: string) => nodes.find((n) => n.id === id);
 
   const totalMinutes = roadmap.entries.reduce((sum, e) => sum + (e.estimatedMinutes ?? 10), 0);
@@ -93,7 +93,7 @@ export default function RoadmapTimelineView({ roadmap, nodes, onPaperClick, onNo
                           그래프
                         </button>
                         <button
-                          onClick={() => onPaperClick(entry.nodeId, node.label)}
+                          onClick={() => onDocTabOpen(entry.nodeId, node.label)}
                           className="flex items-center gap-1 text-xs font-semibold text-coral hover:underline"
                         >
                           상세

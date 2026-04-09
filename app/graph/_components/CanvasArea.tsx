@@ -1,11 +1,13 @@
 "use client";
 
 import { type RefObject } from "react";
-import type { CanvasTab, GraphData, GraphNode, RoadmapModule } from "../_data/types";
-import type { ViewMode, LayoutId, EdgeStyle } from "../_hooks/useGraphData";
-import GraphCanvasWrapper, { type GraphCanvasHandle } from "./GraphCanvas";
-import PaperDetailView from "./PaperDetailView";
+import type { CanvasTab, GraphData, GraphNode, RoadmapModule, NoteDocument } from "../_data/types";
+import type { ViewMode, LayoutId, EdgeStyle, RelevanceDensity } from "../_hooks/useGraphData";
+import GraphCanvasWrapper, { type GraphCanvasHandle, type NodeClickEvent } from "./GraphCanvas";
+import DocDetailView from "./DocDetailView";
 import RoadmapTimelineView from "./RoadmapTimelineView";
+import NoteCanvasView from "./NoteCanvasView";
+import GraphStatusBar from "./GraphStatusBar";
 
 interface Props {
   activeTab: CanvasTab;
@@ -18,15 +20,34 @@ interface Props {
   selections: string[];
   actives: string[];
   gapNodeIds?: Set<string>;
-  onNodeClick: (id: string) => void;
+  onNodeClick: (event: NodeClickEvent) => void;
   onNodeDoubleClick: (id: string) => void;
   onCanvasClick: () => void;
   // Paper detail props
   allNodes: GraphNode[];
   // Roadmap props
   roadmaps: RoadmapModule[];
-  onPaperTabOpen: (paperId: string, label: string) => void;
+  onDocTabOpen: (nodeId: string, label: string) => void;
   onNodeSelect: (id: string) => void;
+  // Note props
+  notes: NoteDocument[];
+  onNoteUpdate: (noteId: string, updates: Partial<Pick<NoteDocument, "title" | "blocks" | "references">>) => void;
+  // Status bar props
+  statusBar: {
+    viewMode: ViewMode;
+    onViewModeChange: (mode: ViewMode) => void;
+    layoutId: LayoutId;
+    onLayoutChange: (id: LayoutId) => void;
+    edgeStyle: EdgeStyle;
+    onEdgeStyleChange: (style: EdgeStyle) => void;
+    relevanceDensity: RelevanceDensity;
+    onRelevanceDensityChange: (d: RelevanceDensity) => void;
+    localMode: boolean;
+    onLocalToggle: () => void;
+    onFit: () => void;
+    nodeCount: number;
+    edgeCount: number;
+  };
 }
 
 export default function CanvasArea({
@@ -44,8 +65,11 @@ export default function CanvasArea({
   onCanvasClick,
   allNodes,
   roadmaps,
-  onPaperTabOpen,
+  onDocTabOpen,
   onNodeSelect,
+  notes,
+  onNoteUpdate,
+  statusBar,
 }: Props) {
   // Graph is always mounted but hidden when not active (preserve layout state)
   const isGraphActive = activeTab.type === "graph";
@@ -74,13 +98,15 @@ export default function CanvasArea({
           onNodeDoubleClick={onNodeDoubleClick}
           onCanvasClick={onCanvasClick}
         />
+        {/* Floating status bar */}
+        {isGraphActive && <GraphStatusBar {...statusBar} />}
       </div>
 
-      {/* Paper detail tab */}
-      {activeTab.type === "paper-detail" && activeTab.paperId && (
-        <PaperDetailView
-          paperId={activeTab.paperId}
-          node={allNodes.find((n) => n.id === activeTab.paperId) ?? null}
+      {/* Document detail tab */}
+      {activeTab.type === "doc" && activeTab.nodeId && (
+        <DocDetailView
+          nodeId={activeTab.nodeId}
+          node={allNodes.find((n) => n.id === activeTab.nodeId) ?? null}
         />
       )}
 
@@ -92,8 +118,22 @@ export default function CanvasArea({
           <RoadmapTimelineView
             roadmap={rm}
             nodes={allNodes}
-            onPaperClick={onPaperTabOpen}
+            onDocTabOpen={onDocTabOpen}
             onNodeSelect={onNodeSelect}
+          />
+        );
+      })()}
+
+      {/* Note canvas tab */}
+      {activeTab.type === "note" && activeTab.noteId && (() => {
+        const note = notes.find((n) => n.id === activeTab.noteId);
+        if (!note) return null;
+        return (
+          <NoteCanvasView
+            note={note}
+            allNodes={allNodes}
+            onUpdate={(updates) => onNoteUpdate(activeTab.noteId!, updates)}
+            onNodeClick={onNodeSelect}
           />
         );
       })()}

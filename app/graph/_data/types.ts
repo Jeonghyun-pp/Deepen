@@ -43,13 +43,46 @@ export interface GraphData {
   roadmaps: RoadmapModule[];
 }
 
-export type CanvasTabType = "graph" | "paper-detail" | "roadmap-timeline";
+export type CanvasTabType = "graph" | "doc" | "roadmap-timeline" | "note";
 
 export interface CanvasTab {
   id: string;
   type: CanvasTabType;
   label: string;
   closeable: boolean;
-  paperId?: string;
+  nodeId?: string;
   roadmapId?: string;
+  noteId?: string;
+}
+
+// ==================== Highlights ====================
+
+export interface Highlight {
+  id: string;
+  documentNodeId: string;
+  range: { page?: number; startOffset: number; endOffset: number };
+  color: string;
+  memo?: string;
+  linkedNodeIds?: string[];
+  createdAt: string;
+}
+
+// ==================== Note / Writing Canvas ====================
+
+export type NoteBlock =
+  | { type: "paragraph"; text: string }
+  | { type: "heading"; level: 1 | 2 | 3; text: string }
+  | { type: "list"; ordered: boolean; items: string[] }
+  | { type: "code"; language?: string; code: string }
+  | { type: "node-ref"; nodeId: string; label: string }
+  | { type: "divider" };
+
+export interface NoteDocument {
+  id: string;
+  title: string;
+  blocks: NoteBlock[];
+  references: string[];
+  template?: string;
+  createdAt: string;
+  updatedAt: string;
 }

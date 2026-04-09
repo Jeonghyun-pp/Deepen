@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, BookOpen, PenLine, MessageCircle, Upload, Send, Download, type LucideIcon } from "lucide-react";
+import { X, BookOpen, PenLine, MessageCircle, Upload, Send, Download, ExternalLink, type LucideIcon } from "lucide-react";
 import type { GraphNode } from "../_data/types";
 import { NODE_COLORS, TYPE_LABELS, EDGE_TYPE_LABELS } from "../_data/colors";
 import ConceptTimeline from "./ConceptTimeline";
@@ -43,6 +43,10 @@ interface Props {
   onSearchKnowledge?: (query: string) => { answer: string; sources: GraphNode[] };
   // export
   onExport?: () => void;
+  // open in tab
+  onOpenDocTab?: (nodeId: string, label: string) => void;
+  onOpenNoteTab?: (noteId: string, label: string) => void;
+  hasNote?: (nodeId: string) => boolean;
 }
 
 const TAB_CONFIG: Record<string, { icon: LucideIcon; label: string }> = {
@@ -99,12 +103,18 @@ function NodeDetailContent({
   onNodeClick,
   onEdgeLabelUpdate,
   allEdges,
+  onOpenDocTab,
+  onOpenNoteTab,
+  hasNote,
 }: {
   node: GraphNode | null;
   connections: ConnectedNode[];
   onNodeClick: (id: string) => void;
   onEdgeLabelUpdate?: (edgeId: string, label: string) => void;
   allEdges?: { id: string; source: string; target: string; label?: string }[];
+  onOpenDocTab?: (nodeId: string, label: string) => void;
+  onOpenNoteTab?: (noteId: string, label: string) => void;
+  hasNote?: (nodeId: string) => boolean;
 }) {
   if (!node) {
     return (
@@ -146,6 +156,25 @@ function NodeDetailContent({
           {node.label}
         </h3>
       </div>
+
+      {/* Open in tab button */}
+      {(node.type === "paper" || node.type === "document" || (node.type === "memo" && hasNote?.(node.id))) && (
+        <div className="px-4 py-2 border-b border-border">
+          <button
+            onClick={() => {
+              if (node.type === "paper" || node.type === "document") {
+                onOpenDocTab?.(node.id, node.label);
+              } else if (node.type === "memo") {
+                onOpenNoteTab?.(node.id, node.label);
+              }
+            }}
+            className="w-full flex items-center justify-center gap-1.5 h-8 rounded-xl border border-coral/30 text-xs font-semibold text-coral hover:bg-coral-light transition-colors"
+          >
+            <ExternalLink size={12} />
+            탭에서 열기
+          </button>
+        </div>
+      )}
 
       {/* Meta */}
       {node.meta && (
@@ -359,6 +388,9 @@ export default function RightPanel({
   gapNodes,
   onSearchKnowledge,
   onExport,
+  onOpenDocTab,
+  onOpenNoteTab,
+  hasNote,
 }: Props) {
 
   return (
@@ -416,6 +448,9 @@ export default function RightPanel({
                 onNodeClick={onNodeClick}
                 onEdgeLabelUpdate={onEdgeLabelUpdate}
                 allEdges={allEdges}
+                onOpenDocTab={onOpenDocTab}
+                onOpenNoteTab={onOpenNoteTab}
+                hasNote={hasNote}
               />
             )}
           </>

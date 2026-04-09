@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Plus, ChevronRight, Trash2, Eye, FolderOpen, AlertTriangle } from "lucide-react";
-import type { GraphNode, RoadmapModule, NodeType } from "../_data/types";
+import { Search, Plus, ChevronRight, Trash2, Filter, FolderOpen, AlertTriangle, NotebookPen } from "lucide-react";
+import type { GraphNode, RoadmapModule, NodeType, NoteDocument } from "../_data/types";
 import { NODE_COLORS, TYPE_LABELS } from "../_data/colors";
 import Link from "next/link";
 
@@ -26,6 +26,9 @@ interface Props {
   gapMode: boolean;
   onGapToggle: () => void;
   gapCount: number;
+  // notes
+  notes: NoteDocument[];
+  onOpenNoteTab: (noteId: string, label: string) => void;
 }
 
 export default function LeftSidebar({
@@ -44,6 +47,8 @@ export default function LeftSidebar({
   gapMode,
   onGapToggle,
   gapCount,
+  notes,
+  onOpenNoteTab,
 }: Props) {
   const [newRoadmapName, setNewRoadmapName] = useState("");
   const [showAddInput, setShowAddInput] = useState(false);
@@ -161,20 +166,22 @@ export default function LeftSidebar({
                   />
                 </button>
                 <button
-                  onClick={() => onRoadmapClick(rm.id)}
-                  className={`flex-1 text-left text-xs font-semibold truncate ${
-                    isActive ? "text-coral" : "text-text-primary"
-                  }`}
+                  onClick={() => onOpenRoadmapTab(rm.id, rm.name)}
+                  className="flex-1 text-left text-xs font-semibold truncate text-text-primary hover:text-coral transition-colors"
                 >
                   {rm.name}
                 </button>
                 <span className="text-[10px] text-text-muted">{rm.entries.length}</span>
                 <button
-                  onClick={(e) => { e.stopPropagation(); onOpenRoadmapTab(rm.id, rm.name); }}
-                  className="opacity-0 group-hover:opacity-100 p-0.5 text-text-muted hover:text-coral transition-all"
-                  title="로드맵 보기"
+                  onClick={(e) => { e.stopPropagation(); onRoadmapClick(rm.id); }}
+                  className={`p-0.5 transition-all ${
+                    isActive
+                      ? "text-coral"
+                      : "opacity-0 group-hover:opacity-100 text-text-muted hover:text-coral"
+                  }`}
+                  title={isActive ? "필터 해제" : "그래프 필터링"}
                 >
-                  <Eye size={11} />
+                  <Filter size={11} />
                 </button>
                 <button
                   onClick={(e) => { e.stopPropagation(); onRemoveRoadmap(rm.id); }}
@@ -212,7 +219,26 @@ export default function LeftSidebar({
         })}
       </div>
 
-      {/* Gap analysis + Add roadmap */}
+      {/* Notes section */}
+      {notes.length > 0 && (
+        <div className="px-2 py-2 border-t border-border">
+          <p className="px-2 text-[10px] font-bold text-text-muted mb-1 uppercase tracking-wider">노트</p>
+          <div className="flex flex-col gap-0.5">
+            {notes.map((note) => (
+              <button
+                key={note.id}
+                onClick={() => onOpenNoteTab(note.id, note.title)}
+                className="flex items-center gap-2 px-2 py-1 rounded text-left text-[11px] text-text-secondary hover:bg-coral-light/30 hover:text-text-primary transition-colors truncate"
+              >
+                <NotebookPen size={11} className="text-amber-500 shrink-0" />
+                <span className="truncate">{note.title}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Gap analysis + Add roadmap + New note */}
       <div className="px-3 py-2 border-t border-border flex flex-col gap-2">
         {/* Gap toggle */}
         <button
@@ -257,6 +283,7 @@ export default function LeftSidebar({
             새 로드맵
           </button>
         )}
+
       </div>
     </aside>
   );

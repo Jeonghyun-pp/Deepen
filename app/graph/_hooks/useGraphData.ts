@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
-import type { GraphNode, GraphData, NodeType, CanvasTab } from "../_data/types";
+import type { GraphNode, GraphData, NodeType, CanvasTab, NoteDocument } from "../_data/types";
 
 export type ViewMode = "2d" | "3d";
 export type EdgeStyle = "curved" | "linear";
@@ -54,8 +54,8 @@ export function useGraphData(initialData: GraphData) {
   const [localMode, setLocalMode] = useState(false);
   const [gapMode, setGapMode] = useState(false);
   const [panelOpen, setPanelOpen] = useState(true);
-  const [edgeStyle, setEdgeStyle] = useState<EdgeStyle>("curved");
-  const [relevanceDensity, setRelevanceDensity] = useState<RelevanceDensity>("compact");
+  const [edgeStyle, setEdgeStyle] = useState<EdgeStyle>("linear");
+  const [relevanceDensity, setRelevanceDensity] = useState<RelevanceDensity>("default");
 
   // --- Roadmap ---
   const [activeRoadmapId, setActiveRoadmapIdRaw] = useState<string | null>(null);
@@ -63,6 +63,9 @@ export function useGraphData(initialData: GraphData) {
   // --- Canvas tabs ---
   const [tabs, setTabs] = useState<CanvasTab[]>([GRAPH_TAB]);
   const [activeTabId, setActiveTabId] = useState("graph");
+
+  // --- Notes ---
+  const [notes, setNotes] = useState<NoteDocument[]>([]);
 
   // ==================== View mode / layout ====================
 
@@ -149,11 +152,11 @@ export function useGraphData(initialData: GraphData) {
 
   // ==================== Canvas Tabs ====================
 
-  const openPaperTab = useCallback((paperId: string, label: string) => {
-    const tabId = `paper-${paperId}`;
+  const openDocTab = useCallback((nodeId: string, label: string) => {
+    const tabId = `doc-${nodeId}`;
     setTabs((prev) => {
       if (prev.some((t) => t.id === tabId)) return prev;
-      return [...prev, { id: tabId, type: "paper-detail", label, closeable: true, paperId }];
+      return [...prev, { id: tabId, type: "doc", label, closeable: true, nodeId }];
     });
     setActiveTabId(tabId);
   }, []);
@@ -165,6 +168,82 @@ export function useGraphData(initialData: GraphData) {
       return [...prev, { id: tabId, type: "roadmap-timeline", label, closeable: true, roadmapId }];
     });
     setActiveTabId(tabId);
+  }, []);
+
+  const openNoteTab = useCallback((noteId: string, label: string) => {
+    const tabId = `note-${noteId}`;
+    setTabs((prev) => {
+      if (prev.some((t) => t.id === tabId)) return prev;
+      return [...prev, { id: tabId, type: "note", label, closeable: true, noteId }];
+    });
+    setActiveTabId(tabId);
+  }, []);
+
+  const createNote = useCallback((title?: string) => {
+    const id = `note-${Date.now()}`;
+    const now = new Date().toISOString();
+    const noteTitle = title || "새 노트";
+    const note: NoteDocument = {
+      id,
+      title: noteTitle,
+      blocks: [{ type: "paragraph", text: "" }],
+      references: [],
+      createdAt: now,
+      updatedAt: now,
+    };
+    setNotes((prev) => [...prev, note]);
+    // Create corresponding memo node in graph
+    setData((prev) => ({
+      ...prev,
+      nodes: [
+        ...prev.nodes,
+        { id, label: noteTitle, type: "memo" as const, content: "" },
+      ],
+    }));
+    openNoteTab(id, noteTitle);
+    return id;
+  }, [openNoteTab]);
+
+  const updateNote = useCallback((noteId: string, updates: Partial<Pick<NoteDocument, "title" | "blocks" | "references">>) => {
+    setNotes((prev) =>
+      prev.map((n) => {
+        if (n.id !== noteId) return n;
+        const updated = { ...n, ...updates, updatedAt: new Date().toISOString() };
+        return updated;
+      })
+    );
+    // Sync title to memo node label
+    if (updates.title) {
+      setData((prev) => ({
+        ...prev,
+        nodes: prev.nodes.map((nd) =>
+          nd.id === noteId ? { ...nd, label: updates.title! } : nd
+        ),
+      }));
+      // Update tab label
+      setTabs((prev) =>
+        prev.map((t) => (t.noteId === noteId ? { ...t, label: updates.title! } : t))
+      );
+    }
+    // Sync references → graph edges
+    if (updates.references) {
+      setData((prev) => {
+        // Remove old reference edges from this note
+        const edges = prev.edges.filter(
+          (e) => !(e.source === noteId && e.type === "manual")
+        );
+        // Add new reference edges
+        const newEdges = updates.references!.map((refId) => ({
+          id: `${noteId}-ref-${refId}`,
+          source: noteId,
+          target: refId,
+          type: "manual" as const,
+          label: "참조",
+          weight: 0.6,
+        }));
+        return { ...prev, edges: [...edges, ...newEdges] };
+      });
+    }
   }, []);
 
   const closeTab = useCallback((tabId: string) => {
@@ -283,6 +362,23 @@ export function useGraphData(initialData: GraphData) {
 
   const gapNodeIds = useMemo(() => new Set(gapNodes.map((g) => g.node.id)), [gapNodes]);
 
+  // ==================== Quick memo ====================
+
+  const addQuickMemo = useCallback((targetNodeId: string, memo: string) => {
+    const memoId = `memo-quick-${Date.now()}`;
+    setData((prev) => ({
+      ...prev,
+      nodes: [
+        ...prev.nodes,
+        { id: memoId, label: memo.slice(0, 40), type: "memo" as const, content: memo },
+      ],
+      edges: [
+        ...prev.edges,
+        { id: `${memoId}-ref-${targetNodeId}`, source: memoId, target: targetNodeId, type: "manual" as const, label: "메모", weight: 0.6 },
+      ],
+    }));
+  }, []);
+
   // ==================== Edge editing ====================
 
   const updateEdgeLabel = useCallback((edgeId: string, label: string) => {
@@ -366,6 +462,8 @@ export function useGraphData(initialData: GraphData) {
     toggleGapMode,
     gapNodes,
     gapNodeIds,
+    // quick memo
+    addQuickMemo,
     // edge
     edgeStyle,
     setEdgeStyle,
@@ -389,8 +487,13 @@ export function useGraphData(initialData: GraphData) {
     activeTab,
     activeTabId,
     setActiveTabId,
-    openPaperTab,
+    openDocTab,
     openRoadmapTab,
+    openNoteTab,
     closeTab,
+    // notes
+    notes,
+    createNote,
+    updateNote,
   };
 }

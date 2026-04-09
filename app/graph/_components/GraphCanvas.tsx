@@ -133,6 +133,12 @@ export interface GraphCanvasHandle {
   fitView: () => void;
 }
 
+export interface NodeClickEvent {
+  id: string;
+  screenX: number;
+  screenY: number;
+}
+
 interface Props {
   data: GraphData;
   viewMode: ViewMode;
@@ -141,7 +147,7 @@ interface Props {
   selections: string[];
   actives: string[];
   gapNodeIds?: Set<string>;
-  onNodeClick: (id: string) => void;
+  onNodeClick: (event: NodeClickEvent) => void;
   onNodeDoubleClick?: (id: string) => void;
   onCanvasClick: () => void;
 }
@@ -201,7 +207,14 @@ const GraphCanvasWrapper = forwardRef<GraphCanvasHandle, Props>(
         labelType="auto"
         draggable
         animated
-        onNodeClick={(node) => onNodeClick(node.id)}
+        onNodeClick={(node, _props, event) => {
+          const e = event?.nativeEvent;
+          onNodeClick({
+            id: node.id,
+            screenX: e?.clientX ?? 0,
+            screenY: e?.clientY ?? 0,
+          });
+        }}
         onNodeDoubleClick={(node) => onNodeDoubleClick?.(node.id)}
         onCanvasClick={onCanvasClick}
       />

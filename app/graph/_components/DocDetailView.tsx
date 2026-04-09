@@ -9,24 +9,30 @@ import AnalysisLoading from "@/app/components/AnalysisLoading";
 import type { GraphNode } from "../_data/types";
 
 interface Props {
-  paperId: string;
+  nodeId: string;
   node?: GraphNode | null;
 }
 
-export default function PaperDetailView({ paperId, node }: Props) {
+export default function DocDetailView({ nodeId, node }: Props) {
   const [analysisData, setAnalysisData] = useState<PaperAnalysisData | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const isPaper = node?.type === "paper";
+
   useEffect(() => {
+    if (!isPaper) {
+      setLoading(false); // eslint-disable-line react-hooks/set-state-in-effect
+      return;
+    }
     let cancelled = false;
     const timer = setTimeout(() => {
       if (!cancelled) {
-        setAnalysisData(getMockAnalysis(paperId));
+        setAnalysisData(getMockAnalysis(nodeId));
         setLoading(false);
       }
     }, 1500);
     return () => { cancelled = true; clearTimeout(timer); };
-  }, [paperId]);
+  }, [nodeId, isPaper]);
 
   return (
     <div className="h-full overflow-y-auto">
@@ -34,6 +40,11 @@ export default function PaperDetailView({ paperId, node }: Props) {
         {/* Header from graph node data */}
         {node && (
           <>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-coral-light text-coral">
+                {isPaper ? "논문" : "문서"}
+              </span>
+            </div>
             <h1 className="text-xl font-extrabold text-text-primary leading-snug mb-2">
               {node.label}
             </h1>
@@ -54,8 +65,8 @@ export default function PaperDetailView({ paperId, node }: Props) {
           </>
         )}
 
-        {/* TLDR */}
-        {analysisData && (
+        {/* Paper-specific: TLDR */}
+        {isPaper && analysisData && (
           <div className="p-4 rounded-xl bg-coral-light/30 border border-coral/20 mb-6">
             <h3 className="text-xs font-bold text-coral mb-1">TLDR</h3>
             <p className="text-sm text-text-secondary leading-relaxed italic">
@@ -64,23 +75,25 @@ export default function PaperDetailView({ paperId, node }: Props) {
           </div>
         )}
 
-        {/* 6-Layer Analysis */}
-        <section className="mb-8">
-          <h2 className="text-base font-bold text-text-primary mb-4">6레이어 분석</h2>
-          {loading ? (
-            <AnalysisLoading />
-          ) : analysisData ? (
-            <>
-              <SixLayerTabs analysis={analysisData.analysis} />
-              <div className="mt-4">
-                <Disclaimer />
-              </div>
-            </>
-          ) : null}
-        </section>
+        {/* Paper-specific: 6-Layer Analysis */}
+        {isPaper && (
+          <section className="mb-8">
+            <h2 className="text-base font-bold text-text-primary mb-4">6레이어 분석</h2>
+            {loading ? (
+              <AnalysisLoading />
+            ) : analysisData ? (
+              <>
+                <SixLayerTabs analysis={analysisData.analysis} />
+                <div className="mt-4">
+                  <Disclaimer />
+                </div>
+              </>
+            ) : null}
+          </section>
+        )}
 
-        {/* Citations */}
-        {analysisData && (
+        {/* Paper-specific: Citations */}
+        {isPaper && analysisData && (
           <section className="mb-8">
             <h2 className="text-base font-bold text-text-primary mb-4">인용 관계</h2>
             <div className="flex flex-col gap-6">
@@ -92,6 +105,15 @@ export default function PaperDetailView({ paperId, node }: Props) {
                 title="후속연구 (이 논문을 인용)"
                 papers={analysisData.citedBy}
               />
+            </div>
+          </section>
+        )}
+
+        {/* Document-specific: placeholder for PDF viewer / highlights */}
+        {!isPaper && node && (
+          <section className="mb-8">
+            <div className="flex flex-col items-center justify-center py-16 border-2 border-dashed border-border rounded-2xl">
+              <p className="text-sm text-text-muted">문서 뷰어 · 하이라이트 · 메모 (준비 중)</p>
             </div>
           </section>
         )}

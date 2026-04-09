@@ -54,19 +54,12 @@ export default function GraphStatusBar({
   );
 
   return (
-    <div className="flex items-center h-8 px-3 bg-gray-50 border-t border-border text-xs shrink-0 gap-2">
-      {/* Node/Edge count */}
-      <span className="text-text-muted">
-        {nodeCount} nodes · {edgeCount} edges
-      </span>
-
-      <div className="flex-1" />
-
+    <div className="absolute bottom-4 left-4 right-4 z-10 flex items-center justify-center gap-3 px-5 py-2.5 bg-white/90 backdrop-blur-sm rounded-2xl border border-border/60 shadow-lg text-xs">
       {/* Layout Dropdown */}
       <div ref={dropdownRef} className="relative">
         <button
           onClick={() => setLayoutOpen(!layoutOpen)}
-          className="flex items-center gap-1 h-6 px-2 rounded text-[11px] font-semibold text-text-secondary hover:bg-white hover:text-text-primary border border-transparent hover:border-border transition-all"
+          className="flex items-center gap-1 h-7 px-2.5 rounded-xl text-[11px] font-semibold text-text-secondary hover:bg-black/5 transition-all"
         >
           <LayoutGrid size={11} />
           <span>{currentLayout?.label}</span>
@@ -74,7 +67,7 @@ export default function GraphStatusBar({
         </button>
 
         {layoutOpen && (
-          <div className="absolute left-0 bottom-8 bg-white border border-border rounded-lg shadow-lg py-1 min-w-[140px] z-20">
+          <div className="absolute left-0 bottom-9 bg-white border border-border rounded-xl shadow-lg py-1 min-w-[140px] z-20">
             {availableLayouts.map((l) => (
               <button
                 key={l.id}
@@ -93,16 +86,19 @@ export default function GraphStatusBar({
         )}
       </div>
 
+      {/* Divider */}
+      <div className="w-px h-4 bg-border/60" />
+
       {/* 2D / 3D Toggle */}
-      <div className="flex rounded overflow-hidden border border-border">
+      <div className="flex rounded-lg overflow-hidden border border-border/60">
         {(["2d", "3d"] as ViewMode[]).map((mode) => (
           <button
             key={mode}
             onClick={() => onViewModeChange(mode)}
-            className={`h-6 px-2 text-[11px] font-bold transition-all cursor-pointer ${
+            className={`h-7 px-2.5 text-[11px] font-bold transition-all cursor-pointer ${
               viewMode === mode
                 ? "bg-coral text-white"
-                : "bg-white text-text-muted hover:text-text-secondary"
+                : "text-text-muted hover:text-text-secondary"
             }`}
           >
             {mode.toUpperCase()}
@@ -110,48 +106,34 @@ export default function GraphStatusBar({
         ))}
       </div>
 
-      {/* Edge Style Toggle */}
-      <div className="flex rounded overflow-hidden border border-border">
-        {(["curved", "linear"] as EdgeStyle[]).map((style) => (
+      {/* Relevance Density Toggle */}
+      <div className="flex rounded-lg overflow-hidden border border-border/60">
+        {(["default", "full"] as RelevanceDensity[]).map((d) => (
           <button
-            key={style}
-            onClick={() => onEdgeStyleChange(style)}
-            className={`h-6 px-2 text-[11px] font-bold transition-all cursor-pointer ${
-              edgeStyle === style
+            key={d}
+            onClick={() => onRelevanceDensityChange(d)}
+            className={`h-7 px-2.5 text-[11px] font-bold transition-all cursor-pointer ${
+              relevanceDensity === d
                 ? "bg-coral text-white"
-                : "bg-white text-text-muted hover:text-text-secondary"
+                : "text-text-muted hover:text-text-secondary"
             }`}
           >
-            {style === "curved" ? "곡선" : "직선"}
+            {d === "default" ? "기본" : "전체"}
           </button>
         ))}
       </div>
 
-      {/* Relevance Density Toggle */}
-      <div className="flex rounded overflow-hidden border border-border">
-        {(["compact", "default", "full"] as RelevanceDensity[]).map((d) => (
-          <button
-            key={d}
-            onClick={() => onRelevanceDensityChange(d)}
-            className={`h-6 px-2 text-[11px] font-bold transition-all cursor-pointer ${
-              relevanceDensity === d
-                ? "bg-coral text-white"
-                : "bg-white text-text-muted hover:text-text-secondary"
-            }`}
-          >
-            {d === "compact" ? "간략" : d === "default" ? "기본" : "전체"}
-          </button>
-        ))}
-      </div>
+      {/* Divider */}
+      <div className="w-px h-4 bg-border/60" />
 
       {/* Local Mode */}
       <button
         onClick={onLocalToggle}
         title="로컬 모드"
-        className={`flex items-center gap-1 h-6 px-2 rounded text-[11px] font-semibold transition-all border ${
+        className={`flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-semibold transition-all ${
           localMode
-            ? "bg-coral text-white border-coral"
-            : "bg-white text-text-muted border-border hover:text-text-secondary"
+            ? "bg-coral text-white"
+            : "text-text-muted hover:bg-black/5"
         }`}
       >
         <Compass size={11} />
@@ -162,7 +144,7 @@ export default function GraphStatusBar({
       <button
         onClick={onFit}
         title="전체 보기"
-        className="flex items-center h-6 px-2 rounded text-[11px] font-semibold text-text-muted bg-white border border-border hover:text-text-secondary transition-all"
+        className="flex items-center h-7 px-2.5 rounded-lg text-[11px] font-semibold text-text-muted hover:bg-black/5 transition-all"
       >
         <Maximize2 size={11} />
       </button>
