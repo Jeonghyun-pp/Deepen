@@ -174,9 +174,9 @@ const GraphCanvasWrapper = forwardRef<GraphCanvasHandle, Props>(
     const layoutOverrides = useMemo(() => {
       if (layoutId !== "forceDirected") return undefined;
       return {
-        centerInertia: 5,      // 강한 중심 인력 → 고degree 노드가 중앙에 안착
-        nodeStrength: -150,    // 강한 반발력 → 위성 노드가 적절히 퍼짐
-        linkDistance: 100,     // 넉넉한 링크 거리 → 선 교차 감소
+        centerInertia: 0.8,    // 약한 중심 인력 → 노드가 중앙에 뭉치지 않음
+        nodeStrength: -350,    // 강한 반발력 → 노드 간격 충분히 확보
+        linkDistance: 170,     // 넉넉한 링크 거리 → 선 교차 감소
       };
     }, [layoutId]);
 

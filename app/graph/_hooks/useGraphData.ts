@@ -50,12 +50,12 @@ export function useGraphData(initialData: GraphData) {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewModeRaw] = useState<ViewMode>("2d");
-  const [layoutId, setLayoutIdRaw] = useState<LayoutId>("forceDirected");
+  const [layoutId, setLayoutIdRaw] = useState<LayoutId>("treeTd");
   const [localMode, setLocalMode] = useState(false);
   const [gapMode, setGapMode] = useState(false);
   const [panelOpen, setPanelOpen] = useState(true);
   const [edgeStyle, setEdgeStyle] = useState<EdgeStyle>("curved");
-  const [relevanceDensity, setRelevanceDensity] = useState<RelevanceDensity>("default");
+  const [relevanceDensity, setRelevanceDensity] = useState<RelevanceDensity>("compact");
 
   // --- Roadmap ---
   const [activeRoadmapId, setActiveRoadmapIdRaw] = useState<string | null>(null);
