@@ -1,5 +1,13 @@
 import { useState, useMemo, useCallback } from "react";
-import type { GraphNode, GraphData, NodeType, CanvasTab, NoteDocument } from "../_data/types";
+import type {
+  GraphNode,
+  GraphEdge,
+  GraphData,
+  NodeType,
+  CanvasTab,
+  NoteDocument,
+  RoadmapOverlayState,
+} from "../_data/types";
 
 export type ViewMode = "2d" | "3d";
 export type EdgeStyle = "curved" | "linear";
@@ -45,20 +53,21 @@ export function useGraphData(initialData: GraphData) {
 
   // --- Filters & view ---
   const [activeFilters, setActiveFilters] = useState<Set<NodeType>>(
-    () => new Set(["paper", "concept", "memo", "document"])
+    () => new Set(["paper", "concept", "technique", "application", "question", "memo", "document"])
   );
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewModeRaw] = useState<ViewMode>("2d");
-  const [layoutId, setLayoutIdRaw] = useState<LayoutId>("treeTd");
+  const [layoutId, setLayoutIdRaw] = useState<LayoutId>("forceDirected");
   const [localMode, setLocalMode] = useState(false);
   const [gapMode, setGapMode] = useState(false);
   const [panelOpen, setPanelOpen] = useState(true);
   const [edgeStyle, setEdgeStyle] = useState<EdgeStyle>("linear");
   const [relevanceDensity, setRelevanceDensity] = useState<RelevanceDensity>("default");
 
-  // --- Roadmap ---
-  const [activeRoadmapId, setActiveRoadmapIdRaw] = useState<string | null>(null);
+  // --- Roadmap overlay (graph path) ---
+  const [roadmapOverlay, setRoadmapOverlay] =
+    useState<RoadmapOverlayState | null>(null);
 
   // --- Canvas tabs ---
   const [tabs, setTabs] = useState<CanvasTab[]>([GRAPH_TAB]);
@@ -101,53 +110,56 @@ export function useGraphData(initialData: GraphData) {
 
   const toggleLocalMode = useCallback(() => setLocalMode((prev) => !prev), []);
 
-  // ==================== Roadmap ====================
+  // ==================== Roadmap overlay ====================
 
-  const setActiveRoadmapId = useCallback((id: string | null) => {
-    setActiveRoadmapIdRaw((prev) => (prev === id ? null : id));
+  const activateRoadmapOverlay = useCallback(
+    (pathNodeIds: string[], title?: string) => {
+      if (pathNodeIds.length === 0) return;
+      setRoadmapOverlay({ pathNodeIds, currentIndex: 0, title });
+    },
+    [],
+  );
+
+  const advanceRoadmap = useCallback(() => {
+    setRoadmapOverlay((prev) =>
+      prev && prev.currentIndex < prev.pathNodeIds.length - 1
+        ? { ...prev, currentIndex: prev.currentIndex + 1 }
+        : prev,
+    );
   }, []);
 
-  const addRoadmap = useCallback((name: string) => {
-    const id = `rm-${Date.now()}`;
-    setData((prev) => ({
-      ...prev,
-      roadmaps: [...prev.roadmaps, { id, name, entries: [] }],
-    }));
-    return id;
+  const backRoadmap = useCallback(() => {
+    setRoadmapOverlay((prev) =>
+      prev && prev.currentIndex > 0
+        ? { ...prev, currentIndex: prev.currentIndex - 1 }
+        : prev,
+    );
   }, []);
 
-  const removeRoadmap = useCallback((roadmapId: string) => {
-    setData((prev) => ({
-      ...prev,
-      roadmaps: prev.roadmaps.filter((r) => r.id !== roadmapId),
-    }));
-    setActiveRoadmapIdRaw((prev) => (prev === roadmapId ? null : prev));
-    // Close any open roadmap tab for this roadmap
-    setTabs((prev) => prev.filter((t) => t.roadmapId !== roadmapId));
+  const jumpRoadmap = useCallback((index: number) => {
+    setRoadmapOverlay((prev) => {
+      if (!prev) return prev;
+      const clamped = Math.max(0, Math.min(prev.pathNodeIds.length - 1, index));
+      return { ...prev, currentIndex: clamped };
+    });
   }, []);
 
-  const addNodeToRoadmap = useCallback((roadmapId: string, nodeId: string) => {
-    setData((prev) => ({
-      ...prev,
-      roadmaps: prev.roadmaps.map((r) => {
-        if (r.id !== roadmapId) return r;
-        if (r.entries.some((e) => e.nodeId === nodeId)) return r;
-        return { ...r, entries: [...r.entries, { nodeId, order: r.entries.length + 1 }] };
-      }),
-    }));
+  const clearRoadmapOverlay = useCallback(() => setRoadmapOverlay(null), []);
+
+  // ==================== Graph mutation (agent tool 결과) ====================
+
+  const addNode = useCallback((node: GraphNode) => {
+    setData((prev) => {
+      if (prev.nodes.some((n) => n.id === node.id)) return prev;
+      return { ...prev, nodes: [...prev.nodes, node] };
+    });
   }, []);
 
-  const removeNodeFromRoadmap = useCallback((roadmapId: string, nodeId: string) => {
-    setData((prev) => ({
-      ...prev,
-      roadmaps: prev.roadmaps.map((r) => {
-        if (r.id !== roadmapId) return r;
-        const entries = r.entries
-          .filter((e) => e.nodeId !== nodeId)
-          .map((e, i) => ({ ...e, order: i + 1 }));
-        return { ...r, entries };
-      }),
-    }));
+  const addEdge = useCallback((edge: GraphEdge) => {
+    setData((prev) => {
+      if (prev.edges.some((e) => e.id === edge.id)) return prev;
+      return { ...prev, edges: [...prev.edges, edge] };
+    });
   }, []);
 
   // ==================== Canvas Tabs ====================
@@ -157,15 +169,6 @@ export function useGraphData(initialData: GraphData) {
     setTabs((prev) => {
       if (prev.some((t) => t.id === tabId)) return prev;
       return [...prev, { id: tabId, type: "doc", label, closeable: true, nodeId }];
-    });
-    setActiveTabId(tabId);
-  }, []);
-
-  const openRoadmapTab = useCallback((roadmapId: string, label: string) => {
-    const tabId = `roadmap-${roadmapId}`;
-    setTabs((prev) => {
-      if (prev.some((t) => t.id === tabId)) return prev;
-      return [...prev, { id: tabId, type: "roadmap-timeline", label, closeable: true, roadmapId }];
     });
     setActiveTabId(tabId);
   }, []);
@@ -269,20 +272,8 @@ export function useGraphData(initialData: GraphData) {
     return ids;
   }, [localMode, selectedNodeId, data.edges]);
 
-  // Active roadmap node IDs
-  const activeRoadmapNodeIds = useMemo(() => {
-    if (!activeRoadmapId) return null;
-    const rm = data.roadmaps.find((r) => r.id === activeRoadmapId);
-    if (!rm) return null;
-    return new Set(rm.entries.map((e) => e.nodeId));
-  }, [activeRoadmapId, data.roadmaps]);
-
-  const filteredData = useMemo(() => {
+  const filteredData = useMemo<GraphData>(() => {
     let nodes = data.nodes.filter((n) => activeFilters.has(n.type));
-    // Roadmap filter: only show nodes in active roadmap
-    if (activeRoadmapNodeIds) {
-      nodes = nodes.filter((n) => activeRoadmapNodeIds.has(n.id));
-    }
     if (localNodeIds) {
       nodes = nodes.filter((n) => localNodeIds.has(n.id));
     }
@@ -297,8 +288,8 @@ export function useGraphData(initialData: GraphData) {
       (e) => nodeIds.has(e.source) && nodeIds.has(e.target)
         && (e.weight ?? 0.5) >= threshold
     );
-    return { nodes, edges, roadmaps: data.roadmaps };
-  }, [data, activeFilters, activeRoadmapNodeIds, localNodeIds, relevanceDensity]);
+    return { nodes, edges };
+  }, [data, activeFilters, localNodeIds, relevanceDensity]);
 
   const selectedNode = useMemo(
     () => data.nodes.find((n) => n.id === selectedNodeId) ?? null,
@@ -475,20 +466,22 @@ export function useGraphData(initialData: GraphData) {
     searchKnowledge,
     // export
     exportMarkdown,
-    // roadmap
-    activeRoadmapId,
-    setActiveRoadmapId,
-    addRoadmap,
-    removeRoadmap,
-    addNodeToRoadmap,
-    removeNodeFromRoadmap,
+    // roadmap overlay
+    roadmapOverlay,
+    activateRoadmapOverlay,
+    advanceRoadmap,
+    backRoadmap,
+    jumpRoadmap,
+    clearRoadmapOverlay,
+    // mutation
+    addNode,
+    addEdge,
     // tabs
     tabs,
     activeTab,
     activeTabId,
     setActiveTabId,
     openDocTab,
-    openRoadmapTab,
     openNoteTab,
     closeTab,
     // notes

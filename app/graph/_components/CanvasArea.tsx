@@ -1,11 +1,10 @@
 "use client";
 
 import { type RefObject } from "react";
-import type { CanvasTab, GraphData, GraphNode, RoadmapModule, NoteDocument } from "../_data/types";
+import type { CanvasTab, GraphData, GraphNode, NoteDocument } from "../_data/types";
 import type { ViewMode, LayoutId, EdgeStyle, RelevanceDensity } from "../_hooks/useGraphData";
-import GraphCanvasWrapper, { type GraphCanvasHandle, type NodeClickEvent } from "./GraphCanvas";
+import GraphCanvasWrapper, { type GraphCanvasHandle, type NodeClickEvent, type NodeHoverEvent } from "./GraphCanvas";
 import DocDetailView from "./DocDetailView";
-import RoadmapTimelineView from "./RoadmapTimelineView";
 import NoteCanvasView from "./NoteCanvasView";
 import GraphStatusBar from "./GraphStatusBar";
 
@@ -23,11 +22,9 @@ interface Props {
   onNodeClick: (event: NodeClickEvent) => void;
   onNodeDoubleClick: (id: string) => void;
   onCanvasClick: () => void;
+  onNodeHover?: (event: NodeHoverEvent | null) => void;
   // Paper detail props
   allNodes: GraphNode[];
-  // Roadmap props
-  roadmaps: RoadmapModule[];
-  onDocTabOpen: (nodeId: string, label: string) => void;
   onNodeSelect: (id: string) => void;
   // Note props
   notes: NoteDocument[];
@@ -63,9 +60,8 @@ export default function CanvasArea({
   onNodeClick,
   onNodeDoubleClick,
   onCanvasClick,
+  onNodeHover,
   allNodes,
-  roadmaps,
-  onDocTabOpen,
   onNodeSelect,
   notes,
   onNoteUpdate,
@@ -97,6 +93,7 @@ export default function CanvasArea({
           onNodeClick={onNodeClick}
           onNodeDoubleClick={onNodeDoubleClick}
           onCanvasClick={onCanvasClick}
+          onNodeHover={onNodeHover}
         />
         {/* Floating status bar */}
         {isGraphActive && <GraphStatusBar {...statusBar} />}
@@ -107,22 +104,10 @@ export default function CanvasArea({
         <DocDetailView
           nodeId={activeTab.nodeId}
           node={allNodes.find((n) => n.id === activeTab.nodeId) ?? null}
+          graphData={filteredData}
+          onNavigateToNode={onNodeSelect}
         />
       )}
-
-      {/* Roadmap timeline tab */}
-      {activeTab.type === "roadmap-timeline" && activeTab.roadmapId && (() => {
-        const rm = roadmaps.find((r) => r.id === activeTab.roadmapId);
-        if (!rm) return null;
-        return (
-          <RoadmapTimelineView
-            roadmap={rm}
-            nodes={allNodes}
-            onDocTabOpen={onDocTabOpen}
-            onNodeSelect={onNodeSelect}
-          />
-        );
-      })()}
 
       {/* Note canvas tab */}
       {activeTab.type === "note" && activeTab.noteId && (() => {

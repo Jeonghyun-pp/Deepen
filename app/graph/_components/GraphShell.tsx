@@ -1,42 +1,79 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { PanelLeftOpen, PanelRightOpen } from "lucide-react";
 import { sampleGraphData } from "../_data/sample-data";
 import { useGraphData } from "../_hooks/useGraphData";
-import type { GraphCanvasHandle, NodeClickEvent } from "./GraphCanvas";
+import { useAgent } from "../_hooks/useAgent";
+import type { GraphCanvasHandle, NodeClickEvent, NodeHoverEvent } from "./GraphCanvas";
 import LeftSidebar from "./LeftSidebar";
 import CanvasTabBar from "./CanvasTabBar";
 import CanvasArea from "./CanvasArea";
 import RightPanel from "./RightPanel";
 import ExportModal from "./ExportModal";
 import FloatingMemo from "./FloatingMemo";
+import NodePreviewTooltip from "./NodePreviewTooltip";
+import RoadmapOverlay from "./RoadmapOverlay";
 
 export default function GraphShell() {
   const [rightTab, setRightTab] = useState("graph");
   const [exportOpen, setExportOpen] = useState(false);
   const [floatingMemo, setFloatingMemo] = useState<{ nodeId: string; x: number; y: number } | null>(null);
+  const [hoverPreview, setHoverPreview] = useState<{ nodeId: string; x: number; y: number } | null>(null);
   const [leftOpen, setLeftOpen] = useState(true);
   const graphRef = useRef<GraphCanvasHandle>(null);
 
   const gd = useGraphData(sampleGraphData);
+  const agent = useAgent(gd.fullData, {
+    onAddNode: gd.addNode,
+    onAddEdge: gd.addEdge,
+  });
+
+  // Handle ?focus= and ?roadmap= query params from /search entry
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const focus = searchParams.get("focus");
+    if (focus && gd.fullData.nodes.some((n) => n.id === focus)) {
+      gd.selectNode(focus);
+      gd.openDocTab(
+        focus,
+        gd.fullData.nodes.find((n) => n.id === focus)?.label ?? "",
+      );
+      setTimeout(() => graphRef.current?.centerGraph([focus]), 200);
+    }
+    const roadmapPrompt = searchParams.get("roadmap");
+    if (roadmapPrompt) {
+      // Send the roadmap prompt to the agent — it will call find_path
+      setRightTab("chat");
+      gd.setPanelOpen(true);
+      agent.sendMessage(roadmapPrompt);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const handleNodeClick = useCallback(
     (event: NodeClickEvent) => {
       gd.selectNode(event.id);
       setRightTab("graph");
-      if (gd.activeTab.type !== "graph") {
-        gd.setActiveTabId("graph");
+
+      if (event.shiftKey) {
+        // Shift+click → FloatingMemo 생성 (graph 탭 유지)
+        if (gd.activeTab.type !== "graph") gd.setActiveTabId("graph");
+        graphRef.current?.centerGraph([event.id]);
+        setFloatingMemo({ nodeId: event.id, x: event.screenX, y: event.screenY });
+      } else {
+        // Normal click → DocDetailView 중앙 탭 열기
+        setFloatingMemo(null);
+        gd.openDocTab(event.id, gd.fullData.nodes.find((n) => n.id === event.id)?.label ?? "");
+        graphRef.current?.centerGraph([event.id]);
       }
-      graphRef.current?.centerGraph([event.id]);
-      // Show floating memo near click position
-      setFloatingMemo({ nodeId: event.id, x: event.screenX, y: event.screenY });
     },
     [gd]
   );
 
   const handleNodeDoubleClick = useCallback(
-    // No-op: Doc 열기는 플로팅 메모의 "문서 열기" 버튼으로 통일
+    // No-op: click이 이미 DocDetailView를 열고, shift+click은 memo를 뜨게 함
     () => {},
     []
   );
@@ -44,7 +81,16 @@ export default function GraphShell() {
   const handleCanvasClick = useCallback(() => {
     if (!gd.localMode) gd.selectNode(null);
     setFloatingMemo(null);
+    setHoverPreview(null);
   }, [gd]);
+
+  const handleNodeHover = useCallback((event: NodeHoverEvent | null) => {
+    if (event) {
+      setHoverPreview({ nodeId: event.id, x: event.screenX, y: event.screenY });
+    } else {
+      setHoverPreview(null);
+    }
+  }, []);
 
   const handleMemoSave = useCallback(
     (nodeId: string, memo: string) => {
@@ -78,7 +124,12 @@ export default function GraphShell() {
     : [];
 
   const selections = gd.selectedNode ? [gd.selectedNode.id] : [];
-  const actives = gd.searchMatchIds.length > 0 ? gd.searchMatchIds : [];
+  // path 노드도 actives에 포함시켜 시각적 강조
+  const pathIds = gd.roadmapOverlay?.pathNodeIds ?? [];
+  const actives =
+    pathIds.length > 0
+      ? Array.from(new Set([...gd.searchMatchIds, ...pathIds]))
+      : gd.searchMatchIds;
 
   const isGraphTab = gd.activeTab.type === "graph";
 
@@ -90,16 +141,10 @@ export default function GraphShell() {
         style={{ width: leftOpen ? 240 : 0 }}
       >
         <LeftSidebar
-        roadmaps={gd.fullData.roadmaps}
         nodes={gd.fullData.nodes}
-        activeRoadmapId={gd.activeRoadmapId}
         searchQuery={gd.searchQuery}
         onSearchChange={gd.setSearchQuery}
-        onRoadmapClick={gd.setActiveRoadmapId}
         onNodeClick={handleNavigateToNode}
-        onAddRoadmap={gd.addRoadmap}
-        onRemoveRoadmap={gd.removeRoadmap}
-        onOpenRoadmapTab={gd.openRoadmapTab}
         activeFilters={gd.activeFilters}
         onToggleFilter={gd.toggleFilter}
         gapMode={gd.gapMode}
@@ -125,7 +170,7 @@ export default function GraphShell() {
             <PanelLeftOpen size={14} />
           </button>
 
-          <div className="flex-1 overflow-x-auto">
+          <div className="flex-1 min-w-0">
             <CanvasTabBar
               tabs={gd.tabs}
               activeTabId={gd.activeTabId}
@@ -147,7 +192,36 @@ export default function GraphShell() {
           </button>
         </div>
 
-        {/* Canvas Content */}
+        {/* Canvas Content (Roadmap overlay floats above when active) */}
+        {gd.roadmapOverlay && gd.activeTab.type === "graph" && (
+          <RoadmapOverlay
+            pathNodeIds={gd.roadmapOverlay.pathNodeIds}
+            currentIndex={gd.roadmapOverlay.currentIndex}
+            nodes={gd.fullData.nodes}
+            onAdvance={() => {
+              gd.advanceRoadmap();
+              const next =
+                gd.roadmapOverlay?.pathNodeIds[
+                  (gd.roadmapOverlay?.currentIndex ?? 0) + 1
+                ];
+              if (next) graphRef.current?.centerGraph([next]);
+            }}
+            onBack={() => {
+              gd.backRoadmap();
+              const prev =
+                gd.roadmapOverlay?.pathNodeIds[
+                  (gd.roadmapOverlay?.currentIndex ?? 0) - 1
+                ];
+              if (prev) graphRef.current?.centerGraph([prev]);
+            }}
+            onJumpTo={(idx) => {
+              gd.jumpRoadmap(idx);
+              const target = gd.roadmapOverlay?.pathNodeIds[idx];
+              if (target) graphRef.current?.centerGraph([target]);
+            }}
+            onClear={gd.clearRoadmapOverlay}
+          />
+        )}
         <CanvasArea
           activeTab={gd.activeTab}
           graphRef={graphRef}
@@ -161,9 +235,8 @@ export default function GraphShell() {
           onNodeClick={handleNodeClick}
           onNodeDoubleClick={handleNodeDoubleClick}
           onCanvasClick={handleCanvasClick}
+          onNodeHover={handleNodeHover}
           allNodes={gd.fullData.nodes}
-          roadmaps={gd.fullData.roadmaps}
-          onDocTabOpen={gd.openDocTab}
           notes={gd.notes}
           onNoteUpdate={gd.updateNote}
           onNodeSelect={handleNodeSelectFromTab}
@@ -198,7 +271,16 @@ export default function GraphShell() {
         allEdges={gd.fullData.edges}
         gapMode={gd.gapMode}
         gapNodes={gd.gapNodes}
-        onSearchKnowledge={gd.searchKnowledge}
+        agentMessages={agent.messages}
+        agentLoading={agent.isLoading}
+        onAgentSend={agent.sendMessage}
+        onAgentApprove={agent.approve}
+        onActivateRoadmap={(ids) => {
+          gd.activateRoadmapOverlay(ids);
+          setRightTab("graph");
+          if (gd.activeTab.type !== "graph") gd.setActiveTabId("graph");
+          if (ids[0]) graphRef.current?.centerGraph([ids[0]]);
+        }}
         onExport={() => setExportOpen(true)}
         onOpenDocTab={gd.openDocTab}
         onOpenNoteTab={gd.openNoteTab}
@@ -214,7 +296,7 @@ export default function GraphShell() {
         onClose={() => setExportOpen(false)}
       />
 
-      {/* Floating Memo */}
+      {/* Floating Memo — shift+click로 생성 */}
       {floatingMemo && gd.activeTab.type === "graph" && (() => {
         const node = gd.fullData.nodes.find((n) => n.id === floatingMemo.nodeId);
         if (!node) return null;
@@ -226,6 +308,23 @@ export default function GraphShell() {
             onClose={() => setFloatingMemo(null)}
             onSave={handleMemoSave}
             onOpenDoc={gd.openDocTab}
+          />
+        );
+      })()}
+
+      {/* Hover Preview Tooltip */}
+      {hoverPreview && gd.activeTab.type === "graph" && (() => {
+        const node = gd.fullData.nodes.find((n) => n.id === hoverPreview.nodeId);
+        if (!node) return null;
+        const edgeCount = gd.fullData.edges.filter(
+          (e) => e.source === node.id || e.target === node.id,
+        ).length;
+        return (
+          <NodePreviewTooltip
+            node={node}
+            x={hoverPreview.x}
+            y={hoverPreview.y}
+            edgeCount={edgeCount}
           />
         );
       })()}

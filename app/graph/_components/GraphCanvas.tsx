@@ -137,6 +137,13 @@ export interface NodeClickEvent {
   id: string;
   screenX: number;
   screenY: number;
+  shiftKey: boolean;
+}
+
+export interface NodeHoverEvent {
+  id: string;
+  screenX: number;
+  screenY: number;
 }
 
 interface Props {
@@ -150,11 +157,14 @@ interface Props {
   onNodeClick: (event: NodeClickEvent) => void;
   onNodeDoubleClick?: (id: string) => void;
   onCanvasClick: () => void;
+  onNodeHover?: (event: NodeHoverEvent | null) => void;
 }
 
 const GraphCanvasWrapper = forwardRef<GraphCanvasHandle, Props>(
-  function GraphCanvasWrapper({ data, viewMode, layoutId, edgeStyle, selections, actives, gapNodeIds, onNodeClick, onNodeDoubleClick, onCanvasClick }, ref) {
+  function GraphCanvasWrapper({ data, viewMode, layoutId, edgeStyle, selections, actives, gapNodeIds, onNodeClick, onNodeDoubleClick, onCanvasClick, onNodeHover }, ref) {
     const graphRef = useRef<GraphCanvasRef>(null);
+    const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const lastPointer = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
     useImperativeHandle(ref, () => ({
       centerGraph: (ids?: string[]) => {
@@ -187,7 +197,12 @@ const GraphCanvasWrapper = forwardRef<GraphCanvasHandle, Props>(
     }, [layoutId]);
 
     return (
-      <div style={{ width: "100%", height: "100%", position: "absolute", inset: 0 }}>
+      <div
+        style={{ width: "100%", height: "100%", position: "absolute", inset: 0 }}
+        onPointerMove={(e) => {
+          lastPointer.current = { x: e.clientX, y: e.clientY };
+        }}
+      >
       <ReagraphCanvas
         ref={graphRef}
         nodes={nodes}
@@ -213,10 +228,34 @@ const GraphCanvasWrapper = forwardRef<GraphCanvasHandle, Props>(
             id: node.id,
             screenX: e?.clientX ?? 0,
             screenY: e?.clientY ?? 0,
+            shiftKey: Boolean(e?.shiftKey),
           });
         }}
         onNodeDoubleClick={(node) => onNodeDoubleClick?.(node.id)}
-        onCanvasClick={onCanvasClick}
+        onCanvasClick={() => {
+          if (hoverTimer.current) {
+            clearTimeout(hoverTimer.current);
+            hoverTimer.current = null;
+          }
+          onNodeHover?.(null);
+          onCanvasClick();
+        }}
+        onNodePointerOver={(node) => {
+          if (!onNodeHover) return;
+          if (hoverTimer.current) clearTimeout(hoverTimer.current);
+          const { x, y } = lastPointer.current;
+          hoverTimer.current = setTimeout(() => {
+            onNodeHover({ id: node.id, screenX: x, screenY: y });
+          }, 150);
+        }}
+        onNodePointerOut={() => {
+          if (!onNodeHover) return;
+          if (hoverTimer.current) {
+            clearTimeout(hoverTimer.current);
+            hoverTimer.current = null;
+          }
+          onNodeHover(null);
+        }}
       />
       </div>
     );

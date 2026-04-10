@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { X, BookOpen, PenLine, MessageCircle, Upload, Send, Download, ExternalLink, type LucideIcon } from "lucide-react";
+import { X, BookOpen, PenLine, MessageCircle, Upload, Download, ExternalLink, type LucideIcon } from "lucide-react";
 import type { GraphNode } from "../_data/types";
 import { NODE_COLORS, TYPE_LABELS, EDGE_TYPE_LABELS } from "../_data/colors";
 import ConceptTimeline from "./ConceptTimeline";
 import GapSummary from "./GapSummary";
+import ChatPanel from "./ChatPanel";
+import type { ChatMessage } from "../_hooks/useAgent";
 
 interface ConnectedNode {
   node: GraphNode;
@@ -17,12 +19,6 @@ interface GapNodeInfo {
   node: GraphNode;
   connectionCount: number;
   memoCount: number;
-}
-
-interface ChatMessage {
-  role: "user" | "assistant";
-  text: string;
-  sources?: GraphNode[];
 }
 
 interface Props {
@@ -39,8 +35,12 @@ interface Props {
   // gap mode
   gapMode?: boolean;
   gapNodes?: GapNodeInfo[];
-  // Q&A
-  onSearchKnowledge?: (query: string) => { answer: string; sources: GraphNode[] };
+  // agent chat
+  agentMessages?: ChatMessage[];
+  agentLoading?: boolean;
+  onAgentSend?: (text: string) => void;
+  onAgentApprove?: (decisions: Record<string, boolean>) => Promise<void> | void;
+  onActivateRoadmap?: (pathNodeIds: string[]) => void;
   // export
   onExport?: () => void;
   // open in tab
@@ -266,95 +266,6 @@ function EditorContent() {
   );
 }
 
-function ChatContent({
-  onSearchKnowledge,
-  onNodeClick,
-}: {
-  onSearchKnowledge?: (query: string) => { answer: string; sources: GraphNode[] };
-  onNodeClick: (id: string) => void;
-}) {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      role: "assistant",
-      text: "내 지식 그래프를 기반으로 질문에 답해드립니다. 논문 간의 관계, 개념 설명 등을 물어보세요.",
-    },
-  ]);
-  const [input, setInput] = useState("");
-
-  const handleSend = () => {
-    if (!input.trim() || !onSearchKnowledge) return;
-    const userMsg: ChatMessage = { role: "user", text: input };
-    const result = onSearchKnowledge(input);
-    const assistantMsg: ChatMessage = {
-      role: "assistant",
-      text: result.answer,
-      sources: result.sources,
-    };
-    setMessages((prev) => [...prev, userMsg, assistantMsg]);
-    setInput("");
-  };
-
-  return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 p-4 flex flex-col gap-3 overflow-y-auto">
-        {messages.map((msg, i) => (
-          <div key={i} className={`flex gap-2 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
-            {msg.role === "assistant" && (
-              <div className="w-6 h-6 rounded-full bg-coral flex items-center justify-center shrink-0">
-                <span className="text-[10px] text-white font-bold">D</span>
-              </div>
-            )}
-            <div
-              className={`rounded-xl px-3 py-2 max-w-[85%] ${
-                msg.role === "user"
-                  ? "bg-coral text-white rounded-tr-sm"
-                  : "bg-coral-light/40 rounded-tl-sm"
-              }`}
-            >
-              <p className="text-xs leading-relaxed whitespace-pre-wrap">
-                {msg.text}
-              </p>
-              {msg.sources && msg.sources.length > 0 && (
-                <div className="mt-2 flex flex-col gap-1">
-                  <p className="text-[10px] font-semibold text-text-muted">출처 노드:</p>
-                  {msg.sources.map((s) => (
-                    <button
-                      key={s.id}
-                      onClick={() => onNodeClick(s.id)}
-                      className="text-left text-[10px] px-2 py-1.5 rounded-lg border border-border bg-white hover:border-coral/40 transition-colors"
-                    >
-                      <span className="font-semibold text-text-primary">{s.label}</span>
-                      <span className="text-text-muted ml-1">({TYPE_LABELS[s.type]})</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="px-4 py-3 border-t border-border">
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="질문을 입력하세요..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            className="flex-1 h-9 px-3 rounded-xl bg-white border border-border text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-coral transition-colors"
-          />
-          <button
-            onClick={handleSend}
-            className="w-9 h-9 rounded-xl bg-coral text-white flex items-center justify-center hover:bg-coral-dark transition-colors"
-          >
-            <Send size={14} />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function UploadContent() {
   return (
     <div className="flex flex-col h-full p-4 gap-4">
@@ -386,7 +297,11 @@ export default function RightPanel({
   allEdges,
   gapMode,
   gapNodes,
-  onSearchKnowledge,
+  agentMessages,
+  agentLoading,
+  onAgentSend,
+  onAgentApprove,
+  onActivateRoadmap,
   onExport,
   onOpenDocTab,
   onOpenNoteTab,
@@ -457,7 +372,14 @@ export default function RightPanel({
         )}
         {activeTab === "editor" && <EditorContent />}
         {activeTab === "chat" && (
-          <ChatContent onSearchKnowledge={onSearchKnowledge} onNodeClick={onNodeClick} />
+          <ChatPanel
+            messages={agentMessages ?? []}
+            isLoading={agentLoading ?? false}
+            onSend={onAgentSend ?? (() => {})}
+            onApprove={onAgentApprove ?? (async () => {})}
+            onActivateRoadmap={onActivateRoadmap}
+            onNavigateToNode={onNodeClick}
+          />
         )}
         {activeTab === "upload" && <UploadContent />}
       </div>

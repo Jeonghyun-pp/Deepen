@@ -90,7 +90,7 @@ export default function ExportModal({ data, fullData, selectedNodeId, open, onCl
       const nodes = fullData.nodes.filter((n) => connectedIds.has(n.id));
       const nodeIds = new Set(nodes.map((n) => n.id));
       const edges = fullData.edges.filter((e) => nodeIds.has(e.source) && nodeIds.has(e.target));
-      return { nodes, edges, roadmaps: fullData.roadmaps ?? [] };
+      return { nodes, edges };
     }
     return data;
   }, [scope, data, fullData, selectedNodeId]);

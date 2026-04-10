@@ -1,11 +1,33 @@
-export type NodeType = "paper" | "concept" | "memo" | "document";
-export type EdgeType = "citation" | "shared_concept" | "manual" | "contains" | "similarity";
+export type NodeType =
+  | "paper"
+  | "concept"
+  | "technique"
+  | "application"
+  | "question"
+  | "memo"
+  | "document";
+
+export type EdgeType =
+  // legacy / structural
+  | "citation"
+  | "shared_concept"
+  | "manual"
+  | "contains"
+  | "similarity"
+  // typed relations (v2)
+  | "introduces"
+  | "uses"
+  | "extends"
+  | "appliedIn"
+  | "raises"
+  | "relatedTo";
 
 export interface GraphNode {
   id: string;
   label: string;
   type: NodeType;
   content: string;
+  tldr?: string;
   meta?: {
     authors?: string;
     year?: number;
@@ -21,29 +43,15 @@ export interface GraphEdge {
   type: EdgeType;
   label?: string;
   weight?: number; // 0~1, 연관성 강도. 미지정 시 0.5 취급
-}
-
-export interface RoadmapEntry {
-  nodeId: string;
-  order: number;
-  reason?: string;
-  difficulty?: "beginner" | "intermediate" | "advanced";
-  estimatedMinutes?: number;
-}
-
-export interface RoadmapModule {
-  id: string;
-  name: string;
-  entries: RoadmapEntry[];
+  note?: string;
 }
 
 export interface GraphData {
   nodes: GraphNode[];
   edges: GraphEdge[];
-  roadmaps: RoadmapModule[];
 }
 
-export type CanvasTabType = "graph" | "doc" | "roadmap-timeline" | "note";
+export type CanvasTabType = "graph" | "doc" | "note";
 
 export interface CanvasTab {
   id: string;
@@ -51,8 +59,14 @@ export interface CanvasTab {
   label: string;
   closeable: boolean;
   nodeId?: string;
-  roadmapId?: string;
   noteId?: string;
+}
+
+// Roadmap = graph path overlay (사용자가 학습 중인 node sequence)
+export interface RoadmapOverlayState {
+  pathNodeIds: string[];
+  currentIndex: number;
+  title?: string;
 }
 
 // ==================== Highlights ====================

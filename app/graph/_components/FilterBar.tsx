@@ -3,7 +3,15 @@
 import type { NodeType } from "../_data/types";
 import { NODE_COLORS, TYPE_LABELS } from "../_data/colors";
 
-const NODE_TYPES: NodeType[] = ["paper", "concept", "memo", "document"];
+const NODE_TYPES: NodeType[] = [
+  "paper",
+  "concept",
+  "technique",
+  "application",
+  "question",
+  "memo",
+  "document",
+];
 
 interface Props {
   activeFilters: Set<NodeType>;
