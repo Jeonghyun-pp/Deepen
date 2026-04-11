@@ -2,7 +2,8 @@
 
 import { useRef, useState, useCallback, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { PanelLeftOpen, PanelRightOpen } from "lucide-react";
+import Link from "next/link";
+import { PanelLeftOpen, PanelRightOpen, Sparkles } from "lucide-react";
 import { sampleGraphData } from "../_data/sample-data";
 import { useGraphData } from "../_hooks/useGraphData";
 import { useAgent } from "../_hooks/useAgent";
@@ -179,6 +180,16 @@ export default function GraphShell() {
               onCreateNote={() => gd.createNote()}
             />
           </div>
+
+          {/* 추천 프로토타입 링크 */}
+          <Link
+            href="/recommendations"
+            className="flex items-center gap-1 px-2.5 h-full text-xs font-semibold text-[#7F77DD] border-l border-border hover:bg-[#7F77DD]/10 transition-colors"
+            title="추천 프로토타입"
+          >
+            <Sparkles size={12} />
+            추천
+          </Link>
 
           {/* Right panel toggle */}
           <button
