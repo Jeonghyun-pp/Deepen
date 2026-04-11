@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, BookOpen, PenLine, MessageCircle, Upload, Download, ExternalLink, type LucideIcon } from "lucide-react";
+import { X, BookOpen, PenLine, MessageCircle, Upload, Download, ExternalLink, Map, type LucideIcon } from "lucide-react";
 import type { GraphNode } from "../_data/types";
 import { NODE_COLORS, TYPE_LABELS, EDGE_TYPE_LABELS } from "../_data/colors";
 import ConceptTimeline from "./ConceptTimeline";
@@ -47,6 +47,8 @@ interface Props {
   onOpenDocTab?: (nodeId: string, label: string) => void;
   onOpenNoteTab?: (noteId: string, label: string) => void;
   hasNote?: (nodeId: string) => boolean;
+  // create roadmap from this node
+  onCreateRoadmapFromNode?: (nodeId: string) => void;
 }
 
 const TAB_CONFIG: Record<string, { icon: LucideIcon; label: string }> = {
@@ -106,6 +108,7 @@ function NodeDetailContent({
   onOpenDocTab,
   onOpenNoteTab,
   hasNote,
+  onCreateRoadmapFromNode,
 }: {
   node: GraphNode | null;
   connections: ConnectedNode[];
@@ -115,6 +118,7 @@ function NodeDetailContent({
   onOpenDocTab?: (nodeId: string, label: string) => void;
   onOpenNoteTab?: (noteId: string, label: string) => void;
   hasNote?: (nodeId: string) => boolean;
+  onCreateRoadmapFromNode?: (nodeId: string) => void;
 }) {
   if (!node) {
     return (
@@ -157,9 +161,9 @@ function NodeDetailContent({
         </h3>
       </div>
 
-      {/* Open in tab button */}
-      {(node.type === "paper" || node.type === "document" || (node.type === "memo" && hasNote?.(node.id))) && (
-        <div className="px-4 py-2 border-b border-border">
+      {/* Action buttons */}
+      <div className="px-4 py-2 border-b border-border flex flex-col gap-1.5">
+        {(node.type === "paper" || node.type === "document" || (node.type === "memo" && hasNote?.(node.id))) && (
           <button
             onClick={() => {
               if (node.type === "paper" || node.type === "document") {
@@ -173,8 +177,18 @@ function NodeDetailContent({
             <ExternalLink size={12} />
             탭에서 열기
           </button>
-        </div>
-      )}
+        )}
+        {onCreateRoadmapFromNode && (
+          <button
+            onClick={() => onCreateRoadmapFromNode(node.id)}
+            className="w-full flex items-center justify-center gap-1.5 h-8 rounded-xl border border-blue-300 text-xs font-semibold text-blue-600 hover:bg-blue-50 transition-colors"
+            title="이 노드를 이해하기 위한 prereq chain 자동 생성"
+          >
+            <Map size={12} />
+            이 노드 학습 경로 만들기
+          </button>
+        )}
+      </div>
 
       {/* Meta */}
       {node.meta && (
@@ -306,6 +320,7 @@ export default function RightPanel({
   onOpenDocTab,
   onOpenNoteTab,
   hasNote,
+  onCreateRoadmapFromNode,
 }: Props) {
 
   return (
@@ -366,6 +381,7 @@ export default function RightPanel({
                 onOpenDocTab={onOpenDocTab}
                 onOpenNoteTab={onOpenNoteTab}
                 hasNote={hasNote}
+                onCreateRoadmapFromNode={onCreateRoadmapFromNode}
               />
             )}
           </>

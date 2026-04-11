@@ -6,8 +6,10 @@ import {
   Filter,
   AlertTriangle,
   NotebookPen,
+  Map as MapIcon,
+  X,
 } from "lucide-react";
-import type { GraphNode, NodeType, NoteDocument } from "../_data/types";
+import type { GraphNode, NodeType, NoteDocument, Roadmap } from "../_data/types";
 import { NODE_COLORS, TYPE_LABELS } from "../_data/colors";
 import Link from "next/link";
 
@@ -36,6 +38,12 @@ interface Props {
   // notes
   notes: NoteDocument[];
   onOpenNoteTab: (noteId: string, label: string) => void;
+  // roadmaps
+  roadmaps: Roadmap[];
+  activeRoadmapId?: string;
+  onActivateRoadmap: (roadmapId: string) => void;
+  onDeleteRoadmap: (roadmapId: string) => void;
+  onClearRoadmap: () => void;
 }
 
 export default function LeftSidebar({
@@ -50,6 +58,11 @@ export default function LeftSidebar({
   gapCount,
   notes,
   onOpenNoteTab,
+  roadmaps,
+  activeRoadmapId,
+  onActivateRoadmap,
+  onDeleteRoadmap,
+  onClearRoadmap,
 }: Props) {
   // 필터·검색 적용된 노드 (그룹화 표시용)
   const visibleNodes = useMemo(() => {
@@ -171,6 +184,67 @@ export default function LeftSidebar({
           </div>
         ))}
       </div>
+
+      {/* Roadmaps section */}
+      {roadmaps.length > 0 && (
+        <div className="px-2 py-2 border-t border-border">
+          <div className="flex items-center justify-between px-2 mb-1">
+            <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">
+              로드맵
+            </p>
+            {activeRoadmapId && (
+              <button
+                onClick={onClearRoadmap}
+                className="text-[9px] text-coral hover:underline"
+                title="활성 로드맵 해제"
+              >
+                해제
+              </button>
+            )}
+          </div>
+          <div className="flex flex-col gap-0.5">
+            {roadmaps.map((rm) => {
+              const active = rm.id === activeRoadmapId;
+              const sourceColor =
+                rm.source === "seed"
+                  ? "text-blue-500"
+                  : rm.source === "agent"
+                  ? "text-purple-500"
+                  : "text-emerald-500";
+              return (
+                <div
+                  key={rm.id}
+                  className={`group flex items-center gap-1 px-2 py-1 rounded transition-colors ${
+                    active
+                      ? "bg-coral-light text-coral"
+                      : "text-text-secondary hover:bg-coral-light/30 hover:text-text-primary"
+                  }`}
+                >
+                  <button
+                    onClick={() => onActivateRoadmap(rm.id)}
+                    className="flex items-center gap-2 flex-1 min-w-0 text-left cursor-pointer"
+                  >
+                    <MapIcon size={11} className={`shrink-0 ${active ? "text-coral" : sourceColor}`} />
+                    <span className="text-[11px] truncate">{rm.title}</span>
+                    <span className="text-[9px] text-text-muted shrink-0">
+                      {rm.nodeIds.length}
+                    </span>
+                  </button>
+                  {rm.source !== "seed" && (
+                    <button
+                      onClick={() => onDeleteRoadmap(rm.id)}
+                      className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-text-muted hover:text-coral transition-opacity"
+                      title="삭제"
+                    >
+                      <X size={10} />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Notes section */}
       {notes.length > 0 && (

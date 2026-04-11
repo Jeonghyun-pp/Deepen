@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { PanelLeftOpen, PanelRightOpen } from "lucide-react";
 import { sampleGraphData } from "../_data/sample-data";
@@ -21,6 +21,7 @@ export default function GraphShell() {
   const [exportOpen, setExportOpen] = useState(false);
   const [floatingMemo, setFloatingMemo] = useState<{ nodeId: string; x: number; y: number } | null>(null);
   const [hoverPreview, setHoverPreview] = useState<{ nodeId: string; x: number; y: number } | null>(null);
+  const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
   const [leftOpen, setLeftOpen] = useState(true);
   const graphRef = useRef<GraphCanvasHandle>(null);
 
@@ -82,13 +83,16 @@ export default function GraphShell() {
     if (!gd.localMode) gd.selectNode(null);
     setFloatingMemo(null);
     setHoverPreview(null);
+    setHoveredNodeId(null);
   }, [gd]);
 
   const handleNodeHover = useCallback((event: NodeHoverEvent | null) => {
     if (event) {
       setHoverPreview({ nodeId: event.id, x: event.screenX, y: event.screenY });
+      setHoveredNodeId(event.id);
     } else {
       setHoverPreview(null);
+      setHoveredNodeId(null);
     }
   }, []);
 
@@ -124,12 +128,48 @@ export default function GraphShell() {
     : [];
 
   const selections = gd.selectedNode ? [gd.selectedNode.id] : [];
-  // path 노드도 actives에 포함시켜 시각적 강조
   const pathIds = gd.roadmapOverlay?.pathNodeIds ?? [];
-  const actives =
-    pathIds.length > 0
-      ? Array.from(new Set([...gd.searchMatchIds, ...pathIds]))
-      : gd.searchMatchIds;
+
+  // ===== Hover dim 3단계 =====
+  // focus = hover 또는 selected 노드, context = 그 1-hop neighbors (노드 + 연결 엣지),
+  // dimmed = 그 외 전부 (theme.inactiveOpacity 적용).
+  // search/roadmap 결과도 누적해 dim 처리에서 살린다.
+  const computeNeighborhood = useCallback(
+    (nodeId: string): string[] => {
+      const ids = new Set<string>([nodeId]);
+      const edgeIds: string[] = [];
+      for (const e of gd.fullData.edges) {
+        if (e.source === nodeId) {
+          ids.add(e.target);
+          edgeIds.push(e.id);
+        } else if (e.target === nodeId) {
+          ids.add(e.source);
+          edgeIds.push(e.id);
+        }
+      }
+      return [...ids, ...edgeIds];
+    },
+    [gd.fullData.edges],
+  );
+
+  const actives = useMemo(() => {
+    const set = new Set<string>();
+    gd.searchMatchIds.forEach((id) => set.add(id));
+    pathIds.forEach((id) => set.add(id));
+    if (gd.selectedNode) {
+      computeNeighborhood(gd.selectedNode.id).forEach((id) => set.add(id));
+    }
+    if (hoveredNodeId) {
+      computeNeighborhood(hoveredNodeId).forEach((id) => set.add(id));
+    }
+    return Array.from(set);
+  }, [
+    gd.searchMatchIds,
+    pathIds,
+    gd.selectedNode,
+    hoveredNodeId,
+    computeNeighborhood,
+  ]);
 
   const isGraphTab = gd.activeTab.type === "graph";
 
@@ -152,6 +192,15 @@ export default function GraphShell() {
         gapCount={gd.gapNodes.length}
         notes={gd.notes}
         onOpenNoteTab={gd.openNoteTab}
+        roadmaps={gd.roadmaps}
+        activeRoadmapId={gd.roadmapOverlay?.roadmapId}
+        onActivateRoadmap={(id) => {
+          gd.activateRoadmapById(id);
+          if (gd.activeTab.type !== "graph") gd.setActiveTabId("graph");
+          setTimeout(() => graphRef.current?.fitView(), 250);
+        }}
+        onDeleteRoadmap={gd.deleteRoadmap}
+        onClearRoadmap={gd.clearRoadmapOverlay}
       />
       </div>
 
@@ -279,12 +328,18 @@ export default function GraphShell() {
           gd.activateRoadmapOverlay(ids);
           setRightTab("graph");
           if (gd.activeTab.type !== "graph") gd.setActiveTabId("graph");
-          if (ids[0]) graphRef.current?.centerGraph([ids[0]]);
+          // 모듈화 후 path 전체가 화면에 fit 되도록 (filteredData가 path로 좁혀진 뒤 호출)
+          setTimeout(() => graphRef.current?.fitView(), 250);
         }}
         onExport={() => setExportOpen(true)}
         onOpenDocTab={gd.openDocTab}
         onOpenNoteTab={gd.openNoteTab}
         hasNote={(id) => gd.notes.some((n) => n.id === id)}
+        onCreateRoadmapFromNode={(id) => {
+          gd.createRoadmapFromTarget(id);
+          if (gd.activeTab.type !== "graph") gd.setActiveTabId("graph");
+          setTimeout(() => graphRef.current?.fitView(), 250);
+        }}
       />
 
       {/* Export Modal */}

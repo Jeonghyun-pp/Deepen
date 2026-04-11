@@ -62,11 +62,24 @@ export interface CanvasTab {
   noteId?: string;
 }
 
-// Roadmap = graph path overlay (사용자가 학습 중인 node sequence)
+// Roadmap = 일급 객체. 그래프에서 학습 경로(노드 시퀀스)를 영속적으로 보관.
+// source: 시드(큐레이션) / agent 생성 / 사용자 직접 만든 것 구분.
+export interface Roadmap {
+  id: string;
+  title: string;
+  nodeIds: string[];
+  source: "seed" | "agent" | "user";
+  description?: string;
+  createdAt: string;
+}
+
+// 현재 활성화된 로드맵의 view state.
+// roadmapId가 있으면 저장된 Roadmap 참조. 없으면 ad-hoc path (agent find_path 등).
 export interface RoadmapOverlayState {
   pathNodeIds: string[];
   currentIndex: number;
   title?: string;
+  roadmapId?: string;
 }
 
 // ==================== Highlights ====================

@@ -63,21 +63,39 @@ const NODE_BASE_SIZE: Record<string, number> = {
   document: 12,
 };
 
-function toReagraphNodes(data: GraphData, gapNodeIds?: Set<string>): RGNode[] {
+// degree 상위 HUB_LABEL_TOP_N 노드만 쉬는 상태에서 라벨 표시.
+// 나머지는 hover/select/search 등 actives에 들어가야 라벨이 켜진다.
+const HUB_LABEL_TOP_N = 15;
+
+function toReagraphNodes(
+  data: GraphData,
+  actives: string[],
+  gapNodeIds?: Set<string>,
+): RGNode[] {
   const degreeMap = new Map<string, number>();
   for (const e of data.edges) {
     degreeMap.set(e.source, (degreeMap.get(e.source) || 0) + 1);
     degreeMap.set(e.target, (degreeMap.get(e.target) || 0) + 1);
   }
 
+  // Hub: degree 상위 N개 — 쉬는 상태의 골격을 형성
+  const hubSet = new Set(
+    [...degreeMap.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, HUB_LABEL_TOP_N)
+      .map(([id]) => id),
+  );
+  const activesSet = new Set(actives);
+
   return data.nodes.map((n) => {
     const base = NODE_BASE_SIZE[n.type] ?? 10;
     const degree = degreeMap.get(n.id) || 0;
     // degree 보정: paper는 연결 많을수록 더 커짐, 나머지는 소폭 보정
     const degreeBonus = n.type === "paper" ? degree * 1.5 : degree * 0.5;
+    const showLabel = hubSet.has(n.id) || activesSet.has(n.id);
     return {
       id: n.id,
-      label: n.label,
+      label: showLabel ? n.label : "",
       fill: gapNodeIds?.has(n.id) ? "#f59e0b" : NODE_COLORS[n.type],
       size: Math.min(40, base + degreeBonus),
       data: n,
@@ -179,7 +197,10 @@ const GraphCanvasWrapper = forwardRef<GraphCanvasHandle, Props>(
       },
     }));
 
-    const nodes = useMemo(() => toReagraphNodes(data, gapNodeIds), [data, gapNodeIds]);
+    const nodes = useMemo(
+      () => toReagraphNodes(data, actives, gapNodeIds),
+      [data, actives, gapNodeIds],
+    );
     const edges = useMemo(() => toReagraphEdges(data), [data]);
 
     const layoutType = toReagraphLayoutType(layoutId, viewMode) as LayoutTypes;

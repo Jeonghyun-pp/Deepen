@@ -7,7 +7,9 @@ import type {
   CanvasTab,
   NoteDocument,
   RoadmapOverlayState,
+  Roadmap,
 } from "../_data/types";
+import { buildRoadmapFromTarget, SEED_ROADMAPS } from "../_data/roadmap";
 
 export type ViewMode = "2d" | "3d";
 export type EdgeStyle = "curved" | "linear";
@@ -63,9 +65,10 @@ export function useGraphData(initialData: GraphData) {
   const [gapMode, setGapMode] = useState(false);
   const [panelOpen, setPanelOpen] = useState(true);
   const [edgeStyle, setEdgeStyle] = useState<EdgeStyle>("linear");
-  const [relevanceDensity, setRelevanceDensity] = useState<RelevanceDensity>("default");
+  const [relevanceDensity, setRelevanceDensity] = useState<RelevanceDensity>("compact");
 
-  // --- Roadmap overlay (graph path) ---
+  // --- Roadmaps (일급 객체) + 활성 overlay ---
+  const [roadmaps, setRoadmaps] = useState<Roadmap[]>(SEED_ROADMAPS);
   const [roadmapOverlay, setRoadmapOverlay] =
     useState<RoadmapOverlayState | null>(null);
 
@@ -119,6 +122,54 @@ export function useGraphData(initialData: GraphData) {
     },
     [],
   );
+
+  const activateRoadmapById = useCallback(
+    (roadmapId: string) => {
+      const rm = roadmaps.find((r) => r.id === roadmapId);
+      if (!rm || rm.nodeIds.length === 0) return;
+      setRoadmapOverlay({
+        pathNodeIds: rm.nodeIds,
+        currentIndex: 0,
+        title: rm.title,
+        roadmapId: rm.id,
+      });
+    },
+    [roadmaps],
+  );
+
+  // target 노드의 prereq closure를 BFS로 산출 → 새 Roadmap 저장 + 활성화
+  const createRoadmapFromTarget = useCallback(
+    (targetNodeId: string) => {
+      const targetNode = data.nodes.find((n) => n.id === targetNodeId);
+      if (!targetNode) return;
+      const nodeIds = buildRoadmapFromTarget(data, targetNodeId, 3);
+      if (nodeIds.length === 0) return;
+      const id = `rm-${Date.now()}`;
+      const newRoadmap: Roadmap = {
+        id,
+        title: `${targetNode.label} 학습 경로`,
+        nodeIds,
+        source: "user",
+        description: `${targetNode.label}을 이해하기 위한 자동 생성 prereq chain`,
+        createdAt: new Date().toISOString(),
+      };
+      setRoadmaps((prev) => [...prev, newRoadmap]);
+      setRoadmapOverlay({
+        pathNodeIds: nodeIds,
+        currentIndex: 0,
+        title: newRoadmap.title,
+        roadmapId: id,
+      });
+    },
+    [data],
+  );
+
+  const deleteRoadmap = useCallback((roadmapId: string) => {
+    setRoadmaps((prev) => prev.filter((r) => r.id !== roadmapId));
+    setRoadmapOverlay((prev) =>
+      prev?.roadmapId === roadmapId ? null : prev,
+    );
+  }, []);
 
   const advanceRoadmap = useCallback(() => {
     setRoadmapOverlay((prev) =>
@@ -277,10 +328,17 @@ export function useGraphData(initialData: GraphData) {
     if (localNodeIds) {
       nodes = nodes.filter((n) => localNodeIds.has(n.id));
     }
+    // 로드맵 활성화 시 모듈화: path 노드만 표시.
+    // 이때 weight threshold도 무시해 path 사이 약한 엣지가 사라지지 않게 한다.
+    if (roadmapOverlay) {
+      const pathSet = new Set(roadmapOverlay.pathNodeIds);
+      nodes = nodes.filter((n) => pathSet.has(n.id));
+    }
     const nodeIds = new Set(nodes.map((n) => n.id));
 
-    // Relevance density threshold
-    const threshold = relevanceDensity === "compact" ? 0.7
+    const threshold = roadmapOverlay
+      ? 0
+      : relevanceDensity === "compact" ? 0.7
       : relevanceDensity === "default" ? 0.4
       : 0;
 
@@ -289,7 +347,7 @@ export function useGraphData(initialData: GraphData) {
         && (e.weight ?? 0.5) >= threshold
     );
     return { nodes, edges };
-  }, [data, activeFilters, localNodeIds, relevanceDensity]);
+  }, [data, activeFilters, localNodeIds, relevanceDensity, roadmapOverlay]);
 
   const selectedNode = useMemo(
     () => data.nodes.find((n) => n.id === selectedNodeId) ?? null,
@@ -473,6 +531,11 @@ export function useGraphData(initialData: GraphData) {
     backRoadmap,
     jumpRoadmap,
     clearRoadmapOverlay,
+    // roadmaps (일급 객체)
+    roadmaps,
+    activateRoadmapById,
+    createRoadmapFromTarget,
+    deleteRoadmap,
     // mutation
     addNode,
     addEdge,
