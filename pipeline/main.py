@@ -7,8 +7,11 @@
   # 검색어로 여러 편 일괄 추출
   python main.py search "transformer attention mechanism" --count 5
 
-  # 결과를 JSON 파일로 저장
+  # 결과를 output/ 폴더에 저장 (-o 파일명만 쓰면 output/ 안에 자동 저장)
   python main.py search "diffusion model" --count 10 -o results.json
+
+  # 절대/상대 경로 지정 시 해당 경로에 저장
+  python main.py search "RLHF" --count 20 --year-from 2021 -o /some/path/rlhf.json
 
   # 연도 범위 + OA 논문만
   python main.py search "RLHF" --count 20 --year-from 2021 --year-to 2024 --oa
@@ -25,7 +28,7 @@ from dotenv import load_dotenv
 
 load_dotenv()  # .env 파일 자동 로드
 
-from extractors.keyword import from_id, from_search  # noqa: E402  (load_dotenv 먼저)
+from extractors.structured_keyword import from_id, from_search  # noqa: E402
 
 
 # ── CLI 파서 ──────────────────────────────────────────────────────────────
@@ -64,11 +67,25 @@ def _build_parser() -> argparse.ArgumentParser:
 # ── 출력 헬퍼 ─────────────────────────────────────────────────────────────
 
 
+_OUTPUT_DIR = Path(__file__).parent / "output"
+
+
+def _resolve_path(output_path: str) -> Path:
+    """파일명만 주어지면 output/ 폴더 아래에 저장, 경로가 포함되면 그대로 사용."""
+    p = Path(output_path)
+    if p.parent == Path("."):          # 파일명만 입력된 경우
+        _OUTPUT_DIR.mkdir(exist_ok=True)
+        return _OUTPUT_DIR / p
+    p.parent.mkdir(parents=True, exist_ok=True)
+    return p
+
+
 def _dump(data: dict | list, output_path: str | None) -> None:
     text = json.dumps(data, ensure_ascii=False, indent=2)
     if output_path:
-        Path(output_path).write_text(text, encoding="utf-8")
-        print(f"\n저장 완료 → {output_path}")
+        dest = _resolve_path(output_path)
+        dest.write_text(text, encoding="utf-8")
+        print(f"\n저장 완료 → {dest}")
     else:
         print(text)
 

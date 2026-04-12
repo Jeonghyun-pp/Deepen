@@ -21,18 +21,17 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from extractors.keyword import from_id, from_search
-from models.paper import KeywordResult
+from extractors.structured_keyword import from_id, from_search
+from models.paper import StructuredKeywordResult
 
 # ── 앱 초기화 ──────────────────────────────────────────────────────────────
 
 app = FastAPI(
     title="Deepen Keyword Extractor",
-    description="OpenAlex 논문 → Upstage Solar 키워드 추출 API",
-    version="0.1.0",
+    description="OpenAlex 논문 → Upstage Solar LangGraph 키워드 추출 API",
+    version="0.2.0",
 )
 
-# Next.js dev 서버(3000)와 배포 도메인 모두 허용
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -57,12 +56,12 @@ class SearchRequest(BaseModel):
     year_from: Optional[int] = None
     year_to: Optional[int] = None
     open_access_only: bool = False
-    request_delay: float = Field(1.0, ge=0.0, le=10.0)
+    request_delay: float = Field(1.5, ge=0.0, le=10.0)
 
 
 class SearchResponse(BaseModel):
     total: int
-    results: list[KeywordResult]
+    results: list[StructuredKeywordResult]
 
 
 # ── 엔드포인트 ────────────────────────────────────────────────────────────
@@ -73,9 +72,9 @@ def health() -> dict:
     return {"status": "ok"}
 
 
-@app.post("/extract/id", response_model=KeywordResult)
-def extract_by_id(body: IdRequest) -> KeywordResult:
-    """OpenAlex Work ID로 논문 단건 키워드 추출."""
+@app.post("/extract/id", response_model=StructuredKeywordResult)
+def extract_by_id(body: IdRequest) -> StructuredKeywordResult:
+    """OpenAlex ID로 논문 단건 구조화 키워드 추출 (L1~L6)."""
     result = from_id(body.openalex_id)
     if result is None:
         raise HTTPException(status_code=404, detail=f"논문을 찾을 수 없습니다: {body.openalex_id}")
@@ -84,7 +83,7 @@ def extract_by_id(body: IdRequest) -> KeywordResult:
 
 @app.post("/extract/search", response_model=SearchResponse)
 def extract_by_search(body: SearchRequest) -> SearchResponse:
-    """검색어로 논문 여러 편을 가져와 일괄 키워드 추출."""
+    """검색어로 논문 여러 편 구조화 키워드 일괄 추출 (L1~L6)."""
     results = from_search(
         query=body.query,
         count=body.count,

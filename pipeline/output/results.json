@@ -1,0 +1,783 @@
+[
+  {
+    "paper_id": "W4402670859",
+    "title": "Aligning Large Multimodal Models with Factually Augmented RLHF",
+    "year": 2024,
+    "paper_type": "Applied",
+    "l1_lineage": [
+      "Large Multimodal Models",
+      "Reinforcement Learning from Human Feedback (RLHF)"
+    ],
+    "l2_principle": [
+      "Factual Augmentation",
+      "Alignment Optimization",
+      "Multimodal Representation Learning"
+    ],
+    "l3_process": [
+      "Human Feedback Integration",
+      "Factual Consistency Evaluation",
+      "Cross-Modal Reward Modeling"
+    ],
+    "l4_proposal": [
+      "Factually Augmented RLHF",
+      "Multimodal Alignment Framework",
+      "Cross-Modal Knowledge Grounding"
+    ],
+    "l5_field": [
+      "Multimodal Question Answering",
+      "Visual Reasoning",
+      "Improved Factual Accuracy"
+    ],
+    "l6_limitation": [
+      "Scalability Constraints",
+      "Domain-Specific Factual Bias",
+      "Human Annotation Overhead"
+    ],
+    "errors": []
+  },
+  {
+    "paper_id": "W4386437475",
+    "title": "RLAIF vs. RLHF: Scaling Reinforcement Learning from Human Feedback with AI Feedback",
+    "year": 2023,
+    "paper_type": "Applied",
+    "l1_lineage": [
+      "RLHF",
+      "Bai et al.",
+      "LLM"
+    ],
+    "l2_principle": [
+      "reinforcement learning",
+      "reward model",
+      "preference labels"
+    ],
+    "l3_process": [
+      "summarization",
+      "helpful dialogue generation",
+      "harmless dialogue generation"
+    ],
+    "l4_proposal": [
+      "RLAIF",
+      "self-improvement",
+      "direct-RLAIF (d-RLAIF)"
+    ],
+    "l5_field": [
+      "scalability limitations",
+      "superior performance",
+      "on-par with human feedback"
+    ],
+    "l6_limitation": [
+      "off-the-shelf LLM",
+      "single-domain evaluation",
+      "exact same checkpoint"
+    ],
+    "errors": []
+  },
+  {
+    "paper_id": "W4402727405",
+    "title": "RLHF-V: Towards Trustworthy MLLMs via Behavior Alignment from Fine-Grained Correctional Human Feedback",
+    "year": 2024,
+    "paper_type": "Applied",
+    "l1_lineage": [
+      "LLaVA-RLHF",
+      "GPT-4V",
+      "MLLMs"
+    ],
+    "l2_principle": [
+      "direct preference optimization",
+      "fine-grained correctional feedback",
+      "behavior alignment"
+    ],
+    "l3_process": [
+      "segment-level corrections",
+      "dense preference optimization",
+      "human-in-the-loop evaluation"
+    ],
+    "l4_proposal": [
+      "RLHF-V",
+      "hallucination reduction",
+      "trustworthy MLLM alignment"
+    ],
+    "l5_field": [
+      "multimodal understanding",
+      "high-stakes applications",
+      "hallucination rate reduction"
+    ],
+    "l6_limitation": [
+      "limited annotated data scale",
+      "domain-specific generalization",
+      "computational resource constraints"
+    ],
+    "errors": []
+  },
+  {
+    "paper_id": "W4411063470",
+    "title": "RLHF Deciphered: A Critical Analysis of Reinforcement Learning from Human Feedback for LLMs",
+    "year": 2025,
+    "paper_type": "Survey",
+    "l1_lineage": [
+      "Reinforcement Learning from Human Feedback (RLHF)",
+      "Large Language Models (LLMs)",
+      "Reward Model Development"
+    ],
+    "l2_principle": [
+      "Reward Model Taxonomy",
+      "Function Approximation Analysis",
+      "Reward Expressivity Assumptions"
+    ],
+    "l3_process": [
+      "Categorical Literature Review",
+      "Modeling Choices Examination",
+      "Function Approximation Caveats"
+    ],
+    "l4_proposal": [
+      "Incorrect Generalization Mitigation",
+      "Model Misspecification Solutions",
+      "Sparse Feedback Optimization"
+    ],
+    "l5_field": [
+      "LLM Alignment Research",
+      "Reinforcement Learning Community",
+      "Human-AI Interaction Studies"
+    ],
+    "l6_limitation": [
+      "Non-English Feedback Exclusion",
+      "Reward Model Bias",
+      "2023+ Methodology Limitations"
+    ],
+    "errors": []
+  },
+  {
+    "paper_id": "W4387838992",
+    "title": "Safe RLHF: Safe Reinforcement Learning from Human Feedback",
+    "year": 2023,
+    "paper_type": "Applied",
+    "l1_lineage": [
+      "Reinforcement Learning from Human Feedback (RLHF)",
+      "Large Language Models (LLMs)",
+      "Lagrangian method"
+    ],
+    "l2_principle": [
+      "reward and cost models",
+      "constrained optimization",
+      "human value alignment"
+    ],
+    "l3_process": [
+      "three-round fine-tuning",
+      "separate reward and cost modeling",
+      "dynamic objective balancing"
+    ],
+    "l4_proposal": [
+      "Safe RLHF",
+      "explicit helpfulness-harmlessness decoupling",
+      "safety-aware constrained optimization"
+    ],
+    "l5_field": [
+      "harmful response mitigation",
+      "human preference alignment",
+      "Alpaca-7B fine-tuning"
+    ],
+    "l6_limitation": [
+      "crowdworker preference ambiguity",
+      "limited to collected human preferences",
+      "single model evaluation"
+    ],
+    "errors": []
+  },
+  {
+    "paper_id": "W4384111857",
+    "title": "Secrets of RLHF in Large Language Models Part I: PPO",
+    "year": 2023,
+    "paper_type": "Applied",
+    "l1_lineage": [
+      "BERT",
+      "GPT",
+      "PPO",
+      "SFT models",
+      "ChatGPT"
+    ],
+    "l2_principle": [
+      "reinforcement learning with human feedback (RLHF)",
+      "reward models",
+      "policy optimization",
+      "process supervision",
+      "policy constraints"
+    ],
+    "l3_process": [
+      "step-by-step reasoning",
+      "training stability analysis",
+      "comprehensive ability comparison",
+      "open-source implementation",
+      "policy agent training"
+    ],
+    "l4_proposal": [
+      "PPO-max",
+      "RLHF framework dissection",
+      "technical alignment",
+      "safe landing of LLMs",
+      "modest contributions to LLMs advancement"
+    ],
+    "l5_field": [
+      "human-centric assistant",
+      "artificial general intelligence",
+      "LLM alignment",
+      "AI research",
+      "technical alignment development"
+    ],
+    "l6_limitation": [
+      "huge trial and error cost",
+      "reward design challenges",
+      "environment interaction difficulties",
+      "agent training barriers",
+      "single-domain evaluation"
+    ],
+    "errors": []
+  },
+  {
+    "paper_id": "W4403883066",
+    "title": "HybridFlow: A Flexible and Efficient RLHF Framework",
+    "year": 2025,
+    "paper_type": "Tools",
+    "l1_lineage": [
+      "RLHF",
+      "Reinforcement Learning",
+      "Large Language Model (LLM) alignment"
+    ],
+    "l2_principle": [
+      "dataflow",
+      "distributed LLM training",
+      "actor model resharding",
+      "3D-HybridEngine"
+    ],
+    "l3_process": [
+      "multicast",
+      "operation orchestration",
+      "device mapping",
+      "memory redundancy elimination"
+    ],
+    "l4_proposal": [
+      "flexible representation",
+      "efficient execution",
+      "various devices support",
+      "scalable RLHF algorithms"
+    ],
+    "l5_field": [
+      "LLM alignment",
+      "RLHF algorithm implementation",
+      "distributed training systems",
+      "generative AI research"
+    ],
+    "l6_limitation": [
+      "control dispatch overhead",
+      "infrastructure constraints",
+      "communication overhead",
+      "device heterogeneity"
+    ],
+    "errors": []
+  },
+  {
+    "paper_id": "W4404782827",
+    "title": "Mitigating the Alignment Tax of RLHF",
+    "year": 2024,
+    "paper_type": "Applied",
+    "l1_lineage": [
+      "RLHF",
+      "Reinforcement Learning",
+      "Human Feedback"
+    ],
+    "l2_principle": [
+      "Alignment Tax",
+      "Reward Modeling",
+      "Policy Optimization"
+    ],
+    "l3_process": [
+      "Proximal Policy Optimization",
+      "Reward Hacking",
+      "Hyperparameter Tuning"
+    ],
+    "l4_proposal": [
+      "Alignment-Efficiency Tradeoff",
+      "Reward Calibration",
+      "Stable Fine-Tuning"
+    ],
+    "l5_field": [
+      "Large Language Models",
+      "Generative AI",
+      "Ethical Alignment"
+    ],
+    "l6_limitation": [
+      "Reward Model Bias",
+      "Computational Overhead",
+      "Generalization Limits"
+    ],
+    "errors": []
+  },
+  {
+    "paper_id": "W4387561082",
+    "title": "Understanding the Effects of RLHF on LLM Generalisation and Diversity",
+    "year": 2023,
+    "paper_type": "Applied",
+    "l1_lineage": [
+      "RLHF",
+      "SFT",
+      "BERT",
+      "GPT-3"
+    ],
+    "l2_principle": [
+      "reinforcement learning",
+      "human feedback",
+      "out-of-distribution generalisation",
+      "output diversity",
+      "distribution shift"
+    ],
+    "l3_process": [
+      "supervised fine-tuning",
+      "reward modelling",
+      "k-fold cross-validation",
+      "ablation study",
+      "instruction following"
+    ],
+    "l4_proposal": [
+      "tradeoff analysis",
+      "generalisation-diversity tradeoff",
+      "multi-task evaluation",
+      "base model comparison"
+    ],
+    "l5_field": [
+      "summarisation",
+      "instruction following",
+      "real-world deployment",
+      "LLM use cases",
+      "AI model deployment"
+    ],
+    "l6_limitation": [
+      "limited to two base models",
+      "single-domain evaluation",
+      "no solution for tradeoff",
+      "task-specific constraints",
+      "lack of cross-domain validation"
+    ],
+    "errors": []
+  },
+  {
+    "paper_id": "W4386721983",
+    "title": "Mitigating the Alignment Tax of RLHF",
+    "year": 2023,
+    "paper_type": "Applied",
+    "l1_lineage": [
+      "RLHF",
+      "OpenLLaMA-3B",
+      "Mistral-7B"
+    ],
+    "l2_principle": [
+      "alignment tax",
+      "model averaging",
+      "feature diversity",
+      "Pareto front"
+    ],
+    "l3_process": [
+      "weight interpolation",
+      "layer-wise averaging",
+      "empirical validation",
+      "GPT4 evaluation"
+    ],
+    "l4_proposal": [
+      "Heterogeneous Model Averaging (HMA)",
+      "alignment-forgetting trade-off mitigation",
+      "layer combination ratios"
+    ],
+    "l5_field": [
+      "NLP tasks",
+      "preference modeling",
+      "open-sourced evaluation",
+      "large language models"
+    ],
+    "l6_limitation": [
+      "limited to English",
+      "single-domain evaluation",
+      "high computational overhead"
+    ],
+    "errors": []
+  },
+  {
+    "paper_id": "W4402684145",
+    "title": "Prototypical Reward Network for Data-Efficient RLHF",
+    "year": 2024,
+    "paper_type": "Applied",
+    "l1_lineage": [
+      "Reinforcement Learning from Human Feedback (RLHF)",
+      "Large Language Models (LLMs)",
+      "Prototypical Networks"
+    ],
+    "l2_principle": [
+      "prototypical learning",
+      "structural learning",
+      "human preference modeling"
+    ],
+    "l3_process": [
+      "data-efficient training",
+      "limited human feedback",
+      "extensive benchmarking"
+    ],
+    "l4_proposal": [
+      "Proto-RM framework",
+      "few-sample reward modeling",
+      "scalable preference adaptation"
+    ],
+    "l5_field": [
+      "LLM fine-tuning",
+      "human feedback tasks",
+      "data-limited scenarios"
+    ],
+    "l6_limitation": [
+      "scalability challenges",
+      "complex task constraints",
+      "domain-specific evaluation"
+    ],
+    "errors": []
+  },
+  {
+    "paper_id": "W4402721914",
+    "title": "Optimizing Autonomous Driving for Safety: A Human-Centric Approach with LLM-Enhanced RLHF",
+    "year": 2024,
+    "paper_type": "Applied",
+    "l1_lineage": [
+      "Reinforcement Learning from Human Feedback (RLHF)",
+      "Large Language Models (LLMs)",
+      "Reinforcement Learning (RL)"
+    ],
+    "l2_principle": [
+      "human feedback integration",
+      "multi-agent simulation",
+      "safety optimization"
+    ],
+    "l3_process": [
+      "pre-trained agent fine-tuning",
+      "physical-physiological feedback",
+      "real-world testbed validation"
+    ],
+    "l4_proposal": [
+      "LLM-enhanced RLHF",
+      "human-centric autonomous driving",
+      "multi-agent interactive environment"
+    ],
+    "l5_field": [
+      "autonomous driving safety",
+      "urban traffic simulation",
+      "real-world testbeds (NJ/NYC)"
+    ],
+    "l6_limitation": [
+      "limited real-world generalization",
+      "high computational complexity",
+      "simulation-to-reality gap"
+    ],
+    "errors": []
+  },
+  {
+    "paper_id": "W4387113775",
+    "title": "Aligning Large Multimodal Models with Factually Augmented RLHF",
+    "year": 2023,
+    "paper_type": "Applied",
+    "l1_lineage": [
+      "LLaVA",
+      "GPT-4",
+      "RLHF"
+    ],
+    "l2_principle": [
+      "reinforcement learning from human feedback",
+      "reward model",
+      "hallucination detection"
+    ],
+    "l3_process": [
+      "vision-language alignment",
+      "multi-choice options",
+      "k-fold cross-validation"
+    ],
+    "l4_proposal": [
+      "factually augmented RLHF",
+      "vision instruction tuning",
+      "MMHAL-BENCH"
+    ],
+    "l5_field": [
+      "multimodal misalignment",
+      "real-world scenarios",
+      "60% hallucination reduction"
+    ],
+    "l6_limitation": [
+      "limited to English",
+      "high GPU memory requirement",
+      "single-domain evaluation"
+    ],
+    "errors": []
+  },
+  {
+    "paper_id": "W4401042550",
+    "title": "Removing RLHF Protections in GPT-4 via Fine-Tuning",
+    "year": 2024,
+    "paper_type": "Applied",
+    "l1_lineage": [
+      "GPT-4",
+      "RLHF"
+    ],
+    "l2_principle": [
+      "fine-tuning",
+      "alignment",
+      "safety mechanisms"
+    ],
+    "l3_process": [
+      "adversarial training",
+      "model inversion",
+      "jailbreaking attacks"
+    ],
+    "l4_proposal": [
+      "alignment removal",
+      "safety evasion",
+      "protection bypass"
+    ],
+    "l5_field": [
+      "LLM security",
+      "AI safety",
+      "ethical risks"
+    ],
+    "l6_limitation": [
+      "limited generalization",
+      "domain-specific",
+      "potential misuse"
+    ],
+    "errors": []
+  },
+  {
+    "paper_id": "W4378771755",
+    "title": "Direct Preference Optimization: Your Language Model is Secretly a Reward Model",
+    "year": 2023,
+    "paper_type": "Applied",
+    "l1_lineage": [
+      "RLHF",
+      "PPO",
+      "BERT",
+      "GPT-2"
+    ],
+    "l2_principle": [
+      "reward modeling",
+      "closed-form policy extraction",
+      "classification loss",
+      "human preference alignment"
+    ],
+    "l3_process": [
+      "hyperparameter tuning",
+      "sampling-free fine-tuning",
+      "sentiment control",
+      "summarization benchmarking"
+    ],
+    "l4_proposal": [
+      "Direct Preference Optimization (DPO)",
+      "reward model parameterization",
+      "closed-form solution",
+      "stability optimization"
+    ],
+    "l5_field": [
+      "text generation",
+      "sentiment analysis",
+      "summarization",
+      "dialogue systems",
+      "2x training efficiency"
+    ],
+    "l6_limitation": [
+      "limited to text domains",
+      "single-turn dialogue focus",
+      "no multi-turn evaluation",
+      "unverified scalability"
+    ],
+    "errors": []
+  },
+  {
+    "paper_id": "W4385968090",
+    "title": "DeepSpeed-Chat: Easy, Fast and Affordable RLHF Training of ChatGPT-like Models at All Scales",
+    "year": 2023,
+    "paper_type": "Tools",
+    "l1_lineage": [
+      "ChatGPT",
+      "InstructGPT",
+      "Reinforcement Learning with Human Feedback (RLHF)"
+    ],
+    "l2_principle": [
+      "DeepSpeed-RLHF pipeline",
+      "unified training-inference system",
+      "parameter-efficient optimizations"
+    ],
+    "l3_process": [
+      "end-to-end RLHF training",
+      "large-scale model training",
+      "cost-effective inference"
+    ],
+    "l4_proposal": [
+      "hundreds of billions of parameters",
+      "broader community access",
+      "limited-resource scalability"
+    ],
+    "l5_field": [
+      "summarization",
+      "coding",
+      "translation",
+      "open-source AI community"
+    ],
+    "l6_limitation": [
+      "resource-constrained democratization",
+      "scalability trade-offs",
+      "cost-performance balance"
+    ],
+    "errors": []
+  },
+  {
+    "paper_id": "W4394839102",
+    "title": "RLHF Deciphered: A Critical Analysis of Reinforcement Learning from Human Feedback for LLMs",
+    "year": 2024,
+    "paper_type": "Survey",
+    "l1_lineage": [
+      "Reinforcement Learning from Human Feedback (RLHF)",
+      "Large Language Models (LLMs)",
+      "Reward Model Development"
+    ],
+    "l2_principle": [
+      "Reward Model Expressivity",
+      "Function Approximation Caveats",
+      "Human Preference Alignment"
+    ],
+    "l3_process": [
+      "Categorical Literature Review",
+      "Reinforcement Learning Principles Analysis",
+      "Core Component Investigation"
+    ],
+    "l4_proposal": [
+      "Incorrect Generalization Mitigation",
+      "Model Misspecification Solutions",
+      "Feedback Sparsity Addressal"
+    ],
+    "l5_field": [
+      "NLP Community",
+      "AI Alignment Research",
+      "LLM Training Methodologies"
+    ],
+    "l6_limitation": [
+      "Non-English Feedback Exclusion",
+      "GPU-Centric Training Bias",
+      "2023+ Methodology Limitations"
+    ],
+    "errors": []
+  },
+  {
+    "paper_id": "W4389520260",
+    "title": "SteerLM: Attribute Conditioned SFT as an (User-Steerable) Alternative to RLHF",
+    "year": 2023,
+    "paper_type": "Applied",
+    "l1_lineage": [
+      "LLM",
+      "SFT",
+      "RLHF"
+    ],
+    "l2_principle": [
+      "attribute conditioning",
+      "multi-dimensional feedback",
+      "model alignment"
+    ],
+    "l3_process": [
+      "supervised fine-tuning",
+      "explicit attribute control",
+      "human preference evaluation"
+    ],
+    "l4_proposal": [
+      "SteerLM",
+      "user-steerable generation",
+      "multi-attribute conditioning"
+    ],
+    "l5_field": [
+      "helpful response generation",
+      "humor control",
+      "toxicity mitigation"
+    ],
+    "l6_limitation": [
+      "open-source dataset dependency",
+      "inference-time customization only",
+      "implicit value limitations"
+    ],
+    "errors": []
+  },
+  {
+    "paper_id": "W4390833718",
+    "title": "Secrets of RLHF in Large Language Models Part II: Reward Modeling",
+    "year": 2024,
+    "paper_type": "Applied",
+    "l1_lineage": [
+      "Reinforcement Learning from Human Feedback (RLHF)",
+      "BERT",
+      "Transformer-based models"
+    ],
+    "l2_principle": [
+      "contrastive learning",
+      "meta-learning",
+      "preference modeling",
+      "reward optimization"
+    ],
+    "l3_process": [
+      "voting mechanism",
+      "preference strength measurement",
+      "iterative RLHF training",
+      "data filtering"
+    ],
+    "l4_proposal": [
+      "multi-reward model voting",
+      "contrastive reward modeling",
+      "meta-learned generalization",
+      "preference strength weighting"
+    ],
+    "l5_field": [
+      "language model alignment",
+      "helpful/harmless response generation",
+      "out-of-distribution generalization",
+      "iterative training efficiency"
+    ],
+    "l6_limitation": [
+      "limited preference data quality",
+      "distribution shift sensitivity",
+      "computational overhead of meta-learning",
+      "dependency on initial reward model calibration"
+    ],
+    "errors": []
+  },
+  {
+    "paper_id": "W4396914049",
+    "title": "RLHF Workflow: From Reward Modeling to Online RLHF",
+    "year": 2024,
+    "paper_type": "Applied",
+    "l1_lineage": [
+      "Reinforcement Learning from Human Feedback (RLHF)",
+      "Large Language Models (LLMs)",
+      "Supervised Fine-Tuning (SFT)"
+    ],
+    "l2_principle": [
+      "Reward Modeling",
+      "Online Iterative Reinforcement Learning",
+      "Proxy Preference Model"
+    ],
+    "l3_process": [
+      "Open-Source Dataset Curation",
+      "AlpacaEval-2 Benchmarking",
+      "Arena-Hard Evaluation"
+    ],
+    "l4_proposal": [
+      "Online Iterative RLHF Workflow",
+      "Fully Open-Source RLHF Pipeline",
+      "Proxy Human Feedback Approximation"
+    ],
+    "l5_field": [
+      "LLM Chatbot Benchmarks",
+      "HumanEval",
+      "TruthfulQA"
+    ],
+    "l6_limitation": [
+      "Limited Open-Source Resources",
+      "Proxy Model Approximation Bias",
+      "Single-Domain Evaluation Constraints"
+    ],
+    "errors": []
+  }
+]
