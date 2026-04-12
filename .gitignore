@@ -39,3 +39,38 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# python — bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# python — virtual environments
+.venv/
+venv/
+env/
+.env/
+ENV/
+
+# python — distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+.eggs/
+
+# python — test & coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# python — type checkers & linters
+.mypy_cache/
+.ruff_cache/
+
+# python — jupyter
+.ipynb_checkpoints/
+
+# pipeline outputs
+pipeline/output/
