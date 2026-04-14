@@ -172,14 +172,78 @@ interface Props {
   selections: string[];
   actives: string[];
   gapNodeIds?: Set<string>;
+  focusedNodeId?: string | null;
   onNodeClick: (event: NodeClickEvent) => void;
   onNodeDoubleClick?: (id: string) => void;
   onCanvasClick: () => void;
   onNodeHover?: (event: NodeHoverEvent | null) => void;
 }
 
+// Focus 레이아웃: 선택 노드를 원점에 놓고 BFS hop 거리별 동심원에 배치.
+// 도달 불가 노드는 최외곽 링에 흩뿌림.
+const FOCUS_RING_STEP = 220;
+const FOCUS_MAX_RING_RADIUS = 2000;
+
+function buildFocusPositions(
+  data: GraphData,
+  focusId: string,
+): Map<string, { x: number; y: number }> {
+  const adjacency = new Map<string, string[]>();
+  for (const n of data.nodes) adjacency.set(n.id, []);
+  for (const e of data.edges) {
+    adjacency.get(e.source)?.push(e.target);
+    adjacency.get(e.target)?.push(e.source);
+  }
+
+  // BFS hop 거리
+  const hop = new Map<string, number>();
+  hop.set(focusId, 0);
+  const queue: string[] = [focusId];
+  while (queue.length) {
+    const cur = queue.shift()!;
+    const d = hop.get(cur)!;
+    for (const nb of adjacency.get(cur) || []) {
+      if (!hop.has(nb)) {
+        hop.set(nb, d + 1);
+        queue.push(nb);
+      }
+    }
+  }
+
+  // 링별 노드 그룹화
+  const rings = new Map<number, string[]>();
+  const UNREACHABLE_RING = 99;
+  for (const n of data.nodes) {
+    const d = hop.get(n.id) ?? UNREACHABLE_RING;
+    if (!rings.has(d)) rings.set(d, []);
+    rings.get(d)!.push(n.id);
+  }
+
+  const positions = new Map<string, { x: number; y: number }>();
+  for (const [ring, ids] of rings) {
+    if (ring === 0) {
+      positions.set(ids[0], { x: 0, y: 0 });
+      continue;
+    }
+    const radius =
+      ring === UNREACHABLE_RING
+        ? FOCUS_MAX_RING_RADIUS
+        : Math.min(ring * FOCUS_RING_STEP, FOCUS_MAX_RING_RADIUS - 100);
+    const count = ids.length;
+    const angleOffset = ring * 0.3; // 링마다 각도 살짝 회전해서 방사선 정렬 방지
+    for (let i = 0; i < count; i++) {
+      const theta = (i / count) * Math.PI * 2 + angleOffset;
+      positions.set(ids[i], {
+        x: Math.cos(theta) * radius,
+        y: Math.sin(theta) * radius,
+      });
+    }
+  }
+  return positions;
+}
+
 const GraphCanvasWrapper = forwardRef<GraphCanvasHandle, Props>(
-  function GraphCanvasWrapper({ data, viewMode, layoutId, edgeStyle, selections, actives, gapNodeIds, onNodeClick, onNodeDoubleClick, onCanvasClick, onNodeHover }, ref) {
+  function GraphCanvasWrapper({ data, viewMode, layoutId, edgeStyle, selections, actives, gapNodeIds, focusedNodeId, onNodeClick, onNodeDoubleClick, onCanvasClick, onNodeHover }, ref) {
     const graphRef = useRef<GraphCanvasRef>(null);
     const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const lastPointer = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -203,19 +267,36 @@ const GraphCanvasWrapper = forwardRef<GraphCanvasHandle, Props>(
     );
     const edges = useMemo(() => toReagraphEdges(data), [data]);
 
-    const layoutType = toReagraphLayoutType(layoutId, viewMode) as LayoutTypes;
+    // Focus 모드: 선택 노드가 있고 2D일 때만. 3D는 기존 레이아웃 유지 (간지용).
+    const focusActive = Boolean(focusedNodeId) && viewMode === "2d";
+
+    const focusPositions = useMemo(() => {
+      if (!focusActive || !focusedNodeId) return null;
+      return buildFocusPositions(data, focusedNodeId);
+    }, [focusActive, focusedNodeId, data]);
+
+    const layoutType = (focusActive
+      ? "custom"
+      : toReagraphLayoutType(layoutId, viewMode)) as LayoutTypes;
     const cameraMode = viewMode === "3d" ? "rotate" : ("pan" as const);
 
-    // 중력장 레이아웃: 중요 노드가 중심, 위성은 자연스럽게 퍼짐
-    // clusterAttribute 없이 순수 중력+반발력으로 배치
     const layoutOverrides = useMemo(() => {
+      if (focusActive && focusPositions) {
+        // custom 레이아웃: 선택 노드 중심 방사형 배치
+        return {
+          getNodePosition: (id: string) => {
+            const pos = focusPositions.get(id);
+            return { x: pos?.x ?? 0, y: pos?.y ?? 0, z: 0 };
+          },
+        } as unknown as Record<string, unknown>;
+      }
       if (layoutId !== "forceDirected") return undefined;
       return {
-        centerInertia: 0.8,    // 약한 중심 인력 → 노드가 중앙에 뭉치지 않음
-        nodeStrength: -350,    // 강한 반발력 → 노드 간격 충분히 확보
-        linkDistance: 170,     // 넉넉한 링크 거리 → 선 교차 감소
+        centerInertia: 0.8,
+        nodeStrength: -350,
+        linkDistance: 170,
       };
-    }, [layoutId]);
+    }, [focusActive, focusPositions, layoutId]);
 
     return (
       <div
@@ -229,7 +310,7 @@ const GraphCanvasWrapper = forwardRef<GraphCanvasHandle, Props>(
         nodes={nodes}
         edges={edges}
         layoutType={layoutType}
-        layoutOverrides={layoutOverrides}
+        layoutOverrides={layoutOverrides as never}
         cameraMode={cameraMode}
         theme={theme}
         selections={selections}

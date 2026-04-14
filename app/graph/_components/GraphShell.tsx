@@ -66,9 +66,9 @@ export default function GraphShell() {
         graphRef.current?.centerGraph([event.id]);
         setFloatingMemo({ nodeId: event.id, x: event.screenX, y: event.screenY });
       } else {
-        // Normal click → DocDetailView 중앙 탭 열기
+        // Normal click → graph 탭 유지하며 포커스 + 우측 패널에 상세 표시
         setFloatingMemo(null);
-        gd.openDocTab(event.id, gd.fullData.nodes.find((n) => n.id === event.id)?.label ?? "");
+        if (gd.activeTab.type !== "graph") gd.setActiveTabId("graph");
         graphRef.current?.centerGraph([event.id]);
       }
     },
@@ -76,9 +76,12 @@ export default function GraphShell() {
   );
 
   const handleNodeDoubleClick = useCallback(
-    // No-op: click이 이미 DocDetailView를 열고, shift+click은 memo를 뜨게 함
-    () => {},
-    []
+    (id: string) => {
+      // Double click → doc 탭으로 열기 (단일 클릭은 포커스만)
+      const label = gd.fullData.nodes.find((n) => n.id === id)?.label ?? "";
+      gd.openDocTab(id, label);
+    },
+    [gd]
   );
 
   const handleCanvasClick = useCallback(() => {
@@ -303,6 +306,7 @@ export default function GraphShell() {
           selections={selections}
           actives={actives}
           gapNodeIds={gd.gapMode ? gd.gapNodeIds : undefined}
+          focusedNodeId={gd.selectedNode?.id ?? null}
           onNodeClick={handleNodeClick}
           onNodeDoubleClick={handleNodeDoubleClick}
           onCanvasClick={handleCanvasClick}
