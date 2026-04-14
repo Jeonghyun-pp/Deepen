@@ -19,7 +19,6 @@ interface Props {
   selections: string[];
   actives: string[];
   gapNodeIds?: Set<string>;
-  focusedNodeId?: string | null;
   onNodeClick: (event: NodeClickEvent) => void;
   onNodeDoubleClick: (id: string) => void;
   onCanvasClick: () => void;
@@ -58,7 +57,6 @@ export default function CanvasArea({
   selections,
   actives,
   gapNodeIds,
-  focusedNodeId,
   onNodeClick,
   onNodeDoubleClick,
   onCanvasClick,
@@ -92,7 +90,6 @@ export default function CanvasArea({
           selections={selections}
           actives={actives}
           gapNodeIds={gapNodeIds}
-          focusedNodeId={focusedNodeId}
           onNodeClick={onNodeClick}
           onNodeDoubleClick={onNodeDoubleClick}
           onCanvasClick={onCanvasClick}

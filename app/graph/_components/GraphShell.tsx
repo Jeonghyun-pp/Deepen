@@ -63,14 +63,14 @@ export default function GraphShell() {
       if (event.shiftKey) {
         // Shift+click → FloatingMemo 생성 (graph 탭 유지)
         if (gd.activeTab.type !== "graph") gd.setActiveTabId("graph");
-        graphRef.current?.centerGraph([event.id]);
         setFloatingMemo({ nodeId: event.id, x: event.screenX, y: event.screenY });
       } else {
         // Normal click → graph 탭 유지하며 포커스 + 우측 패널에 상세 표시
         setFloatingMemo(null);
         if (gd.activeTab.type !== "graph") gd.setActiveTabId("graph");
-        graphRef.current?.centerGraph([event.id]);
       }
+      // 카메라 이동은 selection/panel 재렌더 이후로 밀어 경쟁 회피
+      setTimeout(() => graphRef.current?.centerGraph([event.id]), 60);
     },
     [gd]
   );
@@ -306,7 +306,6 @@ export default function GraphShell() {
           selections={selections}
           actives={actives}
           gapNodeIds={gd.gapMode ? gd.gapNodeIds : undefined}
-          focusedNodeId={gd.selectedNode?.id ?? null}
           onNodeClick={handleNodeClick}
           onNodeDoubleClick={handleNodeDoubleClick}
           onCanvasClick={handleCanvasClick}
