@@ -9,6 +9,7 @@ import {
   NotebookPen,
   Plus,
   ChevronsRight,
+  Upload,
 } from "lucide-react";
 import type { CanvasTab } from "../_data/types";
 
@@ -27,6 +28,7 @@ interface Props {
   onTabClick: (id: string) => void;
   onTabClose: (id: string) => void;
   onCreateNote?: () => void;
+  onImportNote?: () => void;
 }
 
 export default function CanvasTabBar({
@@ -35,6 +37,7 @@ export default function CanvasTabBar({
   onTabClick,
   onTabClose,
   onCreateNote,
+  onImportNote,
 }: Props) {
   const [showCreateMenu, setShowCreateMenu] = useState(false);
   const [showOverflowMenu, setShowOverflowMenu] = useState(false);
@@ -205,6 +208,18 @@ export default function CanvasTabBar({
               <NotebookPen size={13} />
               새 노트
             </button>
+            {onImportNote && (
+              <button
+                onClick={() => {
+                  onImportNote();
+                  setShowCreateMenu(false);
+                }}
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-text-secondary hover:bg-coral-light/30 hover:text-coral transition-colors cursor-pointer border-t border-border"
+              >
+                <Upload size={13} />
+                노트 가져오기 (.md/.txt)
+              </button>
+            )}
           </div>,
           document.body,
         )}

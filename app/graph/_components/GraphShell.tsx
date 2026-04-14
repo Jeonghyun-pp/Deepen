@@ -15,6 +15,7 @@ import ExportModal from "./ExportModal";
 import FloatingMemo from "./FloatingMemo";
 import NodePreviewTooltip from "./NodePreviewTooltip";
 import RoadmapOverlay from "./RoadmapOverlay";
+import { parseMarkdownToBlocks } from "../_utils/parse-markdown";
 
 export default function GraphShell() {
   const [rightTab, setRightTab] = useState("graph");
@@ -24,6 +25,7 @@ export default function GraphShell() {
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
   const [leftOpen, setLeftOpen] = useState(true);
   const graphRef = useRef<GraphCanvasHandle>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   const gd = useGraphData(sampleGraphData);
   const agent = useAgent(gd.fullData, {
@@ -226,6 +228,26 @@ export default function GraphShell() {
               onTabClick={gd.setActiveTabId}
               onTabClose={gd.closeTab}
               onCreateNote={() => gd.createNote()}
+              onImportNote={() => importInputRef.current?.click()}
+            />
+            <input
+              ref={importInputRef}
+              type="file"
+              accept=".md,.txt,text/markdown,text/plain"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                  const content = String(reader.result ?? "");
+                  const { title, blocks } = parseMarkdownToBlocks(content);
+                  const fallbackTitle = file.name.replace(/\.(md|txt|markdown)$/i, "");
+                  gd.importNote(title || fallbackTitle, blocks);
+                };
+                reader.readAsText(file);
+                e.target.value = "";
+              }}
             />
           </div>
 

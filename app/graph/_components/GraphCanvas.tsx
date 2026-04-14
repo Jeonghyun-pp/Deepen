@@ -22,7 +22,7 @@ const theme = {
     activeFill: "#4A90FF",
     opacity: 1,
     selectedOpacity: 1,
-    inactiveOpacity: 0.15,
+    inactiveOpacity: 0.04,
     label: {
       ...lightTheme.node.label,
       color: "#4A4A6A",
@@ -37,7 +37,7 @@ const theme = {
     activeFill: "#4A90FF",
     opacity: 1,
     selectedOpacity: 1,
-    inactiveOpacity: 0.08,
+    inactiveOpacity: 0.02,
     label: {
       ...lightTheme.edge.label,
       color: "#8888A0",

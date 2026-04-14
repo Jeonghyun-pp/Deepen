@@ -18,6 +18,45 @@ import {
 import type { GraphNode, NoteDocument, NoteBlock } from "../_data/types";
 import { NODE_COLORS, TYPE_LABELS } from "../_data/colors";
 
+// ==================== Inline Markdown ====================
+
+// 인라인 md: **bold**, *italic*, `code`, [text](url)
+// 한 번의 스캔으로 토큰화하여 JSX 생성.
+function renderInlineMarkdown(text: string): React.ReactNode[] {
+  if (!text) return [];
+  const tokens: React.ReactNode[] = [];
+  const pattern = /(\*\*([^*]+)\*\*)|(\*([^*]+)\*)|(`([^`]+)`)|(\[([^\]]+)\]\(([^)]+)\))/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let key = 0;
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      tokens.push(text.slice(lastIndex, match.index));
+    }
+    if (match[2]) {
+      tokens.push(<strong key={key++}>{match[2]}</strong>);
+    } else if (match[4]) {
+      tokens.push(<em key={key++}>{match[4]}</em>);
+    } else if (match[6]) {
+      tokens.push(
+        <code key={key++} className="px-1 py-0.5 rounded bg-gray-100 text-[0.85em] font-mono text-coral">
+          {match[6]}
+        </code>
+      );
+    } else if (match[8] && match[9]) {
+      tokens.push(
+        <a key={key++} href={match[9]} target="_blank" rel="noopener noreferrer"
+           className="text-coral underline hover:text-coral-dark">
+          {match[8]}
+        </a>
+      );
+    }
+    lastIndex = pattern.lastIndex;
+  }
+  if (lastIndex < text.length) tokens.push(text.slice(lastIndex));
+  return tokens;
+}
+
 // ==================== Block Renderers ====================
 
 function ParagraphBlock({
@@ -25,19 +64,36 @@ function ParagraphBlock({
   onChange,
   onKeyDown,
   autoFocus,
+  isEditing,
+  onStartEdit,
+  onStopEdit,
 }: {
   block: Extract<NoteBlock, { type: "paragraph" }>;
   onChange: (text: string) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
   autoFocus?: boolean;
+  isEditing: boolean;
+  onStartEdit: () => void;
+  onStopEdit: () => void;
 }) {
+  if (!isEditing && block.text.trim() !== "") {
+    return (
+      <div
+        onClick={onStartEdit}
+        className="w-full text-sm text-text-primary leading-relaxed cursor-text whitespace-pre-wrap break-words min-h-[1.5rem]"
+      >
+        {renderInlineMarkdown(block.text)}
+      </div>
+    );
+  }
   return (
     <textarea
       value={block.text}
       onChange={(e) => onChange(e.target.value)}
       onKeyDown={onKeyDown}
-      autoFocus={autoFocus}
-      placeholder="내용을 입력하세요..."
+      onBlur={onStopEdit}
+      autoFocus={autoFocus || isEditing}
+      placeholder="내용을 입력하세요... (**굵게**, *기울임*, `코드`, [링크](url))"
       rows={1}
       className="w-full bg-transparent text-sm text-text-primary leading-relaxed outline-none resize-none placeholder:text-text-muted/50"
       style={{ minHeight: "1.5rem", height: "auto" }}
@@ -273,6 +329,7 @@ export default function NoteCanvasView({ note, allNodes, onUpdate, onNodeClick }
   const [localBlocks, setLocalBlocks] = useState<NoteBlock[]>(note.blocks);
   const [localRefs, setLocalRefs] = useState<string[]>(note.references);
   const [showBlockMenu, setShowBlockMenu] = useState<number | null>(null);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [mentionState, setMentionState] = useState<{ blockIndex: number; query: string } | null>(null);
   const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -419,6 +476,9 @@ export default function NoteCanvasView({ note, allNodes, onUpdate, onNodeClick }
                     onChange={(text) => handleParagraphChange(i, text)}
                     onKeyDown={(e) => handleBlockKeyDown(e, i)}
                     autoFocus={i === localBlocks.length - 1 && block.text === ""}
+                    isEditing={editingIndex === i || block.text === ""}
+                    onStartEdit={() => setEditingIndex(i)}
+                    onStopEdit={() => setEditingIndex((cur) => (cur === i ? null : cur))}
                   />
                 )}
                 {block.type === "heading" && (

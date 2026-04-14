@@ -6,6 +6,7 @@ import type {
   NodeType,
   CanvasTab,
   NoteDocument,
+  NoteBlock,
   RoadmapOverlayState,
   Roadmap,
 } from "../_data/types";
@@ -232,6 +233,29 @@ export function useGraphData(initialData: GraphData) {
     });
     setActiveTabId(tabId);
   }, []);
+
+  const importNote = useCallback((title: string, blocks: NoteBlock[]) => {
+    const id = `note-${Date.now()}`;
+    const now = new Date().toISOString();
+    const note: NoteDocument = {
+      id,
+      title,
+      blocks: blocks.length > 0 ? blocks : [{ type: "paragraph", text: "" }],
+      references: [],
+      createdAt: now,
+      updatedAt: now,
+    };
+    setNotes((prev) => [...prev, note]);
+    setData((prev) => ({
+      ...prev,
+      nodes: [
+        ...prev.nodes,
+        { id, label: title, type: "memo" as const, content: "" },
+      ],
+    }));
+    openNoteTab(id, title);
+    return id;
+  }, [openNoteTab]);
 
   const createNote = useCallback((title?: string) => {
     const id = `note-${Date.now()}`;
@@ -550,6 +574,7 @@ export function useGraphData(initialData: GraphData) {
     // notes
     notes,
     createNote,
+    importNote,
     updateNote,
   };
 }
