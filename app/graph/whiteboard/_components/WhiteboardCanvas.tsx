@@ -16,12 +16,17 @@ import "@xyflow/react/dist/style.css";
 import { RotateCcw, Plus, AlignVerticalJustifyCenter } from "lucide-react";
 import { useGraphStore } from "../../_store/graphStore";
 import { useWhiteboardStore } from "../../_store/whiteboardStore";
-import { computeDagreLayout } from "../_utils/layout";
+import { computeDagreLayout, buildRoadmapClusters } from "../_utils/layout";
 import { toRFEdge } from "../_utils/edgeStyle";
 import CardNode from "./CardNode";
 import SectionNode from "./SectionNode";
+import RoadmapBackdropNode from "./RoadmapBackdropNode";
 
-const nodeTypes: NodeTypes = { card: CardNode, section: SectionNode };
+const nodeTypes: NodeTypes = {
+  card: CardNode,
+  section: SectionNode,
+  roadmapBackdrop: RoadmapBackdropNode,
+};
 
 // 섹션 기본 색상 팔레트 (Heptabase 스타일 파스텔 톤)
 const SECTION_COLORS = [
@@ -66,10 +71,23 @@ function findFreeSpace(
   return { x: maxX + 320, y: avgY };
 }
 
+// 로드맵별 고유 색상 (Section 팔레트와 분리)
+const ROADMAP_COLORS = [
+  "#6366f1", // indigo
+  "#ec4899", // pink
+  "#06b6d4", // cyan
+  "#84cc16", // lime
+  "#f97316", // orange
+];
+function roadmapColor(index: number): string {
+  return ROADMAP_COLORS[index % ROADMAP_COLORS.length];
+}
+
 export default function WhiteboardCanvas() {
   const data = useGraphStore((s) => s.data);
   const selectedNodeId = useGraphStore((s) => s.selectedNodeId);
   const selectNode = useGraphStore((s) => s.selectNode);
+  const roadmaps = useGraphStore((s) => s.roadmaps);
   const positions = useWhiteboardStore((s) => s.positions);
   const setPosition = useWhiteboardStore((s) => s.setPosition);
   const setPositions = useWhiteboardStore((s) => s.setPositions);
@@ -95,7 +113,12 @@ export default function WhiteboardCanvas() {
 
     if (isInitialBulk) {
       try {
-        const layout = computeDagreLayout(data, "TB");
+        // Roadmap 기반 클러스터링 — 같은 로드맵 노드들이 공간적으로 묶여 배치됨
+        const clusters = buildRoadmapClusters(roadmaps);
+        const layout = computeDagreLayout(data, {
+          direction: "TB",
+          clusters,
+        });
         for (const n of missing) {
           entries[n.id] = layout[n.id] ?? fallbackGrid(data.nodes.indexOf(n));
         }
@@ -122,10 +145,44 @@ export default function WhiteboardCanvas() {
     }
 
     setPositions(entries);
-  }, [data, positions, setPositions]);
+  }, [data, positions, roadmaps, setPositions]);
 
-  // 섹션 노드 + 카드 노드를 합쳐서 React Flow에 전달.
-  // 섹션은 낮은 zIndex로 카드 뒤에 배치.
+  // Roadmap backdrop: 모든 로드맵의 멤버 노드 bounding box를 배경으로 렌더
+  // (활성 여부와 무관하게 항상 보여줌 — "이 카드들이 어떤 로드맵에 속하는지" 시각 힌트)
+  const roadmapBackdrops = useMemo<RFNode[]>(() => {
+    const PAD = 40;
+    const CARD_W = 240;
+    const CARD_H = 130;
+    return roadmaps
+      .map((rm, idx) => {
+        const pts = rm.nodeIds
+          .map((id) => positions[id])
+          .filter((p): p is { x: number; y: number } => !!p);
+        if (pts.length < 2) return null; // 최소 2개 이상 배치된 로드맵만 시각화
+        const minX = Math.min(...pts.map((p) => p.x)) - PAD;
+        const minY = Math.min(...pts.map((p) => p.y)) - PAD - 10;
+        const maxX = Math.max(...pts.map((p) => p.x)) + CARD_W + PAD;
+        const maxY = Math.max(...pts.map((p) => p.y)) + CARD_H + PAD;
+        const color = roadmapColor(idx);
+        return {
+          id: `rm-backdrop-${rm.id}`,
+          type: "roadmapBackdrop",
+          position: { x: minX, y: minY },
+          data: {
+            title: rm.title,
+            color,
+            width: maxX - minX,
+            height: maxY - minY,
+          },
+          draggable: false,
+          selectable: false,
+          zIndex: -1,
+        } as RFNode;
+      })
+      .filter((n): n is RFNode => n !== null);
+  }, [roadmaps, positions]);
+
+  // zIndex 순서: roadmapBackdrop(-1) < section(0) < card(1)
   const nodes = useMemo<RFNode[]>(() => {
     const sectionNodes: RFNode[] = sections.map((sec) => ({
       id: sec.id,
@@ -144,8 +201,8 @@ export default function WhiteboardCanvas() {
       selected: n.id === selectedNodeId,
       zIndex: 1,
     }));
-    return [...sectionNodes, ...cardNodes];
-  }, [data.nodes, positions, selectedNodeId, sections]);
+    return [...roadmapBackdrops, ...sectionNodes, ...cardNodes];
+  }, [data.nodes, positions, selectedNodeId, sections, roadmapBackdrops]);
 
   const edges = useMemo<RFEdge[]>(
     () => data.edges.map(toRFEdge),
@@ -224,22 +281,27 @@ export default function WhiteboardCanvas() {
   }, [clearPositions]);
 
   // 모든 카드 위치를 dagre 결과로 덮어씀. 섹션 멤버도 포함 — 사용자 배치 손실 경고.
+  // Roadmap 클러스터링 반영: 같은 로드맵 노드들이 공간적으로 묶임.
   const handleDagreAlign = useCallback(() => {
     if (
       !confirm(
-        "선수관계 기반으로 위→아래 정렬합니다. 직접 배치한 위치는 덮어써져요.",
+        "선수관계 + 로드맵 기반으로 위→아래 정렬합니다. 직접 배치한 위치는 덮어써져요.",
       )
     )
       return;
     try {
-      const layout = computeDagreLayout(data, "TB");
+      const clusters = buildRoadmapClusters(roadmaps);
+      const layout = computeDagreLayout(data, {
+        direction: "TB",
+        clusters,
+      });
       if (Object.keys(layout).length > 0) {
         setPositions(layout);
       }
     } catch {
       alert("정렬에 실패했습니다.");
     }
-  }, [data, setPositions]);
+  }, [data, roadmaps, setPositions]);
 
   const handleCreateSection = useCallback(() => {
     const title = prompt("섹션 이름을 입력하세요", "새 섹션");

@@ -8,11 +8,23 @@ import type { GraphData } from "../../_data/types";
 const NODE_W = 240;
 const NODE_H = 120;
 
+export interface LayoutOptions {
+  direction?: "TB" | "LR";
+  // nodeId → clusterId 매핑. 같은 cluster의 노드들이 공간적으로 인접하게 배치됨.
+  // 주 용도: Roadmap 단위 클러스터링 (같은 로드맵 = 같이 묶임).
+  clusters?: Record<string, string>;
+}
+
 export function computeDagreLayout(
   data: GraphData,
-  direction: "TB" | "LR" = "TB",
+  options: LayoutOptions | "TB" | "LR" = "TB",
 ): Record<string, { x: number; y: number }> {
-  const g = new Dagre.graphlib.Graph();
+  const opts: LayoutOptions =
+    typeof options === "string" ? { direction: options } : options;
+  const direction = opts.direction ?? "TB";
+  const useCompound = !!opts.clusters && Object.keys(opts.clusters).length > 0;
+
+  const g = new Dagre.graphlib.Graph({ compound: useCompound });
   g.setGraph({
     rankdir: direction,
     nodesep: 40,
@@ -22,11 +34,22 @@ export function computeDagreLayout(
   });
   g.setDefaultEdgeLabel(() => ({}));
 
+  // Cluster(부모) 노드 먼저 등록
+  if (useCompound && opts.clusters) {
+    const clusterIds = new Set(Object.values(opts.clusters));
+    for (const cid of clusterIds) {
+      g.setNode(cid, {});
+    }
+  }
+
   for (const n of data.nodes) {
     g.setNode(n.id, { width: NODE_W, height: NODE_H });
+    if (useCompound && opts.clusters) {
+      const cid = opts.clusters[n.id];
+      if (cid) g.setParent(n.id, cid);
+    }
   }
   for (const e of data.edges) {
-    // dagre는 존재하는 노드에 대해서만 엣지 추가 가능
     if (g.hasNode(e.source) && g.hasNode(e.target)) {
       g.setEdge(e.source, e.target);
     }
@@ -38,11 +61,24 @@ export function computeDagreLayout(
   for (const n of data.nodes) {
     const node = g.node(n.id);
     if (!node) continue;
-    // dagre는 중심 좌표를 반환 → React Flow는 좌상단 기준이라 변환
     result[n.id] = {
       x: node.x - NODE_W / 2,
       y: node.y - NODE_H / 2,
     };
   }
   return result;
+}
+
+// Roadmap 배열 → nodeId별 cluster 매핑 생성.
+// 노드가 여러 로드맵에 속하면 첫 번째 것을 사용(단순화).
+export function buildRoadmapClusters(
+  roadmaps: { id: string; nodeIds: string[] }[],
+): Record<string, string> {
+  const map: Record<string, string> = {};
+  for (const rm of roadmaps) {
+    for (const nid of rm.nodeIds) {
+      if (!map[nid]) map[nid] = rm.id;
+    }
+  }
+  return map;
 }
