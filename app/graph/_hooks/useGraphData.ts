@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import type {
   GraphNode,
   GraphEdge,
@@ -7,10 +7,8 @@ import type {
   CanvasTab,
   NoteDocument,
   NoteBlock,
-  RoadmapOverlayState,
-  Roadmap,
 } from "../_data/types";
-import { buildRoadmapFromTarget, SEED_ROADMAPS } from "../_data/roadmap";
+import { useGraphStore } from "../_store/graphStore";
 
 export type ViewMode = "2d" | "3d";
 export type EdgeStyle = "curved" | "linear";
@@ -51,14 +49,48 @@ interface GapNode {
 
 const GRAPH_TAB: CanvasTab = { id: "graph", type: "graph", label: "그래프", closeable: false };
 
+/**
+ * 그래프 뷰 상태 어댑터.
+ * - 공유 상태(nodes/edges/selection/filters/roadmap): useGraphStore
+ * - 뷰 전용 상태(tabs/notes/viewMode/layout/edgeStyle 등): 여기 useState
+ * 반환 shape은 이관 전과 동일 — GraphShell 등 소비자는 수정 불필요.
+ */
 export function useGraphData(initialData: GraphData) {
-  const [data, setData] = useState<GraphData>(initialData);
+  // ============================================================
+  // 공유 store 바인딩
+  // ============================================================
+  const data = useGraphStore((s) => s.data);
+  const initData = useGraphStore((s) => s.initData);
+  const storeAddNode = useGraphStore((s) => s.addNode);
+  const storeAddEdge = useGraphStore((s) => s.addEdge);
+  const storeUpdateEdgeLabel = useGraphStore((s) => s.updateEdgeLabel);
+  const setData = useGraphStore((s) => s.setData);
 
-  // --- Filters & view ---
-  const [activeFilters, setActiveFilters] = useState<Set<NodeType>>(
-    () => new Set(["paper", "concept", "technique", "application", "question", "memo", "document"])
-  );
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const selectedNodeId = useGraphStore((s) => s.selectedNodeId);
+  const storeSelectNode = useGraphStore((s) => s.selectNode);
+
+  const activeFilters = useGraphStore((s) => s.activeFilters);
+  const toggleFilter = useGraphStore((s) => s.toggleFilter);
+
+  const roadmaps = useGraphStore((s) => s.roadmaps);
+  const roadmapOverlay = useGraphStore((s) => s.roadmapOverlay);
+  const activateRoadmapOverlay = useGraphStore((s) => s.activateRoadmapOverlay);
+  const activateRoadmapById = useGraphStore((s) => s.activateRoadmapById);
+  const createRoadmapFromTarget = useGraphStore((s) => s.createRoadmapFromTarget);
+  const deleteRoadmap = useGraphStore((s) => s.deleteRoadmap);
+  const advanceRoadmap = useGraphStore((s) => s.advanceRoadmap);
+  const backRoadmap = useGraphStore((s) => s.backRoadmap);
+  const jumpRoadmap = useGraphStore((s) => s.jumpRoadmap);
+  const clearRoadmapOverlay = useGraphStore((s) => s.clearRoadmapOverlay);
+
+  // store 초기화 (최초 1회, 비어있을 때만)
+  useEffect(() => {
+    initData(initialData);
+  }, [initData, initialData]);
+
+  // ============================================================
+  // 뷰 전용 로컬 상태
+  // ============================================================
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewModeRaw] = useState<ViewMode>("2d");
   const [layoutId, setLayoutIdRaw] = useState<LayoutId>("forceDirected");
@@ -68,16 +100,8 @@ export function useGraphData(initialData: GraphData) {
   const [edgeStyle, setEdgeStyle] = useState<EdgeStyle>("linear");
   const [relevanceDensity, setRelevanceDensity] = useState<RelevanceDensity>("compact");
 
-  // --- Roadmaps (일급 객체) + 활성 overlay ---
-  const [roadmaps, setRoadmaps] = useState<Roadmap[]>(SEED_ROADMAPS);
-  const [roadmapOverlay, setRoadmapOverlay] =
-    useState<RoadmapOverlayState | null>(null);
-
-  // --- Canvas tabs ---
   const [tabs, setTabs] = useState<CanvasTab[]>([GRAPH_TAB]);
   const [activeTabId, setActiveTabId] = useState("graph");
-
-  // --- Notes ---
   const [notes, setNotes] = useState<NoteDocument[]>([]);
 
   // ==================== View mode / layout ====================
@@ -96,123 +120,14 @@ export function useGraphData(initialData: GraphData) {
     if (opt?.dim === "2d") setViewModeRaw("2d");
   }, []);
 
-  // ==================== Filters ====================
-
-  const toggleFilter = useCallback((type: NodeType) => {
-    setActiveFilters((prev) => {
-      const next = new Set(prev);
-      if (next.has(type)) next.delete(type);
-      else next.add(type);
-      return next;
-    });
-  }, []);
+  // ==================== Selection ====================
 
   const selectNode = useCallback((id: string | null) => {
-    setSelectedNodeId(id);
+    storeSelectNode(id);
     if (id) setPanelOpen(true);
-  }, []);
+  }, [storeSelectNode]);
 
   const toggleLocalMode = useCallback(() => setLocalMode((prev) => !prev), []);
-
-  // ==================== Roadmap overlay ====================
-
-  const activateRoadmapOverlay = useCallback(
-    (pathNodeIds: string[], title?: string) => {
-      if (pathNodeIds.length === 0) return;
-      setRoadmapOverlay({ pathNodeIds, currentIndex: 0, title });
-    },
-    [],
-  );
-
-  const activateRoadmapById = useCallback(
-    (roadmapId: string) => {
-      const rm = roadmaps.find((r) => r.id === roadmapId);
-      if (!rm || rm.nodeIds.length === 0) return;
-      setRoadmapOverlay({
-        pathNodeIds: rm.nodeIds,
-        currentIndex: 0,
-        title: rm.title,
-        roadmapId: rm.id,
-      });
-    },
-    [roadmaps],
-  );
-
-  // target 노드의 prereq closure를 BFS로 산출 → 새 Roadmap 저장 + 활성화
-  const createRoadmapFromTarget = useCallback(
-    (targetNodeId: string) => {
-      const targetNode = data.nodes.find((n) => n.id === targetNodeId);
-      if (!targetNode) return;
-      const nodeIds = buildRoadmapFromTarget(data, targetNodeId, 3);
-      if (nodeIds.length === 0) return;
-      const id = `rm-${Date.now()}`;
-      const newRoadmap: Roadmap = {
-        id,
-        title: `${targetNode.label} 학습 경로`,
-        nodeIds,
-        source: "user",
-        description: `${targetNode.label}을 이해하기 위한 자동 생성 prereq chain`,
-        createdAt: new Date().toISOString(),
-      };
-      setRoadmaps((prev) => [...prev, newRoadmap]);
-      setRoadmapOverlay({
-        pathNodeIds: nodeIds,
-        currentIndex: 0,
-        title: newRoadmap.title,
-        roadmapId: id,
-      });
-    },
-    [data],
-  );
-
-  const deleteRoadmap = useCallback((roadmapId: string) => {
-    setRoadmaps((prev) => prev.filter((r) => r.id !== roadmapId));
-    setRoadmapOverlay((prev) =>
-      prev?.roadmapId === roadmapId ? null : prev,
-    );
-  }, []);
-
-  const advanceRoadmap = useCallback(() => {
-    setRoadmapOverlay((prev) =>
-      prev && prev.currentIndex < prev.pathNodeIds.length - 1
-        ? { ...prev, currentIndex: prev.currentIndex + 1 }
-        : prev,
-    );
-  }, []);
-
-  const backRoadmap = useCallback(() => {
-    setRoadmapOverlay((prev) =>
-      prev && prev.currentIndex > 0
-        ? { ...prev, currentIndex: prev.currentIndex - 1 }
-        : prev,
-    );
-  }, []);
-
-  const jumpRoadmap = useCallback((index: number) => {
-    setRoadmapOverlay((prev) => {
-      if (!prev) return prev;
-      const clamped = Math.max(0, Math.min(prev.pathNodeIds.length - 1, index));
-      return { ...prev, currentIndex: clamped };
-    });
-  }, []);
-
-  const clearRoadmapOverlay = useCallback(() => setRoadmapOverlay(null), []);
-
-  // ==================== Graph mutation (agent tool 결과) ====================
-
-  const addNode = useCallback((node: GraphNode) => {
-    setData((prev) => {
-      if (prev.nodes.some((n) => n.id === node.id)) return prev;
-      return { ...prev, nodes: [...prev.nodes, node] };
-    });
-  }, []);
-
-  const addEdge = useCallback((edge: GraphEdge) => {
-    setData((prev) => {
-      if (prev.edges.some((e) => e.id === edge.id)) return prev;
-      return { ...prev, edges: [...prev.edges, edge] };
-    });
-  }, []);
 
   // ==================== Canvas Tabs ====================
 
@@ -255,7 +170,7 @@ export function useGraphData(initialData: GraphData) {
     }));
     openNoteTab(id, title);
     return id;
-  }, [openNoteTab]);
+  }, [openNoteTab, setData]);
 
   const createNote = useCallback((title?: string) => {
     const id = `note-${Date.now()}`;
@@ -270,7 +185,6 @@ export function useGraphData(initialData: GraphData) {
       updatedAt: now,
     };
     setNotes((prev) => [...prev, note]);
-    // Create corresponding memo node in graph
     setData((prev) => ({
       ...prev,
       nodes: [
@@ -280,17 +194,15 @@ export function useGraphData(initialData: GraphData) {
     }));
     openNoteTab(id, noteTitle);
     return id;
-  }, [openNoteTab]);
+  }, [openNoteTab, setData]);
 
   const updateNote = useCallback((noteId: string, updates: Partial<Pick<NoteDocument, "title" | "blocks" | "references">>) => {
     setNotes((prev) =>
       prev.map((n) => {
         if (n.id !== noteId) return n;
-        const updated = { ...n, ...updates, updatedAt: new Date().toISOString() };
-        return updated;
+        return { ...n, ...updates, updatedAt: new Date().toISOString() };
       })
     );
-    // Sync title to memo node label
     if (updates.title) {
       setData((prev) => ({
         ...prev,
@@ -298,19 +210,15 @@ export function useGraphData(initialData: GraphData) {
           nd.id === noteId ? { ...nd, label: updates.title! } : nd
         ),
       }));
-      // Update tab label
       setTabs((prev) =>
         prev.map((t) => (t.noteId === noteId ? { ...t, label: updates.title! } : t))
       );
     }
-    // Sync references → graph edges
     if (updates.references) {
       setData((prev) => {
-        // Remove old reference edges from this note
         const edges = prev.edges.filter(
           (e) => !(e.source === noteId && e.type === "manual")
         );
-        // Add new reference edges
         const newEdges = updates.references!.map((refId) => ({
           id: `${noteId}-ref-${refId}`,
           source: noteId,
@@ -322,16 +230,15 @@ export function useGraphData(initialData: GraphData) {
         return { ...prev, edges: [...edges, ...newEdges] };
       });
     }
-  }, []);
+  }, [setData]);
 
   const closeTab = useCallback((tabId: string) => {
     setTabs((prev) => prev.filter((t) => t.id !== tabId));
     setActiveTabId((prevActive) => (prevActive === tabId ? "graph" : prevActive));
   }, []);
 
-  // ==================== Computed data ====================
+  // ==================== Computed ====================
 
-  // 2-hop neighborhood for local mode
   const localNodeIds = useMemo(() => {
     if (!localMode || !selectedNodeId) return null;
     const ids = new Set<string>([selectedNodeId]);
@@ -352,20 +259,16 @@ export function useGraphData(initialData: GraphData) {
     if (localNodeIds) {
       nodes = nodes.filter((n) => localNodeIds.has(n.id));
     }
-    // 로드맵 활성화 시 모듈화: path 노드만 표시.
-    // 이때 weight threshold도 무시해 path 사이 약한 엣지가 사라지지 않게 한다.
     if (roadmapOverlay) {
       const pathSet = new Set(roadmapOverlay.pathNodeIds);
       nodes = nodes.filter((n) => pathSet.has(n.id));
     }
     const nodeIds = new Set(nodes.map((n) => n.id));
-
     const threshold = roadmapOverlay
       ? 0
       : relevanceDensity === "compact" ? 0.7
       : relevanceDensity === "default" ? 0.4
       : 0;
-
     const edges = data.edges.filter(
       (e) => nodeIds.has(e.source) && nodeIds.has(e.target)
         && (e.weight ?? 0.5) >= threshold
@@ -394,8 +297,6 @@ export function useGraphData(initialData: GraphData) {
     () => tabs.find((t) => t.id === activeTabId) ?? GRAPH_TAB,
     [tabs, activeTabId]
   );
-
-  // ==================== Node helpers ====================
 
   const getConnectedNodes = useCallback(
     (nodeId: string) => {
@@ -450,16 +351,14 @@ export function useGraphData(initialData: GraphData) {
         { id: `${memoId}-ref-${targetNodeId}`, source: memoId, target: targetNodeId, type: "manual" as const, label: "메모", weight: 0.6 },
       ],
     }));
-  }, []);
+  }, [setData]);
 
   // ==================== Edge editing ====================
 
-  const updateEdgeLabel = useCallback((edgeId: string, label: string) => {
-    setData((prev) => ({
-      ...prev,
-      edges: prev.edges.map((e) => (e.id === edgeId ? { ...e, label } : e)),
-    }));
-  }, []);
+  const updateEdgeLabel = useCallback(
+    (edgeId: string, label: string) => storeUpdateEdgeLabel(edgeId, label),
+    [storeUpdateEdgeLabel],
+  );
 
   // ==================== Q&A ====================
 
@@ -509,7 +408,9 @@ export function useGraphData(initialData: GraphData) {
     return md;
   }, [filteredData]);
 
-  // ==================== Return ====================
+  // ==================== Graph mutation wrappers (store delegation) ====================
+  const addNode = useCallback((node: GraphNode) => storeAddNode(node), [storeAddNode]);
+  const addEdge = useCallback((edge: GraphEdge) => storeAddEdge(edge), [storeAddEdge]);
 
   return {
     fullData: data,
@@ -530,40 +431,30 @@ export function useGraphData(initialData: GraphData) {
     panelOpen,
     setPanelOpen,
     getConnectedNodes,
-    // gap
     gapMode,
     toggleGapMode,
     gapNodes,
     gapNodeIds,
-    // quick memo
     addQuickMemo,
-    // edge
     edgeStyle,
     setEdgeStyle,
     updateEdgeLabel,
-    // relevance
     relevanceDensity,
     setRelevanceDensity,
-    // Q&A
     searchKnowledge,
-    // export
     exportMarkdown,
-    // roadmap overlay
     roadmapOverlay,
     activateRoadmapOverlay,
     advanceRoadmap,
     backRoadmap,
     jumpRoadmap,
     clearRoadmapOverlay,
-    // roadmaps (일급 객체)
     roadmaps,
     activateRoadmapById,
     createRoadmapFromTarget,
     deleteRoadmap,
-    // mutation
     addNode,
     addEdge,
-    // tabs
     tabs,
     activeTab,
     activeTabId,
@@ -571,7 +462,6 @@ export function useGraphData(initialData: GraphData) {
     openDocTab,
     openNoteTab,
     closeTab,
-    // notes
     notes,
     createNote,
     importNote,

@@ -15,6 +15,7 @@ import ExportModal from "./ExportModal";
 import FloatingMemo from "./FloatingMemo";
 import NodePreviewTooltip from "./NodePreviewTooltip";
 import RoadmapOverlay from "./RoadmapOverlay";
+import ViewSwitcher from "./ViewSwitcher";
 import { parseMarkdownToBlocks } from "../_utils/parse-markdown";
 
 export default function GraphShell() {
@@ -54,6 +55,19 @@ export default function GraphShell() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
+
+  // Context carry-over from Whiteboard: if selectedNodeId was set in another view,
+  // center the graph on it once upon mount (no ?focus override).
+  const didRestoreFocusRef = useRef(false);
+  useEffect(() => {
+    if (didRestoreFocusRef.current) return;
+    if (searchParams.get("focus")) return; // explicit focus wins
+    const id = gd.selectedNode?.id;
+    if (!id) return;
+    didRestoreFocusRef.current = true;
+    setTimeout(() => graphRef.current?.centerGraph([id]), 250);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gd.selectedNode]);
 
   const handleNodeClick = useCallback(
     (event: NodeClickEvent) => {
@@ -180,6 +194,7 @@ export default function GraphShell() {
 
   return (
     <div className="flex h-full w-full">
+      <ViewSwitcher />
       {/* Left Sidebar — collapsible */}
       <div
         className="shrink-0 transition-all duration-200 overflow-hidden"

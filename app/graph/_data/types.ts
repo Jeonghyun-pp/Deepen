@@ -34,6 +34,11 @@ export interface GraphNode {
     citations?: number;
     contexts?: { paperId: string; paperLabel: string; year: number; description: string }[];
   };
+  // Whiteboard(React Flow) 뷰 전용 필드. reagraph는 무시.
+  whiteboardPos?: { x: number; y: number };
+  whiteboardExpanded?: boolean;
+  // 소속 Section id. Whiteboard에서 그룹 박스 안에 배치될 때 사용.
+  sectionId?: string;
 }
 
 export interface GraphEdge {
@@ -70,6 +75,20 @@ export interface Roadmap {
   nodeIds: string[];
   source: "seed" | "agent" | "user";
   description?: string;
+  createdAt: string;
+  // Roadmap 안에 포함되는 Section들. Whiteboard에서 그룹 박스로 렌더링.
+  sectionIds?: string[];
+}
+
+// Section = Roadmap 내부의 주제 묶음(색상 그룹 박스).
+// Whiteboard에서 React Flow Group node로 구현 — 박스 이동 시 안의 카드도 동반 이동.
+export interface Section {
+  id: string;
+  title: string;
+  color: string;          // hex 또는 tailwind token
+  nodeIds: string[];
+  roadmapId: string;      // 소속 Roadmap
+  bounds?: { x: number; y: number; w: number; h: number };
   createdAt: string;
 }
 
