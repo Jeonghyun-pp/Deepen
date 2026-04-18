@@ -3,9 +3,9 @@
 import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { PanelLeftOpen, PanelRightOpen } from "lucide-react";
-import { sampleGraphData } from "../_data/sample-data";
 import { useGraphData } from "../_hooks/useGraphData";
 import { useAgent } from "../_hooks/useAgent";
+import { useInitialGraph } from "../_hooks/useInitialGraph";
 import type { GraphCanvasHandle, NodeClickEvent, NodeHoverEvent } from "./GraphCanvas";
 import LeftSidebar from "./LeftSidebar";
 import CanvasTabBar from "./CanvasTabBar";
@@ -16,7 +16,9 @@ import FloatingMemo from "./FloatingMemo";
 import NodePreviewTooltip from "./NodePreviewTooltip";
 import RoadmapOverlay from "./RoadmapOverlay";
 import ViewSwitcher from "./ViewSwitcher";
+import EmptyGraphState from "./EmptyGraphState";
 import { parseMarkdownToBlocks } from "../_utils/parse-markdown";
+import { apiResponseToGraphData } from "@/lib/graph/mappers";
 
 export default function GraphShell() {
   const [rightTab, setRightTab] = useState("graph");
@@ -28,7 +30,8 @@ export default function GraphShell() {
   const graphRef = useRef<GraphCanvasHandle>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
 
-  const gd = useGraphData(sampleGraphData);
+  const { data: initialData, state: loadState, error: loadError } = useInitialGraph();
+  const gd = useGraphData(initialData);
   const agent = useAgent(gd.fullData, {
     onAddNode: gd.addNode,
     onAddEdge: gd.addEdge,
@@ -126,6 +129,20 @@ export default function GraphShell() {
     graphRef.current?.fitView();
   }, []);
 
+  // 새 문서 처리 완료 시 그래프 재동기화
+  const handleDocumentReady = useCallback(async () => {
+    try {
+      const res = await fetch("/api/graph/current", { credentials: "include" });
+      if (!res.ok) return;
+      const raw = await res.json();
+      const next = apiResponseToGraphData(raw);
+      for (const n of next.nodes) gd.addNode(n);
+      for (const e of next.edges) gd.addEdge(e);
+    } catch {
+      // polling이 다시 가져올 테니 여기선 swallow
+    }
+  }, [gd]);
+
   // For clicks from sidebar / right panel / other tab views (no screen coords)
   const handleNavigateToNode = useCallback(
     (id: string) => {
@@ -191,6 +208,25 @@ export default function GraphShell() {
   ]);
 
   const isGraphTab = gd.activeTab.type === "graph";
+  const isEmptyGraph = loadState === "ready" && gd.fullData.nodes.length === 0;
+
+  if (loadState === "loading") {
+    return (
+      <div className="h-full w-full flex items-center justify-center bg-white">
+        <div className="text-text-muted text-sm">그래프 불러오는 중...</div>
+      </div>
+    );
+  }
+
+  if (loadState === "error") {
+    return (
+      <div className="h-full w-full flex items-center justify-center bg-white">
+        <div className="text-sm text-red-600">
+          그래프 로드 실패: {loadError ?? "unknown error"}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full w-full">
@@ -311,6 +347,9 @@ export default function GraphShell() {
             onClear={gd.clearRoadmapOverlay}
           />
         )}
+        {isEmptyGraph && isGraphTab && (
+          <EmptyGraphState onNodeAdded={(node) => gd.addNode(node)} />
+        )}
         <CanvasArea
           activeTab={gd.activeTab}
           graphRef={graphRef}
@@ -380,6 +419,7 @@ export default function GraphShell() {
           if (gd.activeTab.type !== "graph") gd.setActiveTabId("graph");
           setTimeout(() => graphRef.current?.fitView(), 250);
         }}
+        onDocumentReady={handleDocumentReady}
       />
 
       {/* Export Modal */}
