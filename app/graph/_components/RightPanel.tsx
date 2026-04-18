@@ -7,6 +7,9 @@ import { NODE_COLORS, TYPE_LABELS, EDGE_TYPE_LABELS } from "../_data/colors";
 import ConceptTimeline from "./ConceptTimeline";
 import GapSummary from "./GapSummary";
 import ChatPanel from "./ChatPanel";
+import NodeSources from "./NodeSources";
+import UploadPanel from "@/app/_components/UploadPanel";
+import type { Document as DbDocument } from "@/lib/db/schema";
 import type { ChatMessage } from "../_hooks/useAgent";
 
 interface ConnectedNode {
@@ -49,6 +52,8 @@ interface Props {
   hasNote?: (nodeId: string) => boolean;
   // create roadmap from this node
   onCreateRoadmapFromNode?: (nodeId: string) => void;
+  // upload tab — 새 문서가 ready 되면 그래프 refetch 트리거
+  onDocumentReady?: (doc: DbDocument) => void;
 }
 
 const TAB_CONFIG: Record<string, { icon: LucideIcon; label: string }> = {
@@ -208,6 +213,9 @@ function NodeDetailContent({
         </p>
       </div>
 
+      {/* 출처 chunks (DB에 저장된 노드만 응답 있음) */}
+      <NodeSources nodeId={node.id} />
+
       {/* Concept Evolution (concept 노드만) */}
       {node.type === "concept" && node.meta?.contexts && node.meta.contexts.length > 0 && (
         <div className="px-4 py-3 border-b border-border">
@@ -280,21 +288,10 @@ function EditorContent() {
   );
 }
 
-function UploadContent() {
+function UploadContent({ onDocumentReady }: { onDocumentReady?: (doc: DbDocument) => void }) {
   return (
-    <div className="flex flex-col h-full p-4 gap-4">
-      <div className="flex-1 flex flex-col items-center justify-center gap-3 border-2 border-dashed border-border rounded-2xl hover:border-coral/40 transition-colors cursor-pointer">
-        <div className="w-12 h-12 rounded-2xl bg-coral-light flex items-center justify-center">
-          <Upload size={20} className="text-coral" />
-        </div>
-        <div className="text-center">
-          <p className="text-sm font-semibold text-text-primary">파일을 드래그하거나 클릭</p>
-          <p className="text-xs text-text-muted mt-1">PDF, TXT, MD 파일 지원</p>
-        </div>
-      </div>
-      <button className="w-full px-4 py-2.5 rounded-xl bg-coral text-white text-sm font-bold hover:bg-coral-dark transition-colors">
-        그래프에 추가
-      </button>
+    <div className="p-4">
+      <UploadPanel compact onDocumentReady={onDocumentReady} />
     </div>
   );
 }
@@ -321,6 +318,7 @@ export default function RightPanel({
   onOpenNoteTab,
   hasNote,
   onCreateRoadmapFromNode,
+  onDocumentReady,
 }: Props) {
 
   return (
@@ -397,7 +395,9 @@ export default function RightPanel({
             onNavigateToNode={onNodeClick}
           />
         )}
-        {activeTab === "upload" && <UploadContent />}
+        {activeTab === "upload" && (
+          <UploadContent onDocumentReady={onDocumentReady} />
+        )}
       </div>
 
       {/* Export button */}
