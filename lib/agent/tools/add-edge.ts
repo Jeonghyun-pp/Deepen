@@ -1,5 +1,8 @@
 import type { Tool } from "./types";
-import type { EdgeType } from "@/app/graph/_data/types";
+import type { EdgeType, GraphEdge } from "@/app/graph/_data/types";
+import { and, eq, inArray } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { edges, nodes } from "@/lib/db/schema";
 
 interface Args extends Record<string, unknown> {
   source: string;
@@ -13,7 +16,7 @@ interface Args extends Record<string, unknown> {
 export const addEdgeTool: Tool<Args> = {
   name: "add_edge",
   description:
-    "그래프에 새 엣지를 추가한다. 사용자 승인이 필요하다. typed relation (introduces/uses/extends/appliedIn/raises/relatedTo) 또는 구조적 엣지 (citation/manual 등)를 생성할 수 있다.",
+    "그래프에 새 엣지를 추가한다. 사용자 승인 필요. type은 사용자 발화·문맥에서 너가 추론한다: 사용자가 'A가 B의 기초/선수/전제' 같은 의미를 드러내면 prerequisite, 'A 안에 B 포함/소속' 의미면 contains, 그 외 (단순 연결·연관) relatedTo. 확신 없으면 relatedTo.",
   requiresApproval: true,
   parameters: {
     type: "object",
@@ -22,19 +25,9 @@ export const addEdgeTool: Tool<Args> = {
       target: { type: "string", description: "끝 노드 ID" },
       type: {
         type: "string",
-        enum: [
-          "introduces",
-          "uses",
-          "extends",
-          "appliedIn",
-          "raises",
-          "relatedTo",
-          "citation",
-          "manual",
-          "shared_concept",
-          "similarity",
-          "contains",
-        ],
+        enum: ["prerequisite", "contains", "relatedTo"],
+        description:
+          "관계 종류. 사용자가 명시적으로 말하지 않으면 문맥에서 추론. 기본 relatedTo.",
       },
       label: { type: "string", description: "엣지 라벨 (표시용)" },
       note: { type: "string", description: "관계의 이유·설명" },
@@ -48,26 +41,49 @@ export const addEdgeTool: Tool<Args> = {
   },
   buildPreview: (args) =>
     `+ 엣지 ${args.source} --[${args.type}]--> ${args.target}`,
-  execute: async (args, { graphData }) => {
-    const sourceNode = graphData.nodes.find((n) => n.id === args.source);
-    const targetNode = graphData.nodes.find((n) => n.id === args.target);
-    if (!sourceNode || !targetNode) {
-      return {
-        summary: `엣지 추가 실패: ${!sourceNode ? "source" : "target"} 노드가 존재하지 않음`,
-        data: null,
-      };
+  execute: async (args, { userId }) => {
+    if (args.source === args.target) {
+      throw new Error("self-loop은 허용되지 않음");
     }
-    const edge = {
-      id: `ai-e-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      source: args.source,
-      target: args.target,
-      type: args.type,
-      label: args.label,
-      note: args.note,
-      weight: args.weight ?? 0.5,
+
+    const owned = await db
+      .select({ id: nodes.id, label: nodes.label })
+      .from(nodes)
+      .where(
+        and(eq(nodes.userId, userId), inArray(nodes.id, [args.source, args.target])),
+      );
+    if (owned.length !== 2) {
+      throw new Error(`엣지 추가 실패: source/target 노드가 DB에 없거나 소유자가 다름`);
+    }
+
+    const sourceLabel = owned.find((n) => n.id === args.source)?.label ?? args.source;
+    const targetLabel = owned.find((n) => n.id === args.target)?.label ?? args.target;
+
+    const [created] = await db
+      .insert(edges)
+      .values({
+        userId,
+        sourceNodeId: args.source,
+        targetNodeId: args.target,
+        type: args.type,
+        label: args.label ?? null,
+        note: args.note ?? null,
+        weight: args.weight ?? 0.5,
+      })
+      .returning();
+
+    const edge: GraphEdge = {
+      id: created.id,
+      source: created.sourceNodeId,
+      target: created.targetNodeId,
+      type: created.type,
+      label: created.label ?? undefined,
+      note: created.note ?? undefined,
+      weight: created.weight ?? undefined,
     };
+
     return {
-      summary: `엣지 "${sourceNode.label}" → "${targetNode.label}" (${args.type}) 추가 준비됨`,
+      summary: `엣지 "${sourceLabel}" → "${targetLabel}" (${args.type}) 추가됨`,
       data: { edge },
     };
   },

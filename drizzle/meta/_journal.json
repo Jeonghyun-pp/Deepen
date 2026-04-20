@@ -8,6 +8,20 @@
       "when": 1776499237329,
       "tag": "0000_motionless_salo",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1776537287491,
+      "tag": "0001_friendly_zeigeist",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1776700000000,
+      "tag": "0002_edge_type_reduction",
+      "breakpoints": true
     }
   ]
 }

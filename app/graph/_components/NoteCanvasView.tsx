@@ -333,12 +333,7 @@ export default function NoteCanvasView({ note, allNodes, onUpdate, onNodeClick }
   const [mentionState, setMentionState] = useState<{ blockIndex: number; query: string } | null>(null);
   const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Sync from parent when note id changes (switching notes)
-  useEffect(() => {
-    setLocalTitle(note.title);
-    setLocalBlocks(note.blocks);
-    setLocalRefs(note.references);
-  }, [note.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Note id가 바뀔 때의 sync는 부모(CanvasArea)가 key={note.id}로 재마운트시킨다.
 
   // Debounced sync to parent
   const syncToParent = useCallback(

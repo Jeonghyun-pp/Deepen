@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useState } from "react"
 import UploadDropzone from "./UploadDropzone"
 import type { Document } from "@/lib/db/schema"
+import { createSupabaseBrowserClient } from "@/lib/supabase/client"
 
-const POLL_INTERVAL_MS = 2000
+// Realtime 구독이 주요 신호. polling은 Realtime 이벤트 누락 대비 fallback.
+const POLL_INTERVAL_MS = 8000
 const STATUS_LABEL: Record<string, string> = {
   uploaded: "업로드됨",
   parsing: "PDF 분석 중",
@@ -54,6 +56,41 @@ export default function UploadPanel({
     refresh()
   }, [refresh])
 
+  // Supabase Realtime: documents 테이블 변경을 실시간 수신 (UPDATE/INSERT/DELETE)
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient()
+    let cancelled = false
+    ;(async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!user || cancelled) return
+      const channel = supabase
+        .channel(`documents:${user.id}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "documents",
+            filter: `user_id=eq.${user.id}`,
+          },
+          () => {
+            refresh()
+          },
+        )
+        .subscribe()
+
+      return () => {
+        supabase.removeChannel(channel)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [refresh])
+
+  // Fallback polling — in-flight 문서 있을 때만, 느린 주기로
   useEffect(() => {
     const hasInFlight = docs.some(
       (d) =>

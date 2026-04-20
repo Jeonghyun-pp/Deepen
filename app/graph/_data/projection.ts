@@ -18,12 +18,8 @@ export interface PaperSubgraph {
 
 // 기본 섹션 순서 — DocDetailView 렌더링 우선순위
 export const DEFAULT_SECTION_ORDER: EdgeType[] = [
-  "introduces",
-  "uses",
-  "extends",
-  "appliedIn",
-  "raises",
-  "citation",
+  "prerequisite",
+  "contains",
   "relatedTo",
 ];
 

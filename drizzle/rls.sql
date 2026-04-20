@@ -42,6 +42,7 @@ alter table public.chunks               enable row level security;
 alter table public.nodes                enable row level security;
 alter table public.edges                enable row level security;
 alter table public.chunk_node_mappings  enable row level security;
+alter table public.token_usage          enable row level security;
 
 -- ------------------------------------------------------------
 -- 3. 정책: 자기 데이터만 select/insert/update/delete
@@ -64,7 +65,7 @@ do $$
 declare t text;
 begin
   foreach t in array array[
-    'sessions', 'documents', 'chunks', 'nodes', 'edges', 'chunk_node_mappings'
+    'sessions', 'documents', 'chunks', 'nodes', 'edges', 'chunk_node_mappings', 'token_usage'
   ]
   loop
     execute format('drop policy if exists "%I self all" on public.%I', t, t);

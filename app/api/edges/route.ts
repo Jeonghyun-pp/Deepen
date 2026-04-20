@@ -6,19 +6,7 @@ import { requireUser } from "@/lib/auth/require-user"
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
-const EDGE_TYPES = [
-  "citation",
-  "shared_concept",
-  "manual",
-  "contains",
-  "similarity",
-  "introduces",
-  "uses",
-  "extends",
-  "appliedIn",
-  "raises",
-  "relatedTo",
-] as const
+const EDGE_TYPES = ["prerequisite", "contains", "relatedTo"] as const
 type EdgeType = (typeof EDGE_TYPES)[number]
 
 export async function POST(request: Request) {

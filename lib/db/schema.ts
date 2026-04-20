@@ -34,17 +34,13 @@ export const nodeTypeEnum = pgEnum("node_type", [
   "document",
 ])
 
+// 학습 관점에서 의미 있는 3종만 유지.
+// prerequisite: 방향 O, 학습 순서(DAG) 핵심. A를 알아야 B 이해.
+// contains: 방향 O, 상위 개념 → 하위 개념 (섹션 계층 등).
+// relatedTo: 무방향(관례), 같은 맥락에서 언급됨. 기본값.
 export const edgeTypeEnum = pgEnum("edge_type", [
-  "citation",
-  "shared_concept",
-  "manual",
+  "prerequisite",
   "contains",
-  "similarity",
-  "introduces",
-  "uses",
-  "extends",
-  "appliedIn",
-  "raises",
   "relatedTo",
 ])
 
@@ -243,6 +239,34 @@ export const chunkNodeMappings = pgTable(
 )
 
 // ============================================================
+// token_usage — LLM 호출 토큰/비용 로깅 (per-user cap 감시용)
+// ============================================================
+
+export const tokenUsage = pgTable(
+  "token_usage",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    source: text("source").notNull(), // 'agent' | 'extract_nodes' | ...
+    model: text("model").notNull(),
+    promptTokens: integer("prompt_tokens").notNull().default(0),
+    completionTokens: integer("completion_tokens").notNull().default(0),
+    totalTokens: integer("total_tokens").notNull().default(0),
+    costUsd: real("cost_usd"),
+    meta: jsonb("meta").$type<Record<string, unknown>>(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("token_usage_user_idx").on(t.userId),
+    index("token_usage_created_idx").on(t.createdAt),
+  ]
+)
+
+// ============================================================
 // 타입 export — API 레이어에서 재사용
 // ============================================================
 
@@ -253,6 +277,7 @@ export type Chunk = typeof chunks.$inferSelect
 export type Node = typeof nodes.$inferSelect
 export type Edge = typeof edges.$inferSelect
 export type ChunkNodeMapping = typeof chunkNodeMappings.$inferSelect
+export type TokenUsage = typeof tokenUsage.$inferSelect
 
 export type NewDocument = typeof documents.$inferInsert
 export type NewNode = typeof nodes.$inferInsert

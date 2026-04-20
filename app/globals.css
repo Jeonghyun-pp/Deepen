@@ -3,16 +3,28 @@
 :root {
   --background: #FFFFFF;
   --foreground: #1A1A2E;
-  --coral: #4A90FF;
-  --coral-dark: #3570CC;
-  --coral-light: #E0EDFF;
+  /* brand accent — was blue "#4A90FF"; now remapped to v2 green palette so existing coral/* usages adopt the v2 look */
+  --coral: #22C55E;
+  --coral-dark: #15803D;
+  --coral-light: #DFF7E8;
   --text-primary: #1A1A2E;
   --text-secondary: #4A4A6A;
   --text-muted: #8888A0;
   --surface: #FFFFFF;
-  --border: #E8E8F0;
-  --section-tint: #EEF3FF;
+  --border: #E4EDE6;
+  --section-tint: #F0F7F2;
   --section-footer: #0F1729;
+
+  /* landing-v2 tokens (scrollytelling refresh) */
+  --v2-ink: #050807;
+  --v2-ink-soft: #0D1412;
+  --v2-paper: #FFFFFF;
+  --v2-mint: #DFF7E8;
+  --v2-mint-deep: #0F3B24;
+  --v2-green: #22C55E;
+  --v2-green-soft: #4ADE80;
+  --v2-green-deep: #15803D;
+  --v2-line: #1F2A26;
 }
 
 @theme inline {
@@ -27,6 +39,16 @@
   --color-surface: var(--surface);
   --color-border: var(--border);
   --color-section-footer: var(--section-footer);
+
+  --color-v2-ink: var(--v2-ink);
+  --color-v2-ink-soft: var(--v2-ink-soft);
+  --color-v2-paper: var(--v2-paper);
+  --color-v2-mint: var(--v2-mint);
+  --color-v2-mint-deep: var(--v2-mint-deep);
+  --color-v2-green: var(--v2-green);
+  --color-v2-green-soft: var(--v2-green-soft);
+  --color-v2-green-deep: var(--v2-green-deep);
+  --color-v2-line: var(--v2-line);
 }
 
 body {

@@ -104,7 +104,7 @@ export default function RoadmapOverlay({
             onClick={onAdvance}
             disabled={!canAdvance}
             className="flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-semibold text-white disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-all"
-            style={{ background: canAdvance ? "#4A90FF" : "#9ca3af" }}
+            style={{ background: canAdvance ? "#22C55E" : "#9ca3af" }}
           >
             다음
             <ChevronRight size={12} />

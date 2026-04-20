@@ -26,9 +26,19 @@ function CardNodeComponent({ id, data, selected }: NodeProps) {
   const typeLabel = TYPE_LABELS[node.type];
   const currentSection = sections.find((s) => s.nodeIds.includes(id));
 
+  // Hover 시 Handle이 보이게 해서 사용자가 드래그로 엣지를 만들 수 있게 한다
+  const handleStyle = {
+    width: 10,
+    height: 10,
+    background: "#2563eb",
+    border: "2px solid #fff",
+    opacity: 0,
+    transition: "opacity 120ms",
+  } as const;
+
   return (
     <div
-      className="rounded-lg border bg-white transition-shadow"
+      className="rounded-lg border bg-white transition-shadow group"
       style={{
         width: expanded ? 320 : 240,
         borderColor: selected ? "#2563eb" : "#e5e7eb",
@@ -37,11 +47,35 @@ function CardNodeComponent({ id, data, selected }: NodeProps) {
           : "0 1px 2px rgba(0,0,0,0.04)",
       }}
     >
-      {/* Handles: 4방향 (Phase 7 엣지 라우팅에서 활용) */}
-      <Handle type="target" position={Position.Top} style={{ opacity: 0 }} />
-      <Handle type="source" position={Position.Bottom} style={{ opacity: 0 }} />
-      <Handle type="target" position={Position.Left} style={{ opacity: 0 }} />
-      <Handle type="source" position={Position.Right} style={{ opacity: 0 }} />
+      {/* 4방향 Handle — hover 시 표시. 어느 Handle에서 드래그하든 관계 없음(양쪽 source/target 둘 다 있음). */}
+      <Handle
+        id="t"
+        type="target"
+        position={Position.Top}
+        className="!opacity-0 group-hover:!opacity-100"
+        style={handleStyle}
+      />
+      <Handle
+        id="b"
+        type="source"
+        position={Position.Bottom}
+        className="!opacity-0 group-hover:!opacity-100"
+        style={handleStyle}
+      />
+      <Handle
+        id="l"
+        type="target"
+        position={Position.Left}
+        className="!opacity-0 group-hover:!opacity-100"
+        style={handleStyle}
+      />
+      <Handle
+        id="r"
+        type="source"
+        position={Position.Right}
+        className="!opacity-0 group-hover:!opacity-100"
+        style={handleStyle}
+      />
 
       {/* Header strip */}
       <div

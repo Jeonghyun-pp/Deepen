@@ -5,30 +5,18 @@ import type { GraphData, EdgeType, Roadmap } from "./types";
 //
 // 각 엣지 타입이 학습 prerequisite 관계에서 어떤 방향을 의미하는지.
 //   "target-prereq": e.source가 e.target에 의존 → e.target이 prereq
-//     (예: extends — A extends B → B를 알아야 A 이해)
 //   "source-prereq": e.target이 e.source에 의존 → e.source가 prereq
-//     (예: appliedIn — paper → app → app 학습엔 paper가 prereq)
 //   "skip": prereq 관계 아님 (양방향 연관성)
 // ============================================================
 type PrereqDirection = "target-prereq" | "source-prereq" | "skip";
 
 const PREREQ_DIRECTION: Record<EdgeType, PrereqDirection> = {
-  // source가 target에 의존 → target이 prereq
-  extends: "target-prereq",
-  citation: "target-prereq",
-  uses: "target-prereq",
-  introduces: "target-prereq", // paper introduces concept → concept을 알아야 paper 이해
-
-  // target이 source에 의존 → source가 prereq
-  appliedIn: "source-prereq",  // paper → app: app은 paper가 prereq
-  raises: "source-prereq",     // paper → question: question은 paper가 prereq
-  contains: "source-prereq",   // concept → technique: technique은 concept이 prereq
-
-  // 양방향 연관성, prereq 아님
+  // prerequisite(A → B)는 명시적: target이 prereq
+  prerequisite: "target-prereq",
+  // contains(상위 → 하위): 하위 학습엔 상위가 prereq → source가 prereq
+  contains: "source-prereq",
+  // 양방향 연관, prereq 아님
   relatedTo: "skip",
-  shared_concept: "skip",
-  similarity: "skip",
-  manual: "skip",
 };
 
 // ============================================================

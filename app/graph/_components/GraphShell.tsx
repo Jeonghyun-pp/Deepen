@@ -212,7 +212,7 @@ export default function GraphShell() {
 
   if (loadState === "loading") {
     return (
-      <div className="h-full w-full flex items-center justify-center bg-white">
+      <div className="h-full w-full flex items-center justify-center">
         <div className="text-text-muted text-sm">그래프 불러오는 중...</div>
       </div>
     );
@@ -220,7 +220,7 @@ export default function GraphShell() {
 
   if (loadState === "error") {
     return (
-      <div className="h-full w-full flex items-center justify-center bg-white">
+      <div className="h-full w-full flex items-center justify-center">
         <div className="text-sm text-red-600">
           그래프 로드 실패: {loadError ?? "unknown error"}
         </div>
@@ -229,11 +229,11 @@ export default function GraphShell() {
   }
 
   return (
-    <div className="flex h-full w-full">
+    <div className="flex h-full w-full gap-3 p-3">
       <ViewSwitcher />
       {/* Left Sidebar — collapsible */}
       <div
-        className="shrink-0 transition-all duration-200 overflow-hidden"
+        className="shrink-0 transition-all duration-200 overflow-hidden rounded-2xl shadow-sm bg-white/75 backdrop-blur-md"
         style={{ width: leftOpen ? 240 : 0 }}
       >
         <LeftSidebar
@@ -261,13 +261,13 @@ export default function GraphShell() {
       </div>
 
       {/* Main Canvas Area */}
-      <div className="flex-1 flex flex-col overflow-hidden h-full relative">
+      <div className="flex-1 flex flex-col overflow-hidden h-full relative rounded-2xl shadow-sm bg-white/75 backdrop-blur-md">
         {/* Tab Bar — z-20 so dropdown floats above canvas */}
-        <div className="relative z-20 shrink-0 flex items-center h-9 border-b border-border bg-gray-50">
+        <div className="relative z-20 shrink-0 flex items-center h-9 border-b border-border/60 bg-transparent">
           {/* Left panel toggle */}
           <button
             onClick={() => setLeftOpen((p) => !p)}
-            className={`flex items-center justify-center w-9 h-full border-r border-border transition-colors ${
+            className={`flex items-center justify-center w-9 h-full transition-colors ${
               leftOpen ? "text-text-muted hover:text-text-secondary" : "text-coral bg-coral-light/30"
             }`}
             title={leftOpen ? "사이드바 숨기기" : "사이드바 보기"}
@@ -308,7 +308,7 @@ export default function GraphShell() {
           {/* Right panel toggle */}
           <button
             onClick={() => gd.setPanelOpen(!gd.panelOpen)}
-            className={`flex items-center justify-center w-9 h-full border-l border-border transition-colors ${
+            className={`flex items-center justify-center w-9 h-full transition-colors ${
               gd.panelOpen ? "text-text-muted hover:text-text-secondary" : "text-coral bg-coral-light/30"
             }`}
             title={gd.panelOpen ? "패널 숨기기" : "패널 보기"}

@@ -21,6 +21,7 @@ interface GraphState {
   initData: (data: GraphData) => void;
   addNode: (node: GraphNode) => void;
   addEdge: (edge: GraphEdge) => void;
+  removeEdges: (ids: string[]) => void;
   updateEdgeLabel: (edgeId: string, label: string) => void;
   upsertNode: (
     id: string,
@@ -83,6 +84,17 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     set((s) => {
       if (s.data.edges.some((e) => e.id === edge.id)) return s;
       return { data: { ...s.data, edges: [...s.data.edges, edge] } };
+    }),
+
+  removeEdges: (ids) =>
+    set((s) => {
+      const idSet = new Set(ids);
+      return {
+        data: {
+          ...s.data,
+          edges: s.data.edges.filter((e) => !idSet.has(e.id)),
+        },
+      };
     }),
 
   updateEdgeLabel: (edgeId, label) =>

@@ -186,7 +186,7 @@ function NodeDetailContent({
         {onCreateRoadmapFromNode && (
           <button
             onClick={() => onCreateRoadmapFromNode(node.id)}
-            className="w-full flex items-center justify-center gap-1.5 h-8 rounded-xl border border-blue-300 text-xs font-semibold text-blue-600 hover:bg-blue-50 transition-colors"
+            className="w-full flex items-center justify-center gap-1.5 h-8 rounded-xl border border-[color:var(--v2-green)]/30 bg-[color:var(--v2-mint)]/60 text-xs font-semibold text-[color:var(--v2-green-deep)] hover:bg-[color:var(--v2-mint)] transition-colors"
             title="이 노드를 이해하기 위한 prereq chain 자동 생성"
           >
             <Map size={12} />
@@ -323,10 +323,9 @@ export default function RightPanel({
 
   return (
     <aside
-      className="flex flex-col shrink-0 transition-all duration-200 overflow-hidden bg-white"
+      className="flex flex-col shrink-0 transition-all duration-200 overflow-hidden bg-white/75 backdrop-blur-md rounded-2xl shadow-sm"
       style={{
-        width: open ? 380 : 0,
-        borderLeft: open ? "1px solid var(--border)" : "none",
+        width: open ? 340 : 0,
       }}
     >
       {/* Tab Header */}

@@ -8,7 +8,7 @@ export default function GraphLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="h-screen w-screen overflow-hidden bg-white">
+    <div className="h-screen w-screen overflow-hidden bg-[#F3F8F5]">
       {children}
     </div>
   );

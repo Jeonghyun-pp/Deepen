@@ -10,6 +10,7 @@ import { buildSystemPrompt } from "./prompt";
 import { callOpenAIWithTools } from "../clients/openai";
 import { TOOLS, getToolSchemas } from "./tools";
 import { waitForApproval } from "./approval";
+import { recordTokenUsage } from "@/lib/db/token-usage";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 
 const MAX_ITERATIONS = 5;
@@ -28,11 +29,12 @@ export async function* runAgent(
   messages: Message[],
   graphData: GraphData,
   sessionId: string,
+  userId: string,
 ): AsyncGenerator<AgentEvent> {
   const userQuery =
     [...messages].reverse().find((m) => m.role === "user")?.content ?? "";
-  const systemPrompt = buildSystemPrompt(graphData, userQuery);
-  const ctx = { graphData, sessionId };
+  const systemPrompt = await buildSystemPrompt(graphData, userQuery, userId);
+  const ctx = { graphData, sessionId, userId };
 
   const llmMessages: ChatCompletionMessageParam[] = [
     { role: "system", content: systemPrompt },
@@ -53,6 +55,15 @@ export async function* runAgent(
           yield { type: "text_delta", delta: event.delta };
         } else if (event.type === "tool_calls") {
           pendingToolCalls = event.calls;
+        } else if (event.type === "usage") {
+          void recordTokenUsage({
+            userId,
+            source: "agent",
+            model: event.model,
+            promptTokens: event.promptTokens,
+            completionTokens: event.completionTokens,
+            meta: { sessionId, iteration },
+          });
         }
       }
 

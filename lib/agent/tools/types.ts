@@ -3,6 +3,7 @@ import type { GraphData } from "@/app/graph/_data/types";
 export interface ToolContext {
   graphData: GraphData;
   sessionId: string;
+  userId: string;
 }
 
 export interface ToolExecutionResult {

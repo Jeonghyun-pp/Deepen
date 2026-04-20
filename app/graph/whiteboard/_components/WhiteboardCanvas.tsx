@@ -11,6 +11,7 @@ import {
   type EdgeTypes,
   type NodeChange,
   type NodeTypes,
+  type Connection,
   type ReactFlowInstance,
   MarkerType,
 } from "@xyflow/react";
@@ -114,6 +115,8 @@ export default function WhiteboardCanvas() {
   const selectedNodeId = useGraphStore((s) => s.selectedNodeId);
   const selectNode = useGraphStore((s) => s.selectNode);
   const roadmaps = useGraphStore((s) => s.roadmaps);
+  const addEdgeToStore = useGraphStore((s) => s.addEdge);
+  const removeEdgesFromStore = useGraphStore((s) => s.removeEdges);
   const positions = useWhiteboardStore((s) => s.positions);
   const setPosition = useWhiteboardStore((s) => s.setPosition);
   const setPositions = useWhiteboardStore((s) => s.setPositions);
@@ -421,10 +424,7 @@ export default function WhiteboardCanvas() {
 
       if (bundle && !rerouted) {
         const color = EDGE_COLORS[e.type];
-        const dashed =
-          e.type === "citation" ||
-          e.type === "similarity" ||
-          e.type === "shared_concept";
+        const dashed = e.type === "relatedTo";
         return {
           id: e.id,
           source: e.source,
@@ -538,6 +538,66 @@ export default function WhiteboardCanvas() {
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
+  );
+
+  // 드래그로 엣지 생성 — 기본 relatedTo. DB persist 후 store에 반영.
+  const onConnect = useCallback(
+    async (conn: Connection) => {
+      if (!conn.source || !conn.target || conn.source === conn.target) return;
+      // 낙관적 UI: 먼저 임시 엣지로 추가, 실패하면 제거
+      const tempId = `tmp-${Date.now()}`;
+      addEdgeToStore({
+        id: tempId,
+        source: conn.source,
+        target: conn.target,
+        type: "relatedTo",
+        weight: 0.5,
+      });
+      try {
+        const res = await fetch("/api/edges", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sourceNodeId: conn.source,
+            targetNodeId: conn.target,
+            type: "relatedTo",
+          }),
+        });
+        if (!res.ok) throw new Error(`status ${res.status}`);
+        const created = await res.json();
+        removeEdgesFromStore([tempId]);
+        addEdgeToStore({
+          id: created.id,
+          source: created.sourceNodeId,
+          target: created.targetNodeId,
+          type: created.type,
+          weight: created.weight ?? 0.5,
+        });
+      } catch (e) {
+        console.error("[onConnect] failed:", e);
+        removeEdgesFromStore([tempId]);
+      }
+    },
+    [addEdgeToStore, removeEdgesFromStore],
+  );
+
+  // Delete 키 / 삭제 액션 — 서버에서 제거 후 store에서 제거.
+  const onEdgesDelete = useCallback(
+    async (edgesToDelete: RFEdge[]) => {
+      const ids = edgesToDelete.map((e) => e.id).filter((id) => !id.startsWith("tmp-"));
+      if (ids.length === 0) return;
+      removeEdgesFromStore(ids);
+      await Promise.allSettled(
+        ids.map((id) =>
+          fetch(`/api/edges/${id}`, {
+            method: "DELETE",
+            credentials: "include",
+          }),
+        ),
+      );
+    },
+    [removeEdgesFromStore],
   );
 
   const handleResetLayout = useCallback(() => {
@@ -698,6 +758,9 @@ export default function WhiteboardCanvas() {
         onNodeClick={onNodeClick}
         onPaneClick={() => selectNode(null)}
         onNodeDragStop={onNodeDragStop}
+        onConnect={onConnect}
+        onEdgesDelete={onEdgesDelete}
+        deleteKeyCode={["Delete", "Backspace"]}
         onInit={handleInit}
         fitView
         fitViewOptions={{ padding: 0.2 }}

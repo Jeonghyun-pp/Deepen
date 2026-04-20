@@ -115,6 +115,7 @@ export default function CanvasArea({
         if (!note) return null;
         return (
           <NoteCanvasView
+            key={note.id}
             note={note}
             allNodes={allNodes}
             onUpdate={(updates) => onNoteUpdate(activeTab.noteId!, updates)}

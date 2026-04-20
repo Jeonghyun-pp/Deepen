@@ -217,13 +217,13 @@ export function useGraphData(initialData: GraphData) {
     if (updates.references) {
       setData((prev) => {
         const edges = prev.edges.filter(
-          (e) => !(e.source === noteId && e.type === "manual")
+          (e) => !(e.source === noteId && e.type === "relatedTo")
         );
         const newEdges = updates.references!.map((refId) => ({
           id: `${noteId}-ref-${refId}`,
           source: noteId,
           target: refId,
-          type: "manual" as const,
+          type: "relatedTo" as const,
           label: "참조",
           weight: 0.6,
         }));
@@ -348,7 +348,7 @@ export function useGraphData(initialData: GraphData) {
       ],
       edges: [
         ...prev.edges,
-        { id: `${memoId}-ref-${targetNodeId}`, source: memoId, target: targetNodeId, type: "manual" as const, label: "메모", weight: 0.6 },
+        { id: `${memoId}-ref-${targetNodeId}`, source: memoId, target: targetNodeId, type: "relatedTo" as const, label: "메모", weight: 0.6 },
       ],
     }));
   }, [setData]);

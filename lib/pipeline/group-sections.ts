@@ -12,6 +12,60 @@ export interface Section {
   prompt: string
   /** 섹션의 첫 chunk ordinal — 디버그/정렬용 */
   startOrdinal: number
+  /** 섹션 번호 경로 (예: "2.1.3" → [2, 1, 3]). 감지 실패 시 null */
+  numberPath: number[] | null
+}
+
+/**
+ * heading title 에서 "1.2.3 ..." 혹은 "1 ..." 같은 선두 숫자 경로를 파싱.
+ * 파싱 실패 시 null. "Chapter 2" / "제 3장" 은 단일 레벨([2], [3])로 취급.
+ */
+export function parseSectionNumber(title: string | null): number[] | null {
+  if (!title) return null
+  const trimmed = title.trim()
+
+  const dotMatch = trimmed.match(/^(\d+(?:\.\d+)*)\.?\s+/)
+  if (dotMatch) {
+    return dotMatch[1].split(".").map((s) => parseInt(s, 10))
+  }
+
+  const wordMatch = trimmed.match(/^(?:chapter|section|part|appendix)\s+(\d+)/i)
+  if (wordMatch) return [parseInt(wordMatch[1], 10)]
+
+  const koMatch = trimmed.match(/^제?\s*(\d+)\s*[장절편부]/)
+  if (koMatch) return [parseInt(koMatch[1], 10)]
+
+  return null
+}
+
+/**
+ * 번호 경로 배열에서 parent index 관계를 계산한다.
+ * parent는 "strict prefix + length - 1" 조건: [2,1,3]의 parent는 [2,1].
+ * parent가 배열 내 여러 개면 가장 가까운 것(같은 prefix의 마지막 등장).
+ */
+export function computeSectionParents(
+  sections: Section[]
+): (number | null)[] {
+  const parents: (number | null)[] = new Array(sections.length).fill(null)
+  for (let i = 0; i < sections.length; i++) {
+    const path = sections[i].numberPath
+    if (!path || path.length < 2) continue
+    const parentPath = path.slice(0, -1)
+
+    // 이전 섹션들 중 같은 parentPath를 가진 가장 가까운 섹션 찾기
+    for (let j = i - 1; j >= 0; j--) {
+      const other = sections[j].numberPath
+      if (!other) continue
+      if (
+        other.length === parentPath.length &&
+        parentPath.every((n, k) => n === other[k])
+      ) {
+        parents[i] = j
+        break
+      }
+    }
+  }
+  return parents
 }
 
 // 섹션당 텍스트 예산. gpt-4o-mini 컨텍스트 여유롭게 잡고 프롬프트 크기 포함해도 안전한 선
@@ -59,6 +113,7 @@ export function groupSections(chunks: RawChunk[]): Section[] {
       chunks: current.chunks,
       prompt,
       startOrdinal: current.start,
+      numberPath: parseSectionNumber(current.title),
     })
   }
 
@@ -128,7 +183,13 @@ function fallbackByPage(chunks: RawChunk[]): Section[] {
       .filter((c) => c.contentType === "text")
       .map((c) => c.content)
       .join("\n\n")
-    sections.push({ title, chunks: buffer, prompt, startOrdinal: start })
+    sections.push({
+      title,
+      chunks: buffer,
+      prompt,
+      startOrdinal: start,
+      numberPath: null,
+    })
     buffer = []
     bufChars = 0
   }

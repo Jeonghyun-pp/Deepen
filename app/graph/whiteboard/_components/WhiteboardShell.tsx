@@ -15,9 +15,11 @@ export default function WhiteboardShell() {
   }, [initData]);
 
   return (
-    <div className="h-screen w-screen relative bg-white">
+    <div className="h-full w-full p-3">
       <ViewSwitcher />
-      <WhiteboardCanvas />
+      <div className="h-full w-full rounded-2xl shadow-sm bg-white overflow-hidden relative">
+        <WhiteboardCanvas />
+      </div>
     </div>
   );
 }

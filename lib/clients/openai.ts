@@ -105,6 +105,7 @@ export async function streamOpenAIChat(options: {
 export type ToolUseStreamEvent =
   | { type: "text_delta"; delta: string }
   | { type: "tool_calls"; calls: ToolCall[] }
+  | { type: "usage"; promptTokens: number; completionTokens: number; model: string }
   | { type: "done" };
 
 /**
@@ -122,6 +123,7 @@ export async function* callOpenAIWithTools(options: {
     model: DEFAULT_MODEL,
     max_tokens: options.maxTokens ?? 2048,
     stream: true,
+    stream_options: { include_usage: true },
     messages: options.messages,
     tools: options.tools,
     tool_choice: "auto",
@@ -133,7 +135,19 @@ export async function* callOpenAIWithTools(options: {
     { id: string; name: string; args: string }
   > = {};
 
+  let finishKind: "tool_calls" | "stop" | null = null;
+
   for await (const chunk of stream) {
+    // OpenAI가 stream_options.include_usage=true면 마지막 chunk에 usage가 choices 없이 옴
+    if (chunk.usage) {
+      yield {
+        type: "usage",
+        promptTokens: chunk.usage.prompt_tokens ?? 0,
+        completionTokens: chunk.usage.completion_tokens ?? 0,
+        model: DEFAULT_MODEL,
+      };
+    }
+
     const choice = chunk.choices[0];
     if (!choice) continue;
     const delta = choice.delta;
@@ -155,24 +169,23 @@ export async function* callOpenAIWithTools(options: {
       }
     }
 
-    if (choice.finish_reason === "tool_calls") {
-      const calls: ToolCall[] = Object.values(toolCallsAccum).map((tc) => {
-        let parsedArgs: Record<string, unknown> = {};
-        try {
-          parsedArgs = tc.args ? JSON.parse(tc.args) : {};
-        } catch {
-          parsedArgs = {};
-        }
-        return { id: tc.id, name: tc.name, args: parsedArgs };
-      });
-      yield { type: "tool_calls", calls };
-      return;
-    }
-
-    if (choice.finish_reason === "stop") {
-      yield { type: "done" };
-      return;
-    }
+    if (choice.finish_reason === "tool_calls") finishKind = "tool_calls";
+    else if (choice.finish_reason === "stop") finishKind = "stop";
   }
+
+  if (finishKind === "tool_calls") {
+    const calls: ToolCall[] = Object.values(toolCallsAccum).map((tc) => {
+      let parsedArgs: Record<string, unknown> = {};
+      try {
+        parsedArgs = tc.args ? JSON.parse(tc.args) : {};
+      } catch {
+        parsedArgs = {};
+      }
+      return { id: tc.id, name: tc.name, args: parsedArgs };
+    });
+    yield { type: "tool_calls", calls };
+    return;
+  }
+
   yield { type: "done" };
 }

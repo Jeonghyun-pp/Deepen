@@ -1,9 +1,16 @@
 import type { GraphData } from "@/app/graph/_data/types";
+import { count, eq } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { nodes as nodesTable, edges as edgesTable } from "@/lib/db/schema";
 
 const MAX_NEIGHBORS = 10;
 
-export function buildSystemPrompt(graphData: GraphData, userQuery: string): string {
-  const stats = getStats(graphData);
+export async function buildSystemPrompt(
+  graphData: GraphData,
+  userQuery: string,
+  userId: string,
+): Promise<string> {
+  const stats = await getStatsFromDb(userId);
   const contextBlock = getRelevantContext(graphData, userQuery);
 
   return `당신은 Deepy Research Copilot입니다. 사용자의 지식 그래프 위에서 연구를 탐색·이해·확장하는 에이전트입니다.
@@ -13,6 +20,15 @@ export function buildSystemPrompt(graphData: GraphData, userQuery: string): stri
 - 모든 정보는 지식 그래프에서 찾는다. 그래프에 있는 내용은 절대 상상하지 말고 도구로 조회하라.
 - 노드를 언급할 때는 반드시 ID를 함께 제시하라. 예: "Transformer (c_transformer_arch)".
 - 사용자가 "핵심 개념", "경로", "학습 순서", "관련 논문"을 물으면 먼저 적절한 도구를 호출하라.
+- add_node로 만든 노드를 엣지로 연결하려면, 먼저 add_node 결과를 받은 뒤 다음 턴에서 tool_result summary에 포함된 [uuid] ID를 source/target으로 사용하라. 같은 턴에서 임의 ID를 지어내지 마라.
+
+## 엣지 type 자동 추론
+사용자는 엣지 type(prerequisite/contains/relatedTo)을 모른다고 가정하라. 사용자가 type 단어를 말할 것을 기대하지 말고, 발화에서 네가 추론해 add_edge를 호출하라.
+- **prerequisite** (A → B): "A가 B의 기초/선수/전제/토대", "A를 알아야 B를 이해", "A에서 B로 이어지는 학습 순서" 같은 학습 의존 관계.
+- **contains** (A → B): "A 안에 B 포함", "A의 하위 개념 B", "A 챕터에 속한 B 절" 같은 상위→하위 계층 관계.
+- **relatedTo** (A ↔ B): 위 두 케이스가 아닌 모든 연결. "A와 B 연결", "비슷해", "같은 맥락" 같은 애매한 요청은 전부 여기.
+
+확신 없거나 애매하면 무조건 relatedTo를 선택하라. 사용자에게 type을 되묻지 마라.
 
 ## 사용 가능 도구
 - query_graph: 노드/엣지를 조회. 특정 노드 중심 1-hop 탐색 또는 타입/관계 전역 필터.
@@ -28,15 +44,25 @@ ${stats}
 ${contextBlock}`.trim();
 }
 
-function getStats(graphData: GraphData): string {
-  const byType = graphData.nodes.reduce((acc, n) => {
-    acc[n.type] = (acc[n.type] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-  const typeSummary = Object.entries(byType)
-    .map(([t, c]) => `${t}:${c}개`)
+async function getStatsFromDb(userId: string): Promise<string> {
+  const [nodeRows, edgeCountRows] = await Promise.all([
+    db
+      .select({ type: nodesTable.type, count: count() })
+      .from(nodesTable)
+      .where(eq(nodesTable.userId, userId))
+      .groupBy(nodesTable.type),
+    db
+      .select({ count: count() })
+      .from(edgesTable)
+      .where(eq(edgesTable.userId, userId)),
+  ]);
+  const totalNodes = nodeRows.reduce((s, r) => s + Number(r.count), 0);
+  if (totalNodes === 0) return "그래프가 비어 있습니다 (0 노드, 0 엣지).";
+  const typeSummary = nodeRows
+    .map((r) => `${r.type}:${r.count}개`)
     .join(", ");
-  return `총 ${graphData.nodes.length}개 노드 (${typeSummary}), ${graphData.edges.length}개 엣지`;
+  const edgeCount = edgeCountRows[0]?.count ?? 0;
+  return `총 ${totalNodes}개 노드 (${typeSummary}), ${edgeCount}개 엣지`;
 }
 
 function getRelevantContext(graphData: GraphData, userQuery: string): string {

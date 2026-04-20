@@ -61,11 +61,10 @@ export default function SearchPage() {
   }, []);
 
   const recommendedConcepts = useMemo(() => {
+    // 엣지 방향 count — 많이 참조되는 노드를 우선 추천
     const introCount = new Map<string, number>();
     for (const e of sampleGraphData.edges) {
-      if (e.type === "introduces" || e.type === "uses") {
-        introCount.set(e.target, (introCount.get(e.target) ?? 0) + 1);
-      }
+      introCount.set(e.target, (introCount.get(e.target) ?? 0) + 1);
     }
     return [...sampleGraphData.nodes]
       .filter((n) => n.type === "concept" || n.type === "technique")
@@ -82,10 +81,10 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-neutral-100">
       {/* Header */}
-      <header className="border-b border-border">
-        <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
+      <header className="max-w-5xl mx-auto px-3 md:px-6 pt-3 md:pt-6">
+        <div className="rounded-2xl shadow-sm bg-white px-6 h-14 flex items-center justify-between">
           <Link href="/" className="text-lg font-extrabold text-coral">
             Deepen
           </Link>
@@ -98,7 +97,7 @@ export default function SearchPage() {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-6 py-12">
+      <main className="max-w-5xl mx-auto px-3 md:px-6 py-6 md:py-10">
         {/* Search hero */}
         <div className="mb-12">
           <h1 className="text-3xl font-extrabold text-text-primary mb-2">
@@ -121,7 +120,7 @@ export default function SearchPage() {
                 if (e.key === "Enter" && matches[0]) goToGraph(matches[0].id);
               }}
               placeholder="논문, 개념, 응용 분야를 검색하세요..."
-              className="w-full h-12 pl-11 pr-4 rounded-2xl border border-border bg-gray-50 text-sm outline-none focus:border-coral focus:bg-white transition-colors placeholder:text-text-muted"
+              className="w-full h-12 pl-11 pr-4 rounded-2xl border border-border bg-white shadow-sm text-sm outline-none focus:border-coral transition-colors placeholder:text-text-muted"
             />
             {matches.length > 0 && (
               <div className="absolute top-full left-0 right-0 mt-1 rounded-xl border border-border bg-white shadow-lg z-10 overflow-hidden">

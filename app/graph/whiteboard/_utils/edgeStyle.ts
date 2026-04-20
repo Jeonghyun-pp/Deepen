@@ -2,27 +2,16 @@ import { MarkerType, type Edge as RFEdge } from "@xyflow/react";
 import type { GraphEdge, EdgeType } from "../../_data/types";
 import { EDGE_COLORS, EDGE_TYPE_LABELS } from "../../_data/colors";
 
-// 엣지 카테고리: 학습 관점에서 3가지로 분류
-// - prereq: 선수/계승 관계 (실선 화살표, 강조)
-// - reference: 참조/인용 (점선, 회색 톤)
-// - soft: 약한 관계 (옅은 실선)
-type EdgeCategory = "prereq" | "reference" | "soft";
+// 엣지 카테고리: 3종 타입에 직접 대응
+// - prereq: prerequisite (선수 학습, 강조 화살표)
+// - hierarchy: contains (상위→하위, 가는 화살표)
+// - soft: relatedTo (점선, 약한 연관)
+type EdgeCategory = "prereq" | "hierarchy" | "soft";
 
 const EDGE_CATEGORY: Record<EdgeType, EdgeCategory> = {
-  // 선수관계에 해당
-  extends: "prereq",
-  introduces: "prereq",
-  uses: "prereq",
-  // 참조/인용
-  citation: "reference",
-  similarity: "reference",
-  shared_concept: "reference",
-  // 기타(응용/질문/수동 등)
-  appliedIn: "soft",
-  raises: "soft",
+  prerequisite: "prereq",
+  contains: "hierarchy",
   relatedTo: "soft",
-  manual: "soft",
-  contains: "soft",
 };
 
 export function toRFEdge(e: GraphEdge): RFEdge {
@@ -50,22 +39,24 @@ export function toRFEdge(e: GraphEdge): RFEdge {
     };
   }
 
-  if (cat === "reference") {
+  if (cat === "hierarchy") {
     return {
       ...base,
       type: "default",
-      style: {
-        stroke: color,
-        strokeWidth: 1.25,
-        strokeDasharray: "4 3",
-      },
+      style: { stroke: color, strokeWidth: 1.1 },
+      markerEnd: { type: MarkerType.ArrowClosed, color, width: 10, height: 10 },
     };
   }
 
-  // soft
+  // soft (relatedTo)
   return {
     ...base,
     type: "default",
-    style: { stroke: color, strokeWidth: 1, opacity: 0.7 },
+    style: {
+      stroke: color,
+      strokeWidth: 1,
+      strokeDasharray: "4 3",
+      opacity: 0.75,
+    },
   };
 }

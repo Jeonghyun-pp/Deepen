@@ -1,11 +1,21 @@
 import { runAgent } from "@/lib/agent/runner";
 import type { Message } from "@/lib/agent/types";
 import type { GraphData } from "@/app/graph/_data/types";
+import { requireUser } from "@/lib/auth/require-user";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
+  let userId: string;
+  try {
+    const { user } = await requireUser();
+    userId = user.id;
+  } catch (e) {
+    if (e instanceof Response) return e;
+    return Response.json({ error: "unauthorized" }, { status: 401 });
+  }
+
   const {
     messages,
     graphData,
@@ -17,7 +27,7 @@ export async function POST(req: Request) {
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        for await (const event of runAgent(messages, graphData, sessionId)) {
+        for await (const event of runAgent(messages, graphData, sessionId, userId)) {
           controller.enqueue(
             encoder.encode(`data: ${JSON.stringify(event)}\n\n`)
           );

@@ -94,7 +94,7 @@ export default function LeftSidebar({
   }, [visibleNodes]);
 
   return (
-    <aside className="flex flex-col w-[240px] shrink-0 bg-white border-r border-border h-full">
+    <aside className="flex flex-col w-[240px] shrink-0 bg-white h-full">
       {/* Header */}
       <div className="flex items-center justify-between px-4 h-12 border-b border-border shrink-0">
         <Link href="/" className="text-lg font-extrabold text-coral">
@@ -207,10 +207,10 @@ export default function LeftSidebar({
               const active = rm.id === activeRoadmapId;
               const sourceColor =
                 rm.source === "seed"
-                  ? "text-blue-500"
+                  ? "text-emerald-500"
                   : rm.source === "agent"
                   ? "text-purple-500"
-                  : "text-emerald-500";
+                  : "text-teal-500";
               return (
                 <div
                   key={rm.id}

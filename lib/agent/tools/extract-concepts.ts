@@ -9,15 +9,15 @@ interface Args extends Record<string, unknown> {
 export const extractConceptsTool: Tool<Args> = {
   name: "extract_concepts",
   description:
-    "특정 논문(paper)이 제안(introduces)하거나 사용(uses)하는 개념·기법을 추출한다.",
+    "특정 노드(주로 paper/document)에서 이어지는 개념·기법을 추출한다. 엣지 타입에 무관하게 연결된 concept/technique 이웃을 반환.",
   requiresApproval: false,
   parameters: {
     type: "object",
     properties: {
-      paperId: { type: "string", description: "논문 노드 ID" },
+      paperId: { type: "string", description: "논문/문서 노드 ID" },
       paperLabel: {
         type: "string",
-        description: "ID 대신 label로 논문 지정",
+        description: "ID 대신 label로 노드 지정",
       },
     },
     additionalProperties: false,
@@ -28,34 +28,27 @@ export const extractConceptsTool: Tool<Args> = {
       (args.paperLabel && findNodeByLabel(graphData, args.paperLabel)) ||
       null;
 
-    if (!paper || paper.type !== "paper") {
+    if (!paper) {
       return {
-        summary: "논문을 찾지 못했습니다.",
-        data: { introduces: [], uses: [] },
+        summary: "노드를 찾지 못했습니다.",
+        data: { concepts: [] },
       };
     }
 
-    const conceptEdges = graphData.edges.filter(
-      (e) =>
-        e.source === paper.id &&
-        (e.type === "introduces" || e.type === "uses"),
-    );
-
     const nodeById = new Map(graphData.nodes.map((n) => [n.id, n]));
-    const introduces: { node: unknown; note?: string }[] = [];
-    const uses: { node: unknown; note?: string }[] = [];
+    const outgoing = graphData.edges.filter((e) => e.source === paper.id);
+    const concepts: { node: unknown; note?: string; type: string }[] = [];
 
-    for (const e of conceptEdges) {
+    for (const e of outgoing) {
       const target = nodeById.get(e.target);
       if (!target) continue;
-      const item = { node: target, note: e.note };
-      if (e.type === "introduces") introduces.push(item);
-      else uses.push(item);
+      if (target.type !== "concept" && target.type !== "technique") continue;
+      concepts.push({ node: target, note: e.note, type: e.type });
     }
 
     return {
-      summary: `${paper.label}: ${introduces.length}개 제안 개념, ${uses.length}개 사용 개념`,
-      data: { paper, introduces, uses },
+      summary: `${paper.label}: 연결된 개념/기법 ${concepts.length}개`,
+      data: { paper, concepts },
     };
   },
 };

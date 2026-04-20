@@ -41,15 +41,7 @@ export const queryGraphTool: Tool<Args> = {
       },
       relationType: {
         type: "string",
-        enum: [
-          "introduces",
-          "uses",
-          "extends",
-          "appliedIn",
-          "raises",
-          "citation",
-          "relatedTo",
-        ],
+        enum: ["prerequisite", "contains", "relatedTo"],
         description: "특정 관계 타입의 엣지만 필터링",
       },
     },

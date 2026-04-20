@@ -7,20 +7,11 @@ export type NodeType =
   | "memo"
   | "document";
 
-export type EdgeType =
-  // legacy / structural
-  | "citation"
-  | "shared_concept"
-  | "manual"
-  | "contains"
-  | "similarity"
-  // typed relations (v2)
-  | "introduces"
-  | "uses"
-  | "extends"
-  | "appliedIn"
-  | "raises"
-  | "relatedTo";
+// 학습 관점 3종 (DB edge_type enum과 동기화).
+// prerequisite: A → B 학습 순서 (DAG)
+// contains: 상위 → 하위 개념 포함
+// relatedTo: 같은 맥락 공출현 (기본값)
+export type EdgeType = "prerequisite" | "contains" | "relatedTo";
 
 export interface GraphNode {
   id: string;

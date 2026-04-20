@@ -13,13 +13,15 @@ import type { GraphData } from "../_data/types";
 import { NODE_COLORS, EDGE_COLORS } from "../_data/colors";
 import { type ViewMode, type LayoutId, type EdgeStyle, toReagraphLayoutType } from "../_hooks/useGraphData";
 
+// Palette aligned with landing-v2: v2-green (#22C55E) = selection/active accent,
+// v2-mint / v2-paper = surfaces, v2-line-ish neutrals = inactive.
 const theme = {
   ...lightTheme,
-  canvas: { background: "#FFFFFF" },
+  canvas: { background: "#F3F8F5" },
   node: {
     ...lightTheme.node,
     fill: "#9CA3AF",
-    activeFill: "#4A90FF",
+    activeFill: "#22C55E",
     opacity: 1,
     selectedOpacity: 1,
     inactiveOpacity: 0.04,
@@ -27,14 +29,14 @@ const theme = {
       ...lightTheme.node.label,
       color: "#4A4A6A",
       stroke: "#FFFFFF",
-      activeColor: "#4A90FF",
+      activeColor: "#15803D",
     },
   },
-  ring: { fill: "#E8E8F0", activeFill: "#4A90FF" },
+  ring: { fill: "#E4EDE6", activeFill: "#22C55E" },
   edge: {
     ...lightTheme.edge,
     fill: "#D8D8E8",
-    activeFill: "#4A90FF",
+    activeFill: "#22C55E",
     opacity: 1,
     selectedOpacity: 1,
     inactiveOpacity: 0.02,
@@ -42,14 +44,14 @@ const theme = {
       ...lightTheme.edge.label,
       color: "#8888A0",
       stroke: "#FFFFFF",
-      activeColor: "#4A90FF",
+      activeColor: "#15803D",
     },
   },
-  arrow: { fill: "#D8D8E8", activeFill: "#4A90FF" },
-  lasso: { background: "rgba(74,144,255,0.08)", border: "1px solid #4A90FF" },
+  arrow: { fill: "#D8D8E8", activeFill: "#22C55E" },
+  lasso: { background: "rgba(34,197,94,0.08)", border: "1px solid #22C55E" },
   cluster: {
-    stroke: "#E8E8F0",
-    fill: "#EEF3FF",
+    stroke: "#E4EDE6",
+    fill: "#F0F7F2",
     opacity: 0.2,
     label: { color: "#8888A0", fontSize: 2 },
   },
@@ -107,10 +109,10 @@ function toReagraphNodes(
   });
 }
 
-// 엣지 3단계 시각 계층:
-//   1단계 — citation: 빨간 굵은 화살표 (논문 간 직접 인용)
-//   2단계 — shared_concept/similarity/manual: 회색 점선 (느슨한 연관)
-//   3단계 — contains: 연한 얇은 선 (개념↔논문 소속)
+// 엣지 3종 시각 계층:
+//   prerequisite — 학습 순서, 화살표 있음, 굵기 강조
+//   contains     — 상위→하위 포함, 연한 실선, 화살표 있음
+//   relatedTo    — 같은 맥락, 점선, 방향 없음
 function toReagraphEdges(data: GraphData): RGEdge[] {
   return data.edges.map((e) => {
     const w = e.weight ?? 0.5;
@@ -119,19 +121,17 @@ function toReagraphEdges(data: GraphData): RGEdge[] {
     let dashed: boolean;
     let arrowPlacement: "end" | "none";
 
-    if (e.type === "citation") {
-      // 1단계: 굵은 화살표, weight로 굵기 보정
-      size = 2 + w * 2.5;
+    if (e.type === "prerequisite") {
+      size = 1.4 + w * 2.0;
       dashed = false;
       arrowPlacement = "end";
     } else if (e.type === "contains") {
-      // 3단계: 연한 얇은 선
-      size = 0.3 + w * 0.5;
+      size = 0.4 + w * 0.6;
       dashed = false;
-      arrowPlacement = "none";
+      arrowPlacement = "end";
     } else {
-      // 2단계: 회색 점선 (shared_concept, similarity, manual)
-      size = 0.8 + w * 1.0;
+      // relatedTo
+      size = 0.7 + w * 0.8;
       dashed = true;
       arrowPlacement = "none";
     }
