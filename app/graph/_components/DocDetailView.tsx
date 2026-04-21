@@ -26,7 +26,7 @@ export default function DocDetailView({
 
   if (!node) {
     return (
-      <div className="h-full flex items-center justify-center text-text-muted text-sm">
+      <div className="h-full flex items-center justify-center text-white/50 text-sm">
         노드를 찾을 수 없습니다.
       </div>
     );
@@ -44,21 +44,21 @@ export default function DocDetailView({
         <div className="flex items-center gap-2 mb-2">
           <span
             className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-            style={{ background: nodeColor + "18", color: nodeColor }}
+            style={{ background: nodeColor + "22", color: nodeColor }}
           >
             {typeLabel}
           </span>
           {node.meta?.year && (
-            <span className="text-[11px] text-text-muted font-semibold">
+            <span className="text-[11px] text-white/50 font-semibold">
               {node.meta.year}
             </span>
           )}
         </div>
-        <h1 className="text-xl font-extrabold text-text-primary leading-snug mb-2">
+        <h1 className="text-xl font-extrabold text-white leading-snug mb-2">
           {node.label}
         </h1>
         {node.meta?.authors && (
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text-secondary mb-4">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/75 mb-4">
             <span>{node.meta.authors}</span>
             {node.meta?.citations != null && (
               <span>· {node.meta.citations.toLocaleString()} citations</span>
@@ -68,11 +68,11 @@ export default function DocDetailView({
 
         {/* TLDR */}
         {node.tldr && (
-          <div className="p-4 rounded-xl bg-coral-light/30 border border-coral/20 mb-4">
-            <h3 className="text-[10px] font-bold text-coral mb-1 tracking-wider">
+          <div className="p-4 rounded-xl bg-[color:var(--v2-green)]/10 border border-[color:var(--v2-green-soft)]/30 mb-4">
+            <h3 className="text-[10px] font-bold text-[color:var(--v2-green-soft)] mb-1 tracking-wider">
               TLDR
             </h3>
-            <p className="text-sm text-text-primary leading-relaxed">
+            <p className="text-sm text-white leading-relaxed">
               {node.tldr}
             </p>
           </div>
@@ -80,8 +80,8 @@ export default function DocDetailView({
 
         {/* Content / Description */}
         {node.content && (
-          <div className="p-4 rounded-xl bg-gray-50 border border-border mb-6">
-            <p className="text-sm text-text-secondary leading-relaxed">
+          <div className="p-4 rounded-xl bg-white/5 border border-white/10 mb-6">
+            <p className="text-sm text-white/75 leading-relaxed">
               {node.content}
             </p>
           </div>
@@ -91,11 +91,11 @@ export default function DocDetailView({
         {subgraph && hasAnySection ? (
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="h-px flex-1 bg-border" />
-              <span className="text-[10px] font-bold text-text-muted tracking-wider">
+              <div className="h-px flex-1 bg-white/10" />
+              <span className="text-[10px] font-bold text-white/50 tracking-wider">
                 GRAPH 연결
               </span>
-              <div className="h-px flex-1 bg-border" />
+              <div className="h-px flex-1 bg-white/10" />
             </div>
             {subgraph.sections.map((section) => (
               <ProjectionSection
@@ -106,7 +106,7 @@ export default function DocDetailView({
             ))}
           </div>
         ) : (
-          <div className="py-10 text-center text-sm text-text-muted">
+          <div className="py-10 text-center text-sm text-white/50">
             이 노드와 연결된 관계 정보가 아직 없습니다.
           </div>
         )}

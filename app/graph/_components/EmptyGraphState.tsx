@@ -53,56 +53,56 @@ export default function EmptyGraphState({
   }
 
   return (
-    <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 pointer-events-auto">
+    <div className="absolute inset-0 z-10 flex items-center justify-center bg-[color:var(--v2-ink)]/60 backdrop-blur-sm pointer-events-auto">
       <form
         onSubmit={handleSubmit}
-        className="w-80 space-y-3 rounded-lg border border-neutral-200 bg-white p-5 shadow-sm"
+        className="w-80 space-y-3 rounded-2xl border border-white/10 bg-[color:var(--v2-ink-soft)]/90 backdrop-blur-md p-5 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)]"
       >
         <div className="space-y-1">
-          <h2 className="text-sm font-semibold">그래프가 비어있습니다</h2>
-          <p className="text-xs text-neutral-500">
+          <h2 className="text-sm font-semibold text-white">그래프가 비어있습니다</h2>
+          <p className="text-xs text-white/50">
             PDF를 업로드해 자동으로 노드를 생성하거나, 아래에서 수동으로 추가할 수 있습니다.
           </p>
         </div>
 
         <Link
           href="/upload"
-          className="block w-full rounded border border-neutral-300 bg-white px-3 py-1.5 text-center text-sm hover:border-neutral-900"
+          className="block w-full rounded-lg border border-[color:var(--v2-green-soft)]/40 bg-[color:var(--v2-green)]/10 px-3 py-1.5 text-center text-sm text-[color:var(--v2-green-soft)] hover:bg-[color:var(--v2-green)]/20 transition-colors"
         >
           PDF 업로드로 시작하기 →
         </Link>
 
         <div className="relative py-1">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-neutral-200" />
+            <div className="w-full border-t border-white/10" />
           </div>
           <div className="relative flex justify-center text-xs">
-            <span className="bg-white px-2 text-neutral-400">또는 수동으로</span>
+            <span className="bg-[color:var(--v2-ink-soft)] px-2 text-white/40">또는 수동으로</span>
           </div>
         </div>
 
         <label className="block space-y-1">
-          <span className="text-xs text-neutral-600">라벨</span>
+          <span className="text-xs text-white/75">라벨</span>
           <input
             type="text"
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             placeholder="예: Bayes' Theorem"
             disabled={status === "saving"}
-            className="w-full rounded border border-neutral-300 px-2 py-1.5 text-sm focus:border-neutral-900 focus:outline-none"
+            className="w-full rounded-lg border border-white/10 bg-white/5 text-white px-2 py-1.5 text-sm focus:border-[color:var(--v2-green-soft)]/40 focus:outline-none placeholder:text-white/40"
           />
         </label>
 
         <label className="block space-y-1">
-          <span className="text-xs text-neutral-600">타입</span>
+          <span className="text-xs text-white/75">타입</span>
           <select
             value={type}
             onChange={(e) => setType(e.target.value as NodeType)}
             disabled={status === "saving"}
-            className="w-full rounded border border-neutral-300 px-2 py-1.5 text-sm"
+            className="w-full rounded-lg border border-white/10 bg-white/5 text-white px-2 py-1.5 text-sm"
           >
             {NODE_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>
+              <option key={t.value} value={t.value} className="bg-[color:var(--v2-ink-soft)] text-white">
                 {t.label}
               </option>
             ))}
@@ -112,13 +112,13 @@ export default function EmptyGraphState({
         <button
           type="submit"
           disabled={status === "saving" || !label.trim()}
-          className="w-full rounded bg-neutral-900 px-3 py-1.5 text-sm text-white disabled:opacity-50"
+          className="w-full rounded-lg bg-[color:var(--v2-green)] px-3 py-1.5 text-sm font-semibold text-black hover:bg-[color:var(--v2-green-soft)] transition-colors disabled:opacity-50"
         >
           {status === "saving" ? "저장 중..." : "노드 추가"}
         </button>
 
         {status === "error" && (
-          <p className="text-xs text-red-600">{error}</p>
+          <p className="text-xs text-red-400">{error}</p>
         )}
       </form>
     </div>

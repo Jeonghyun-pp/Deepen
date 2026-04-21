@@ -17,10 +17,10 @@ interface Props {
 
 export default function SidebarNav({ activeTab, onTabChange }: Props) {
   return (
-    <nav className="flex flex-col items-center py-3 gap-1 shrink-0 bg-white border-r border-border" style={{ width: 52 }}>
+    <nav className="flex flex-col items-center py-3 gap-1 shrink-0 bg-[color:var(--v2-ink-soft)]/85 backdrop-blur-md border-r border-white/10" style={{ width: 52 }}>
       <Link
         href="/"
-        className="flex items-center justify-center w-8 h-8 rounded-xl mb-4 font-extrabold text-sm text-white bg-coral"
+        className="flex items-center justify-center w-8 h-8 rounded-xl mb-4 font-extrabold text-sm text-black bg-[color:var(--v2-green)]"
       >
         D
       </Link>
@@ -34,8 +34,8 @@ export default function SidebarNav({ activeTab, onTabChange }: Props) {
             onClick={() => onTabChange(id)}
             className={`flex items-center justify-center w-9 h-9 rounded-xl transition-colors ${
               isActive
-                ? "bg-coral-light text-coral"
-                : "text-text-muted hover:bg-coral-light/50 hover:text-text-secondary"
+                ? "bg-[color:var(--v2-green)]/15 text-[color:var(--v2-green-soft)]"
+                : "text-white/50 hover:bg-white/5 hover:text-white/80"
             }`}
           >
             <Icon size={18} strokeWidth={1.8} />
@@ -48,13 +48,13 @@ export default function SidebarNav({ activeTab, onTabChange }: Props) {
       <Link
         href="/"
         title="Home"
-        className="flex items-center justify-center w-9 h-9 rounded-xl text-text-muted hover:bg-coral-light/50 hover:text-text-secondary transition-colors"
+        className="flex items-center justify-center w-9 h-9 rounded-xl text-white/50 hover:bg-white/5 hover:text-white/80 transition-colors"
       >
         <Home size={18} strokeWidth={1.8} />
       </Link>
       <button
         title="Settings"
-        className="flex items-center justify-center w-9 h-9 rounded-xl text-text-muted hover:bg-coral-light/50 hover:text-text-secondary transition-colors"
+        className="flex items-center justify-center w-9 h-9 rounded-xl text-white/50 hover:bg-white/5 hover:text-white/80 transition-colors"
       >
         <Settings size={18} strokeWidth={1.8} />
       </button>

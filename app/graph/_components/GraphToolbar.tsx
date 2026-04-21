@@ -36,10 +36,10 @@ function ToolbarButton({
       title={title}
       className={`h-8 px-2.5 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer border ${
         active
-          ? "bg-coral text-white border-coral"
-          : "bg-white text-text-secondary border-border hover:border-coral/40 hover:text-text-primary"
+          ? "bg-[color:var(--v2-green)] text-black border-[color:var(--v2-green)]"
+          : "bg-[color:var(--v2-ink-soft)]/80 backdrop-blur-md text-white/75 border-white/10 hover:border-[color:var(--v2-green-soft)]/40 hover:text-white"
       }`}
-      style={active ? { boxShadow: "0 2px 0 var(--coral-dark)" } : undefined}
+      style={active ? { boxShadow: "0 2px 0 var(--v2-green-deep)" } : undefined}
     >
       {children}
     </button>
@@ -85,16 +85,16 @@ export default function GraphToolbar({
     >
       {/* Search */}
       <div
-        className="flex items-center gap-2 px-3 h-[34px] rounded-xl bg-white border border-border min-w-[200px] max-w-[320px] shadow-sm"
+        className="flex items-center gap-2 px-3 h-[34px] rounded-xl bg-[color:var(--v2-ink-soft)]/80 backdrop-blur-md border border-white/10 min-w-[200px] max-w-[320px]"
         style={{ pointerEvents: "auto" }}
       >
-        <Search size={14} className="text-text-muted" />
+        <Search size={14} className="text-white/50" />
         <input
           type="text"
           placeholder="노드 검색..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="bg-transparent outline-none text-sm flex-1 text-text-primary placeholder:text-text-muted"
+          className="bg-transparent outline-none text-sm flex-1 text-white placeholder:text-white/40"
         />
       </div>
 
@@ -104,7 +104,7 @@ export default function GraphToolbar({
       <div ref={dropdownRef} className="relative" style={{ pointerEvents: "auto" }}>
         <button
           onClick={() => setLayoutOpen(!layoutOpen)}
-          className="h-8 px-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer border bg-white text-text-secondary border-border hover:border-coral/40 hover:text-text-primary shadow-sm"
+          className="h-8 px-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer border bg-[color:var(--v2-ink-soft)]/80 backdrop-blur-md text-white/75 border-white/10 hover:border-[color:var(--v2-green-soft)]/40 hover:text-white"
         >
           <LayoutGrid size={13} />
           <span>{currentLayout?.label}</span>
@@ -112,19 +112,19 @@ export default function GraphToolbar({
         </button>
 
         {layoutOpen && (
-          <div className="absolute right-0 top-10 bg-white border border-border rounded-xl shadow-lg py-1 min-w-[160px] z-20">
+          <div className="absolute right-0 top-10 bg-[color:var(--v2-ink-soft)]/95 backdrop-blur-md border border-white/10 rounded-xl shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)] py-1 min-w-[160px] z-20">
             {availableLayouts.map((l) => (
               <button
                 key={l.id}
                 onClick={() => { onLayoutChange(l.id); setLayoutOpen(false); }}
                 className={`w-full text-left px-3 py-2 text-xs transition-colors ${
                   layoutId === l.id
-                    ? "text-coral font-bold bg-coral-light/40"
-                    : "text-text-secondary hover:bg-coral-light/20 hover:text-text-primary"
+                    ? "text-[color:var(--v2-green-soft)] font-bold bg-[color:var(--v2-green)]/15"
+                    : "text-white/75 hover:bg-white/5 hover:text-white"
                 }`}
               >
                 {l.label}
-                {l.dim === "2d" && <span className="text-text-muted ml-1">(2D)</span>}
+                {l.dim === "2d" && <span className="text-white/50 ml-1">(2D)</span>}
               </button>
             ))}
           </div>
@@ -132,15 +132,15 @@ export default function GraphToolbar({
       </div>
 
       {/* 2D / 3D Toggle */}
-      <div className="flex rounded-xl overflow-hidden border border-border shadow-sm" style={{ pointerEvents: "auto" }}>
+      <div className="flex rounded-xl overflow-hidden border border-white/10 bg-[color:var(--v2-ink-soft)]/80 backdrop-blur-md" style={{ pointerEvents: "auto" }}>
         {(["2d", "3d"] as ViewMode[]).map((mode) => (
           <button
             key={mode}
             onClick={() => onViewModeChange(mode)}
             className={`h-8 px-3 text-xs font-bold transition-all cursor-pointer ${
               viewMode === mode
-                ? "bg-coral text-white"
-                : "bg-white text-text-secondary hover:text-text-primary"
+                ? "bg-[color:var(--v2-green)] text-black"
+                : "text-white/75 hover:text-white"
             }`}
           >
             {mode.toUpperCase()}

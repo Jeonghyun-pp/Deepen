@@ -66,46 +66,46 @@ export default function ToolCallCard({
     : [];
 
   return (
-    <div className="rounded-xl border border-border bg-white overflow-hidden text-[11px]">
+    <div className="rounded-xl border border-white/10 bg-white/5 overflow-hidden text-[11px]">
       <button
         onClick={() => setExpanded((p) => !p)}
-        className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-gray-50 transition-colors cursor-pointer"
+        className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-white/5 transition-colors cursor-pointer"
       >
         <div
           className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
-          style={{ background: meta.color + "18", color: meta.color }}
+          style={{ background: meta.color + "22", color: meta.color }}
         >
           <Icon size={11} />
         </div>
-        <span className="font-semibold text-text-primary">{meta.label}</span>
-        <span className="text-text-muted truncate flex-1 text-left">
+        <span className="font-semibold text-white">{meta.label}</span>
+        <span className="text-white/50 truncate flex-1 text-left">
           {entry.result?.summary ?? "실행 중..."}
         </span>
         {entry.status === "running" && (
-          <Loader2 size={11} className="animate-spin text-coral flex-shrink-0" />
+          <Loader2 size={11} className="animate-spin text-[color:var(--v2-green-soft)] flex-shrink-0" />
         )}
         {entry.status === "done" && (
-          <CheckCircle2 size={11} className="text-emerald-500 flex-shrink-0" />
+          <CheckCircle2 size={11} className="text-emerald-400 flex-shrink-0" />
         )}
         {entry.status === "error" && (
-          <AlertCircle size={11} className="text-red-500 flex-shrink-0" />
+          <AlertCircle size={11} className="text-red-400 flex-shrink-0" />
         )}
         {expanded ? (
-          <ChevronDown size={11} className="text-text-muted" />
+          <ChevronDown size={11} className="text-white/50" />
         ) : (
-          <ChevronRight size={11} className="text-text-muted" />
+          <ChevronRight size={11} className="text-white/50" />
         )}
       </button>
 
       {expanded && (
-        <div className="px-2.5 py-2 border-t border-border bg-gray-50/50 space-y-1.5">
+        <div className="px-2.5 py-2 border-t border-white/10 bg-white/5 space-y-1.5">
           {/* args */}
           {Object.keys(entry.call.args).length > 0 && (
             <div>
-              <div className="text-[9px] font-bold text-text-muted uppercase mb-0.5">
+              <div className="text-[9px] font-bold text-white/50 uppercase mb-0.5">
                 Args
               </div>
-              <code className="block text-[10px] text-text-secondary bg-white rounded px-1.5 py-1 border border-border break-all">
+              <code className="block text-[10px] text-white/75 bg-[color:var(--v2-ink)]/80 rounded px-1.5 py-1 border border-white/10 break-all">
                 {JSON.stringify(entry.call.args)}
               </code>
             </div>
@@ -113,7 +113,7 @@ export default function ToolCallCard({
 
           {/* result data preview */}
           {entry.result?.error && (
-            <div className="text-[10px] text-red-600">
+            <div className="text-[10px] text-red-400">
               {entry.result.error}
             </div>
           )}
@@ -122,7 +122,7 @@ export default function ToolCallCard({
           {isFindPath && pathNodeIds.length > 0 && (
             <button
               onClick={() => onActivateRoadmap?.(pathNodeIds)}
-              className="w-full mt-1 flex items-center justify-center gap-1.5 h-7 rounded-lg bg-coral text-white text-[10px] font-bold hover:bg-coral-dark transition-colors cursor-pointer"
+              className="w-full mt-1 flex items-center justify-center gap-1.5 h-7 rounded-lg bg-[color:var(--v2-green)] text-black text-[10px] font-bold hover:bg-[color:var(--v2-green-soft)] transition-colors cursor-pointer"
             >
               <MapPin size={11} />
               그래프에 경로 표시
@@ -148,7 +148,7 @@ export default function ToolCallCard({
                     <button
                       key={n.id}
                       onClick={() => onNavigateToNode?.(n.id)}
-                      className="text-[10px] px-1.5 py-0.5 rounded-full border border-border hover:border-coral hover:text-coral transition-colors cursor-pointer"
+                      className="text-[10px] px-1.5 py-0.5 rounded-full border border-white/10 text-white/75 hover:border-[color:var(--v2-green-soft)]/40 hover:text-[color:var(--v2-green-soft)] transition-colors cursor-pointer"
                     >
                       {n.label}
                     </button>

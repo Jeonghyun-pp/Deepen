@@ -13,47 +13,48 @@ import type { GraphData } from "../_data/types";
 import { NODE_COLORS, EDGE_COLORS } from "../_data/colors";
 import { type ViewMode, type LayoutId, type EdgeStyle, toReagraphLayoutType } from "../_hooks/useGraphData";
 
-// Palette aligned with landing-v2: v2-green (#22C55E) = selection/active accent,
-// v2-mint / v2-paper = surfaces, v2-line-ish neutrals = inactive.
+// Dark palette aligned with KnowledgeGapsGraph: deep green radial bg lives on
+// the layout wrapper (canvas itself stays transparent). Active = bright mint
+// (#4ADE80); inactive = translucent off-white so nodes stay legible on dark.
 const theme = {
   ...lightTheme,
-  canvas: { background: "#F3F8F5" },
+  canvas: { background: "rgba(0,0,0,0)" },
   node: {
     ...lightTheme.node,
-    fill: "#9CA3AF",
-    activeFill: "#22C55E",
+    fill: "#4B6B5C",
+    activeFill: "#4ADE80",
     opacity: 1,
     selectedOpacity: 1,
-    inactiveOpacity: 0.04,
+    inactiveOpacity: 0.12,
     label: {
       ...lightTheme.node.label,
-      color: "#4A4A6A",
-      stroke: "#FFFFFF",
-      activeColor: "#15803D",
+      color: "rgba(255,255,255,0.82)",
+      stroke: "#050807",
+      activeColor: "#BBF7D0",
     },
   },
-  ring: { fill: "#E4EDE6", activeFill: "#22C55E" },
+  ring: { fill: "#0F2618", activeFill: "#4ADE80" },
   edge: {
     ...lightTheme.edge,
-    fill: "#D8D8E8",
-    activeFill: "#22C55E",
+    fill: "rgba(187,247,208,0.28)",
+    activeFill: "#4ADE80",
     opacity: 1,
     selectedOpacity: 1,
-    inactiveOpacity: 0.02,
+    inactiveOpacity: 0.06,
     label: {
       ...lightTheme.edge.label,
-      color: "#8888A0",
-      stroke: "#FFFFFF",
-      activeColor: "#15803D",
+      color: "rgba(255,255,255,0.55)",
+      stroke: "#050807",
+      activeColor: "#BBF7D0",
     },
   },
-  arrow: { fill: "#D8D8E8", activeFill: "#22C55E" },
-  lasso: { background: "rgba(34,197,94,0.08)", border: "1px solid #22C55E" },
+  arrow: { fill: "rgba(187,247,208,0.35)", activeFill: "#4ADE80" },
+  lasso: { background: "rgba(74,222,128,0.15)", border: "1px solid #4ADE80" },
   cluster: {
-    stroke: "#E4EDE6",
-    fill: "#F0F7F2",
-    opacity: 0.2,
-    label: { color: "#8888A0", fontSize: 2 },
+    stroke: "#1F2A26",
+    fill: "#081A11",
+    opacity: 0.6,
+    label: { color: "rgba(255,255,255,0.55)", fontSize: 2 },
   },
 };
 

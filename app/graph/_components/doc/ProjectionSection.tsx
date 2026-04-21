@@ -20,12 +20,12 @@ export default function ProjectionSection({ section, onItemClick }: Props) {
       <div className="flex items-center gap-2 mb-3">
         <div
           className="w-6 h-6 rounded-md flex items-center justify-center"
-          style={{ background: meta.color + "18", color: meta.color }}
+          style={{ background: meta.color + "22", color: meta.color }}
         >
           <Icon size={14} />
         </div>
-        <h3 className="text-sm font-bold text-text-primary">{meta.label}</h3>
-        <span className="text-[10px] font-semibold text-text-muted">
+        <h3 className="text-sm font-bold text-white">{meta.label}</h3>
+        <span className="text-[10px] font-semibold text-white/50">
           {section.items.length}
         </span>
       </div>
@@ -37,7 +37,7 @@ export default function ProjectionSection({ section, onItemClick }: Props) {
             <button
               key={edge.id}
               onClick={() => onItemClick(target.id)}
-              className="group w-full text-left rounded-xl border border-border bg-white hover:border-coral/40 hover:shadow-sm transition-all px-3 py-2.5 cursor-pointer"
+              className="group w-full text-left rounded-xl border border-white/10 bg-white/5 hover:border-[color:var(--v2-green-soft)]/40 hover:bg-white/8 transition-all px-3 py-2.5 cursor-pointer"
             >
               <div className="flex items-start gap-2.5">
                 <span
@@ -46,30 +46,30 @@ export default function ProjectionSection({ section, onItemClick }: Props) {
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-sm font-semibold text-text-primary truncate">
+                    <span className="text-sm font-semibold text-white truncate">
                       {target.label}
                     </span>
                     <span
                       className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
-                      style={{ background: nodeColor + "18", color: nodeColor }}
+                      style={{ background: nodeColor + "22", color: nodeColor }}
                     >
                       {TYPE_LABELS[target.type]}
                     </span>
                     {target.meta?.year && (
-                      <span className="text-[10px] text-text-muted">
+                      <span className="text-[10px] text-white/50">
                         {target.meta.year}
                       </span>
                     )}
                   </div>
                   {(edge.note || target.tldr) && (
-                    <p className="text-xs text-text-secondary leading-relaxed mt-1 line-clamp-2">
+                    <p className="text-xs text-white/75 leading-relaxed mt-1 line-clamp-2">
                       {edge.note ?? target.tldr}
                     </p>
                   )}
                 </div>
                 <ArrowUpRight
                   size={14}
-                  className="text-text-muted group-hover:text-coral transition-colors flex-shrink-0 mt-0.5"
+                  className="text-white/50 group-hover:text-[color:var(--v2-green-soft)] transition-colors flex-shrink-0 mt-0.5"
                 />
               </div>
             </button>

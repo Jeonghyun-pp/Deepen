@@ -139,10 +139,10 @@ export default function CanvasTabBar({
           <div
             key={tab.id}
             title={tab.label}
-            className={`flex items-center gap-1.5 h-full px-2.5 text-xs font-semibold cursor-pointer border-r border-border transition-colors flex-1 min-w-0 max-w-[180px] ${
+            className={`flex items-center gap-1.5 h-full px-2.5 text-xs font-semibold cursor-pointer border-r border-white/10 transition-colors flex-1 min-w-0 max-w-[180px] ${
               active
-                ? "bg-white text-coral border-b-2 border-b-coral"
-                : "text-text-muted hover:text-text-secondary hover:bg-white/60"
+                ? "bg-white/5 text-[color:var(--v2-green-soft)] border-b-2 border-b-[color:var(--v2-green-soft)]"
+                : "text-white/50 hover:text-white/75 hover:bg-white/5"
             }`}
             onClick={() => onTabClick(tab.id)}
           >
@@ -154,7 +154,7 @@ export default function CanvasTabBar({
                   e.stopPropagation();
                   onTabClose(tab.id);
                 }}
-                className="flex-shrink-0 p-0.5 rounded hover:bg-gray-200 text-text-muted hover:text-text-primary transition-colors"
+                className="flex-shrink-0 p-0.5 rounded hover:bg-white/10 text-white/50 hover:text-white transition-colors"
               >
                 <X size={10} />
               </button>
@@ -168,10 +168,10 @@ export default function CanvasTabBar({
         <button
           ref={overflowBtnRef}
           onClick={() => setShowOverflowMenu((p) => !p)}
-          className={`flex items-center justify-center gap-0.5 h-full px-2 border-l border-border transition-colors flex-shrink-0 cursor-pointer ${
+          className={`flex items-center justify-center gap-0.5 h-full px-2 border-l border-white/10 transition-colors flex-shrink-0 cursor-pointer ${
             hiddenHasActive
-              ? "text-coral bg-coral-light/20"
-              : "text-text-muted hover:text-coral hover:bg-white/60"
+              ? "text-[color:var(--v2-green-soft)] bg-[color:var(--v2-green)]/15"
+              : "text-white/50 hover:text-[color:var(--v2-green-soft)] hover:bg-white/5"
           }`}
           title={`숨겨진 탭 ${hiddenTabs.length}개`}
         >
@@ -184,7 +184,7 @@ export default function CanvasTabBar({
       <button
         ref={createBtnRef}
         onClick={() => setShowCreateMenu((prev) => !prev)}
-        className="flex items-center justify-center w-8 h-full text-text-muted hover:text-coral hover:bg-white/60 transition-colors flex-shrink-0 cursor-pointer"
+        className="flex items-center justify-center w-8 h-full text-white/50 hover:text-[color:var(--v2-green-soft)] hover:bg-white/5 transition-colors flex-shrink-0 cursor-pointer"
         title="새 탭"
       >
         <Plus size={14} />
@@ -195,7 +195,7 @@ export default function CanvasTabBar({
         createPortal(
           <div
             ref={createMenuRef}
-            className="fixed z-[9999] w-40 bg-white rounded-xl border border-border shadow-lg overflow-hidden"
+            className="fixed z-[9999] w-40 bg-[color:var(--v2-ink-soft)]/95 backdrop-blur-md rounded-xl border border-white/10 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)] overflow-hidden"
             style={{ top: createMenuPos.top, left: createMenuPos.left }}
           >
             <button
@@ -203,7 +203,7 @@ export default function CanvasTabBar({
                 onCreateNote?.();
                 setShowCreateMenu(false);
               }}
-              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-text-secondary hover:bg-coral-light/30 hover:text-coral transition-colors cursor-pointer"
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-white/75 hover:bg-white/5 hover:text-[color:var(--v2-green-soft)] transition-colors cursor-pointer"
             >
               <NotebookPen size={13} />
               새 노트
@@ -214,7 +214,7 @@ export default function CanvasTabBar({
                   onImportNote();
                   setShowCreateMenu(false);
                 }}
-                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-text-secondary hover:bg-coral-light/30 hover:text-coral transition-colors cursor-pointer border-t border-border"
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-white/75 hover:bg-white/5 hover:text-[color:var(--v2-green-soft)] transition-colors cursor-pointer border-t border-white/10"
               >
                 <Upload size={13} />
                 노트 가져오기 (.md/.txt)
@@ -230,11 +230,11 @@ export default function CanvasTabBar({
         createPortal(
           <div
             ref={overflowMenuRef}
-            className="fixed z-[9999] w-60 bg-white rounded-xl border border-border shadow-lg overflow-hidden"
+            className="fixed z-[9999] w-60 bg-[color:var(--v2-ink-soft)]/95 backdrop-blur-md rounded-xl border border-white/10 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)] overflow-hidden"
             style={{ top: overflowMenuPos.top, left: overflowMenuPos.left }}
           >
-            <div className="px-3 py-1.5 border-b border-border bg-gray-50">
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">
+            <div className="px-3 py-1.5 border-b border-white/10 bg-white/5">
+              <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider">
                 숨겨진 탭 · {hiddenTabs.length}
               </span>
             </div>
@@ -251,8 +251,8 @@ export default function CanvasTabBar({
                     }}
                     className={`group flex items-center gap-2 px-3 py-2 text-xs cursor-pointer transition-colors ${
                       active
-                        ? "bg-coral-light/40 text-coral"
-                        : "text-text-secondary hover:bg-coral-light/30 hover:text-coral"
+                        ? "bg-[color:var(--v2-green)]/15 text-[color:var(--v2-green-soft)]"
+                        : "text-white/75 hover:bg-white/5 hover:text-[color:var(--v2-green-soft)]"
                     }`}
                   >
                     <Icon size={12} className="flex-shrink-0" />
@@ -263,7 +263,7 @@ export default function CanvasTabBar({
                           e.stopPropagation();
                           onTabClose(tab.id);
                         }}
-                        className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-gray-200 text-text-muted hover:text-text-primary transition-all flex-shrink-0"
+                        className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-white/10 text-white/50 hover:text-white transition-all flex-shrink-0"
                       >
                         <X size={10} />
                       </button>

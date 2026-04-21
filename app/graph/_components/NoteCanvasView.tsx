@@ -39,14 +39,14 @@ function renderInlineMarkdown(text: string): React.ReactNode[] {
       tokens.push(<em key={key++}>{match[4]}</em>);
     } else if (match[6]) {
       tokens.push(
-        <code key={key++} className="px-1 py-0.5 rounded bg-gray-100 text-[0.85em] font-mono text-coral">
+        <code key={key++} className="px-1 py-0.5 rounded bg-white/8 text-[0.85em] font-mono text-[color:var(--v2-green-soft)]">
           {match[6]}
         </code>
       );
     } else if (match[8] && match[9]) {
       tokens.push(
         <a key={key++} href={match[9]} target="_blank" rel="noopener noreferrer"
-           className="text-coral underline hover:text-coral-dark">
+           className="text-[color:var(--v2-green-soft)] underline hover:text-[color:var(--v2-green)]">
           {match[8]}
         </a>
       );
@@ -80,7 +80,7 @@ function ParagraphBlock({
     return (
       <div
         onClick={onStartEdit}
-        className="w-full text-sm text-text-primary leading-relaxed cursor-text whitespace-pre-wrap break-words min-h-[1.5rem]"
+        className="w-full text-sm text-white leading-relaxed cursor-text whitespace-pre-wrap break-words min-h-[1.5rem]"
       >
         {renderInlineMarkdown(block.text)}
       </div>
@@ -95,7 +95,7 @@ function ParagraphBlock({
       autoFocus={autoFocus || isEditing}
       placeholder="내용을 입력하세요... (**굵게**, *기울임*, `코드`, [링크](url))"
       rows={1}
-      className="w-full bg-transparent text-sm text-text-primary leading-relaxed outline-none resize-none placeholder:text-text-muted/50"
+      className="w-full bg-transparent text-sm text-white leading-relaxed outline-none resize-none placeholder:text-white/40"
       style={{ minHeight: "1.5rem", height: "auto" }}
       onInput={(e) => {
         const t = e.target as HTMLTextAreaElement;
@@ -129,7 +129,7 @@ function HeadingBlock({
       onChange={(e) => onChange(e.target.value)}
       onKeyDown={onKeyDown}
       placeholder={`제목 ${block.level}`}
-      className={`w-full bg-transparent text-text-primary outline-none placeholder:text-text-muted/40 ${sizeClass}`}
+      className={`w-full bg-transparent text-white outline-none placeholder:text-white/40 ${sizeClass}`}
     />
   );
 }
@@ -155,7 +155,7 @@ function ListBlock({
     <div className="flex flex-col gap-1">
       {block.items.map((item, i) => (
         <div key={i} className="flex items-start gap-2">
-          <span className="text-xs text-text-muted mt-0.5 w-4 shrink-0 text-right">
+          <span className="text-xs text-white/50 mt-0.5 w-4 shrink-0 text-right">
             {block.ordered ? `${i + 1}.` : "\u2022"}
           </span>
           <input
@@ -176,13 +176,13 @@ function ListBlock({
               }
             }}
             placeholder="항목..."
-            className="flex-1 bg-transparent text-sm text-text-primary outline-none placeholder:text-text-muted/40"
+            className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/40"
           />
         </div>
       ))}
       <button
         onClick={addItem}
-        className="text-[10px] text-text-muted hover:text-coral ml-6"
+        className="text-[10px] text-white/50 hover:text-[color:var(--v2-green-soft)] ml-6"
       >
         + 항목 추가
       </button>
@@ -198,15 +198,15 @@ function CodeBlock({
   onChange: (code: string) => void;
 }) {
   return (
-    <div className="rounded-lg bg-gray-900 p-3">
+    <div className="rounded-lg bg-[color:var(--v2-ink)] border border-white/10 p-3">
       {block.language && (
-        <span className="text-[10px] text-gray-400 mb-1 block">{block.language}</span>
+        <span className="text-[10px] text-white/50 mb-1 block">{block.language}</span>
       )}
       <textarea
         value={block.code}
         onChange={(e) => onChange(e.target.value)}
         placeholder="코드를 입력하세요..."
-        className="w-full bg-transparent text-sm text-gray-100 font-mono outline-none resize-none placeholder:text-gray-600"
+        className="w-full bg-transparent text-sm text-white/90 font-mono outline-none resize-none placeholder:text-white/30"
         rows={3}
         onInput={(e) => {
           const t = e.target as HTMLTextAreaElement;
@@ -228,7 +228,7 @@ function NodeRefBlock({
   return (
     <button
       onClick={() => onNodeClick(block.nodeId)}
-      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-coral-light/40 border border-coral/20 text-sm font-semibold text-coral hover:bg-coral-light transition-colors"
+      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[color:var(--v2-green)]/15 border border-[color:var(--v2-green-soft)]/30 text-sm font-semibold text-[color:var(--v2-green-soft)] hover:bg-[color:var(--v2-green)]/20 transition-colors"
     >
       <AtSign size={12} />
       {block.label}
@@ -237,7 +237,7 @@ function NodeRefBlock({
 }
 
 function DividerBlock() {
-  return <hr className="border-border my-1" />;
+  return <hr className="border-white/10 my-1" />;
 }
 
 // ==================== @Mention Dropdown ====================
@@ -261,25 +261,25 @@ function MentionDropdown({
   if (filtered.length === 0) return null;
 
   return (
-    <div className="absolute z-50 mt-1 w-72 bg-white rounded-xl border border-border shadow-lg overflow-hidden">
-      <div className="px-3 py-1.5 border-b border-border">
-        <span className="text-[10px] text-text-muted">노드 인용 — &quot;{query}&quot;</span>
+    <div className="absolute z-50 mt-1 w-72 bg-[color:var(--v2-ink-soft)]/95 backdrop-blur-md rounded-xl border border-white/10 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)] overflow-hidden">
+      <div className="px-3 py-1.5 border-b border-white/10">
+        <span className="text-[10px] text-white/50">노드 인용 — &quot;{query}&quot;</span>
       </div>
       <div className="max-h-48 overflow-y-auto">
         {filtered.map((n) => (
           <button
             key={n.id}
             onClick={() => { onSelect(n); onClose(); }}
-            className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-coral-light/30 transition-colors"
+            className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-white/5 transition-colors"
           >
             <span
               className="w-2 h-2 rounded-full shrink-0"
               style={{ background: NODE_COLORS[n.type] }}
             />
-            <span className="text-xs font-semibold text-text-primary truncate flex-1">
+            <span className="text-xs font-semibold text-white truncate flex-1">
               {n.label}
             </span>
-            <span className="text-[10px] text-text-muted">{TYPE_LABELS[n.type]}</span>
+            <span className="text-[10px] text-white/50">{TYPE_LABELS[n.type]}</span>
           </button>
         ))}
       </div>
@@ -431,7 +431,7 @@ export default function NoteCanvasView({ note, allNodes, onUpdate, onNodeClick }
   };
 
   return (
-    <div className="h-full overflow-y-auto bg-white">
+    <div className="h-full overflow-y-auto">
       <div className="max-w-2xl mx-auto px-8 py-8">
         {/* Title */}
         <input
@@ -439,9 +439,9 @@ export default function NoteCanvasView({ note, allNodes, onUpdate, onNodeClick }
           value={localTitle}
           onChange={(e) => updateTitle(e.target.value)}
           placeholder="제목 없음"
-          className="w-full text-2xl font-extrabold text-text-primary outline-none placeholder:text-text-muted/40 mb-1"
+          className="w-full text-2xl font-extrabold text-white outline-none placeholder:text-white/40 mb-1 bg-transparent"
         />
-        <p className="text-[10px] text-text-muted mb-6">
+        <p className="text-[10px] text-white/50 mb-6">
           {localRefs.length > 0 && `${localRefs.length}개 노드 인용 · `}
           {new Date(note.updatedAt).toLocaleDateString("ko-KR")} 수정
         </p>
@@ -452,12 +452,12 @@ export default function NoteCanvasView({ note, allNodes, onUpdate, onNodeClick }
             <div key={i} className="group relative flex gap-2">
               {/* Drag handle + delete */}
               <div className="flex flex-col items-center gap-0.5 pt-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 w-6">
-                <button className="text-text-muted/40 hover:text-text-muted cursor-grab">
+                <button className="text-white/30 hover:text-white/60 cursor-grab">
                   <GripVertical size={12} />
                 </button>
                 <button
                   onClick={() => removeBlock(i)}
-                  className="text-text-muted/40 hover:text-red-400"
+                  className="text-white/30 hover:text-red-400"
                 >
                   <Trash2 size={10} />
                 </button>
@@ -519,21 +519,21 @@ export default function NoteCanvasView({ note, allNodes, onUpdate, onNodeClick }
         <div className="relative mt-4">
           <button
             onClick={() => setShowBlockMenu(localBlocks.length - 1)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-text-muted hover:text-coral hover:bg-coral-light/30 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white/50 hover:text-[color:var(--v2-green-soft)] hover:bg-white/5 transition-colors"
           >
             <Plus size={14} />
             블록 추가
           </button>
 
           {showBlockMenu === localBlocks.length - 1 && (
-            <div className="absolute z-50 bottom-full mb-1 left-0 w-52 bg-white rounded-xl border border-border shadow-lg overflow-hidden">
+            <div className="absolute z-50 bottom-full mb-1 left-0 w-52 bg-[color:var(--v2-ink-soft)]/95 backdrop-blur-md rounded-xl border border-white/10 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)] overflow-hidden">
               {BLOCK_TYPES.map((bt) => {
                 const Icon = bt.icon;
                 return (
                   <button
                     key={bt.type}
                     onClick={() => insertBlockAfter(localBlocks.length - 1, bt.type)}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs text-text-secondary hover:bg-coral-light/30 hover:text-coral transition-colors"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs text-white/75 hover:bg-white/5 hover:text-[color:var(--v2-green-soft)] transition-colors"
                   >
                     <Icon size={13} />
                     {bt.label}
@@ -546,8 +546,8 @@ export default function NoteCanvasView({ note, allNodes, onUpdate, onNodeClick }
 
         {/* Referenced nodes summary */}
         {localRefs.length > 0 && (
-          <div className="mt-8 pt-4 border-t border-border">
-            <p className="text-[10px] font-bold text-text-muted mb-2 uppercase tracking-wider">
+          <div className="mt-8 pt-4 border-t border-white/10">
+            <p className="text-[10px] font-bold text-white/50 mb-2 uppercase tracking-wider">
               인용된 노드
             </p>
             <div className="flex flex-wrap gap-1.5">
@@ -558,7 +558,7 @@ export default function NoteCanvasView({ note, allNodes, onUpdate, onNodeClick }
                   <button
                     key={refId}
                     onClick={() => onNodeClick(refId)}
-                    className="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-border text-[11px] text-text-secondary hover:border-coral/40 hover:text-coral transition-colors"
+                    className="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-white/10 text-[11px] text-white/75 hover:border-[color:var(--v2-green-soft)]/40 hover:text-[color:var(--v2-green-soft)] transition-colors"
                   >
                     <span
                       className="w-1.5 h-1.5 rounded-full"

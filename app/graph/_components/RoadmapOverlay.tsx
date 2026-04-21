@@ -36,26 +36,26 @@ export default function RoadmapOverlay({
 
   return (
     <div className="pointer-events-none absolute top-4 left-1/2 -translate-x-1/2 z-20 w-[min(640px,90%)]">
-      <div className="pointer-events-auto rounded-2xl border border-border bg-white/95 backdrop-blur shadow-lg px-4 py-3">
+      <div className="pointer-events-auto rounded-2xl border border-white/10 bg-[color:var(--v2-ink-soft)]/90 backdrop-blur-md px-4 py-3">
         {/* Header row */}
         <div className="flex items-center gap-2 mb-2.5">
           <div
             className="w-7 h-7 rounded-lg flex items-center justify-center"
-            style={{ background: currentColor + "18", color: currentColor }}
+            style={{ background: currentColor + "22", color: currentColor }}
           >
             <MapPin size={14} />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-[10px] font-bold text-text-muted tracking-wider">
+            <div className="text-[10px] font-bold text-white/50 tracking-wider">
               ROADMAP · Step {currentIndex + 1} / {pathNodeIds.length}
             </div>
-            <div className="text-sm font-bold text-text-primary truncate">
+            <div className="text-sm font-bold text-white truncate">
               {currentNode.label}
             </div>
           </div>
           <button
             onClick={onClear}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-text-muted hover:bg-gray-100 hover:text-text-primary transition-colors cursor-pointer"
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-white/50 hover:bg-white/5 hover:text-white transition-colors cursor-pointer"
             title="로드맵 종료"
           >
             <X size={14} />
@@ -79,7 +79,7 @@ export default function RoadmapOverlay({
                     ? color
                     : passed
                       ? color + "80"
-                      : "#E8E8F0",
+                      : "rgba(255,255,255,0.1)",
                 }}
                 title={node ? `${node.label} (${TYPE_LABELS[node.type]})` : id}
               />
@@ -92,19 +92,19 @@ export default function RoadmapOverlay({
           <button
             onClick={onBack}
             disabled={!canBack}
-            className="flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-semibold text-text-secondary hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors"
+            className="flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-semibold text-white/75 hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors"
           >
             <ChevronLeft size={12} />
             이전
           </button>
-          <div className="flex-1 text-center text-[11px] text-text-muted">
+          <div className="flex-1 text-center text-[11px] text-white/50">
             {currentNode.tldr ?? "다음 단계로 진행하세요"}
           </div>
           <button
             onClick={onAdvance}
             disabled={!canAdvance}
-            className="flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-semibold text-white disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-all"
-            style={{ background: canAdvance ? "#22C55E" : "#9ca3af" }}
+            className="flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-semibold text-black disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-all"
+            style={{ background: canAdvance ? "#4ADE80" : "#374151" }}
           >
             다음
             <ChevronRight size={12} />

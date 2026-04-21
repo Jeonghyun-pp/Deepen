@@ -37,7 +37,7 @@ export default function NodePreviewTooltip({ node, x, y, edgeCount }: Props) {
         width: TOOLTIP_W,
       }}
     >
-      <div className="rounded-xl border border-border bg-white/95 backdrop-blur shadow-lg px-3 py-2.5">
+      <div className="rounded-xl border border-white/10 bg-[color:var(--v2-ink-soft)]/95 backdrop-blur-md shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)] px-3 py-2.5">
         <div className="flex items-center gap-2 mb-1">
           <span
             className="w-2 h-2 rounded-full flex-shrink-0"
@@ -45,30 +45,30 @@ export default function NodePreviewTooltip({ node, x, y, edgeCount }: Props) {
           />
           <span
             className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
-            style={{ background: color + "18", color }}
+            style={{ background: color + "22", color }}
           >
             {typeLabel}
           </span>
           {node.meta?.year && (
-            <span className="text-[10px] text-text-muted font-semibold">
+            <span className="text-[10px] text-white/50 font-semibold">
               {node.meta.year}
             </span>
           )}
           {edgeCount != null && (
-            <span className="text-[10px] text-text-muted ml-auto">
+            <span className="text-[10px] text-white/50 ml-auto">
               · {edgeCount} 연결
             </span>
           )}
         </div>
-        <div className="text-sm font-semibold text-text-primary leading-snug line-clamp-2">
+        <div className="text-sm font-semibold text-white leading-snug line-clamp-2">
           {node.label}
         </div>
         {(node.tldr || node.content) && (
-          <p className="text-[11px] text-text-secondary leading-snug mt-1 line-clamp-2">
+          <p className="text-[11px] text-white/75 leading-snug mt-1 line-clamp-2">
             {node.tldr ?? node.content}
           </p>
         )}
-        <div className="mt-2 pt-1.5 border-t border-border text-[9px] text-text-muted">
+        <div className="mt-2 pt-1.5 border-t border-white/10 text-[9px] text-white/50">
           click: 상세 · shift+click: 메모
         </div>
       </div>

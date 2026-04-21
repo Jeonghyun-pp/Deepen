@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { ChevronRight } from "lucide-react";
 import SectionPill from "../_components/SectionPill";
-import GreenOrbs from "../_components/GreenOrbs";
+import KnowledgeGapsGraph from "../_components/KnowledgeGapsGraph";
 
 const problems = [
   ["읽어도 남지 않는 강의안", "한 번 훑고 잊는 PDF 더미"],
@@ -31,8 +31,8 @@ export default function ProblemSection() {
             지식이 쌓이지 않는 이유는{" "}
             <span className="text-[color:var(--v2-green)]">연결의 부재</span>
           </h2>
-          <p className="mt-4 text-sm md:text-base text-[color:var(--v2-mint-deep)]/70 max-w-xl mx-auto">
-            PDF·강의·필기가 각자 섬처럼 떠 있습니다. Deepen은 그 섬들을 잇는 다리를 만듭니다.
+          <p className="mt-4 text-sm md:text-base text-[color:var(--v2-mint-deep)]/70 max-w-xl mx-auto break-keep">
+            읽은 PDF, 들은 강의, 쓴 필기. 각자 따로 흩어져 있는 걸 Deepen이 이어 붙입니다.
           </p>
         </div>
 
@@ -40,7 +40,7 @@ export default function ProblemSection() {
         <div className="grid md:grid-cols-2 gap-0">
           {/* artwork */}
           <div className="relative min-h-[380px] md:min-h-[460px]">
-            <GreenOrbs />
+            <KnowledgeGapsGraph />
             <div className="absolute inset-x-0 bottom-10 flex flex-col items-center gap-3">
               <div className="w-3 h-3 rounded-full bg-white shadow-[0_0_20px_rgba(74,222,128,0.8)]" />
               <span className="text-white text-xl font-extrabold border-b border-white/60 pb-1">

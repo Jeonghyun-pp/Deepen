@@ -7,7 +7,7 @@ import DotField from "../_components/DotField";
 
 const solutions = [
   {
-    title: "PDF → 그래프",
+    title: "업로드 → 그래프",
     body: "강의안·논문 업로드만으로 개념 지도를 자동 생성합니다.",
   },
   {
@@ -47,7 +47,7 @@ export default function SolutionSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="mt-5 text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.05]"
+          className="mt-5 text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.05] break-keep"
         >
           흩어진 지식을{" "}
           <span className="text-[color:var(--v2-green)]">엮어내는 방식</span>
@@ -73,7 +73,7 @@ export default function SolutionSection() {
             Deepen은
           </div>
           <div className="flex flex-col gap-8 md:gap-10">
-            {solutions.map((s, i) => (
+            {solutions.map((s) => (
               <div key={s.title} className="flex items-start gap-5">
                 <div className="pt-2 flex-shrink-0">
                   <span
@@ -98,9 +98,6 @@ export default function SolutionSection() {
                     {s.body}
                   </div>
                 </div>
-                {i === 0 && (
-                  <div className="hidden md:block w-px flex-1 self-stretch bg-white/20 ml-auto" />
-                )}
               </div>
             ))}
           </div>

@@ -94,33 +94,33 @@ export default function LeftSidebar({
   }, [visibleNodes]);
 
   return (
-    <aside className="flex flex-col w-[240px] shrink-0 bg-white h-full">
+    <aside className="flex flex-col w-[240px] shrink-0 h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 h-12 border-b border-border shrink-0">
-        <Link href="/" className="text-lg font-extrabold text-coral">
+      <div className="flex items-center justify-between px-4 h-12 border-b border-white/10 shrink-0">
+        <Link href="/" className="text-lg font-extrabold text-[color:var(--v2-green-soft)]">
           Deepen
         </Link>
       </div>
 
       {/* Search */}
-      <div className="px-3 py-2 border-b border-border">
-        <div className="flex items-center gap-2 px-2.5 h-8 rounded-lg bg-gray-50 border border-border focus-within:border-coral transition-colors">
-          <Search size={13} className="text-text-muted shrink-0" />
+      <div className="px-3 py-2 border-b border-white/10">
+        <div className="flex items-center gap-2 px-2.5 h-8 rounded-lg bg-white/5 border border-white/10 focus-within:border-[color:var(--v2-green-soft)]/40 transition-colors">
+          <Search size={13} className="text-white/50 shrink-0" />
           <input
             type="text"
             placeholder="노드 검색..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="bg-transparent outline-none text-xs flex-1 text-text-primary placeholder:text-text-muted"
+            className="bg-transparent outline-none text-xs flex-1 text-white placeholder:text-white/40"
           />
         </div>
       </div>
 
       {/* Node type filters */}
-      <div className="px-3 py-2 border-b border-border">
+      <div className="px-3 py-2 border-b border-white/10">
         <div className="flex items-center gap-1.5 mb-1.5">
-          <Filter size={11} className="text-text-muted" />
-          <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">
+          <Filter size={11} className="text-white/50" />
+          <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider">
             타입 필터
           </span>
         </div>
@@ -136,9 +136,9 @@ export default function LeftSidebar({
                   active ? "opacity-100" : "opacity-50"
                 }`}
                 style={{
-                  border: `1px solid ${active ? color + "40" : "#E8E8F0"}`,
-                  background: active ? color + "10" : "transparent",
-                  color: active ? color : "#8888A0",
+                  border: `1px solid ${active ? color + "55" : "rgba(255,255,255,0.1)"}`,
+                  background: active ? color + "1a" : "transparent",
+                  color: active ? color : "rgba(255,255,255,0.5)",
                 }}
               >
                 <span
@@ -155,7 +155,7 @@ export default function LeftSidebar({
       {/* Node list grouped by type */}
       <div className="flex-1 overflow-y-auto px-2 py-2">
         {grouped.length === 0 && (
-          <div className="px-3 py-4 text-[11px] text-text-muted text-center">
+          <div className="px-3 py-4 text-[11px] text-white/50 text-center">
             검색 결과 없음
           </div>
         )}
@@ -166,7 +166,7 @@ export default function LeftSidebar({
                 className="w-1.5 h-1.5 rounded-full"
                 style={{ background: NODE_COLORS[g.type] }}
               />
-              <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">
+              <span className="text-[10px] font-bold text-white/50 uppercase tracking-wider">
                 {TYPE_LABELS[g.type]} · {g.nodes.length}
               </span>
             </div>
@@ -175,7 +175,7 @@ export default function LeftSidebar({
                 <button
                   key={node.id}
                   onClick={() => onNodeClick(node.id)}
-                  className="flex items-center gap-2 px-2 py-1 rounded text-left text-[11px] text-text-secondary hover:bg-coral-light/30 hover:text-text-primary transition-colors truncate cursor-pointer"
+                  className="flex items-center gap-2 px-2 py-1 rounded text-left text-[11px] text-white/75 hover:bg-white/5 hover:text-white transition-colors truncate cursor-pointer"
                 >
                   <span className="truncate">{node.label}</span>
                 </button>
@@ -187,15 +187,15 @@ export default function LeftSidebar({
 
       {/* Roadmaps section */}
       {roadmaps.length > 0 && (
-        <div className="px-2 py-2 border-t border-border">
+        <div className="px-2 py-2 border-t border-white/10">
           <div className="flex items-center justify-between px-2 mb-1">
-            <p className="text-[10px] font-bold text-text-muted uppercase tracking-wider">
+            <p className="text-[10px] font-bold text-white/50 uppercase tracking-wider">
               로드맵
             </p>
             {activeRoadmapId && (
               <button
                 onClick={onClearRoadmap}
-                className="text-[9px] text-coral hover:underline"
+                className="text-[9px] text-[color:var(--v2-green-soft)] hover:underline"
                 title="활성 로드맵 해제"
               >
                 해제
@@ -207,33 +207,33 @@ export default function LeftSidebar({
               const active = rm.id === activeRoadmapId;
               const sourceColor =
                 rm.source === "seed"
-                  ? "text-emerald-500"
+                  ? "text-emerald-400"
                   : rm.source === "agent"
-                  ? "text-purple-500"
-                  : "text-teal-500";
+                  ? "text-purple-400"
+                  : "text-teal-400";
               return (
                 <div
                   key={rm.id}
                   className={`group flex items-center gap-1 px-2 py-1 rounded transition-colors ${
                     active
-                      ? "bg-coral-light text-coral"
-                      : "text-text-secondary hover:bg-coral-light/30 hover:text-text-primary"
+                      ? "bg-[color:var(--v2-green)]/15 text-[color:var(--v2-green-soft)]"
+                      : "text-white/75 hover:bg-white/5 hover:text-white"
                   }`}
                 >
                   <button
                     onClick={() => onActivateRoadmap(rm.id)}
                     className="flex items-center gap-2 flex-1 min-w-0 text-left cursor-pointer"
                   >
-                    <MapIcon size={11} className={`shrink-0 ${active ? "text-coral" : sourceColor}`} />
+                    <MapIcon size={11} className={`shrink-0 ${active ? "text-[color:var(--v2-green-soft)]" : sourceColor}`} />
                     <span className="text-[11px] truncate">{rm.title}</span>
-                    <span className="text-[9px] text-text-muted shrink-0">
+                    <span className="text-[9px] text-white/50 shrink-0">
                       {rm.nodeIds.length}
                     </span>
                   </button>
                   {rm.source !== "seed" && (
                     <button
                       onClick={() => onDeleteRoadmap(rm.id)}
-                      className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-text-muted hover:text-coral transition-opacity"
+                      className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-white/50 hover:text-[color:var(--v2-green-soft)] transition-opacity"
                       title="삭제"
                     >
                       <X size={10} />
@@ -248,8 +248,8 @@ export default function LeftSidebar({
 
       {/* Notes section */}
       {notes.length > 0 && (
-        <div className="px-2 py-2 border-t border-border">
-          <p className="px-2 text-[10px] font-bold text-text-muted mb-1 uppercase tracking-wider">
+        <div className="px-2 py-2 border-t border-white/10">
+          <p className="px-2 text-[10px] font-bold text-white/50 mb-1 uppercase tracking-wider">
             노트
           </p>
           <div className="flex flex-col gap-0.5">
@@ -257,9 +257,9 @@ export default function LeftSidebar({
               <button
                 key={note.id}
                 onClick={() => onOpenNoteTab(note.id, note.title)}
-                className="flex items-center gap-2 px-2 py-1 rounded text-left text-[11px] text-text-secondary hover:bg-coral-light/30 hover:text-text-primary transition-colors truncate cursor-pointer"
+                className="flex items-center gap-2 px-2 py-1 rounded text-left text-[11px] text-white/75 hover:bg-white/5 hover:text-white transition-colors truncate cursor-pointer"
               >
-                <NotebookPen size={11} className="text-amber-500 shrink-0" />
+                <NotebookPen size={11} className="text-amber-400 shrink-0" />
                 <span className="truncate">{note.title}</span>
               </button>
             ))}
@@ -268,13 +268,13 @@ export default function LeftSidebar({
       )}
 
       {/* Gap analysis */}
-      <div className="px-3 py-2 border-t border-border">
+      <div className="px-3 py-2 border-t border-white/10">
         <button
           onClick={onGapToggle}
           className={`w-full flex items-center justify-center gap-1.5 h-8 rounded-lg text-xs font-semibold transition-colors border cursor-pointer ${
             gapMode
-              ? "bg-amber-50 text-amber-700 border-amber-200"
-              : "text-text-muted border-border hover:border-amber-200 hover:text-amber-600"
+              ? "bg-amber-400/10 text-amber-300 border-amber-400/30"
+              : "text-white/50 border-white/10 hover:border-amber-400/30 hover:text-amber-300"
           }`}
         >
           <AlertTriangle size={12} />

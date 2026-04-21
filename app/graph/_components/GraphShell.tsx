@@ -213,7 +213,7 @@ export default function GraphShell() {
   if (loadState === "loading") {
     return (
       <div className="h-full w-full flex items-center justify-center">
-        <div className="text-text-muted text-sm">그래프 불러오는 중...</div>
+        <div className="text-white/50 text-sm">그래프 불러오는 중...</div>
       </div>
     );
   }
@@ -233,7 +233,7 @@ export default function GraphShell() {
       <ViewSwitcher />
       {/* Left Sidebar — collapsible */}
       <div
-        className="shrink-0 transition-all duration-200 overflow-hidden rounded-2xl shadow-sm bg-white/75 backdrop-blur-md"
+        className="shrink-0 transition-all duration-200 overflow-hidden rounded-2xl border border-white/5 bg-[color:var(--v2-ink-soft)]/80 backdrop-blur-md"
         style={{ width: leftOpen ? 240 : 0 }}
       >
         <LeftSidebar
@@ -261,14 +261,14 @@ export default function GraphShell() {
       </div>
 
       {/* Main Canvas Area */}
-      <div className="flex-1 flex flex-col overflow-hidden h-full relative rounded-2xl shadow-sm bg-white/75 backdrop-blur-md">
+      <div className="flex-1 flex flex-col overflow-hidden h-full relative rounded-2xl border border-white/5 bg-[color:var(--v2-ink-soft)]/80 backdrop-blur-md">
         {/* Tab Bar — z-20 so dropdown floats above canvas */}
-        <div className="relative z-20 shrink-0 flex items-center h-9 border-b border-border/60 bg-transparent">
+        <div className="relative z-20 shrink-0 flex items-center h-9 border-b border-white/10 bg-transparent">
           {/* Left panel toggle */}
           <button
             onClick={() => setLeftOpen((p) => !p)}
             className={`flex items-center justify-center w-9 h-full transition-colors ${
-              leftOpen ? "text-text-muted hover:text-text-secondary" : "text-coral bg-coral-light/30"
+              leftOpen ? "text-white/50 hover:text-white/80" : "text-[color:var(--v2-green-soft)] bg-[color:var(--v2-green)]/15"
             }`}
             title={leftOpen ? "사이드바 숨기기" : "사이드바 보기"}
           >
@@ -309,7 +309,7 @@ export default function GraphShell() {
           <button
             onClick={() => gd.setPanelOpen(!gd.panelOpen)}
             className={`flex items-center justify-center w-9 h-full transition-colors ${
-              gd.panelOpen ? "text-text-muted hover:text-text-secondary" : "text-coral bg-coral-light/30"
+              gd.panelOpen ? "text-white/50 hover:text-white/80" : "text-[color:var(--v2-green-soft)] bg-[color:var(--v2-green)]/15"
             }`}
             title={gd.panelOpen ? "패널 숨기기" : "패널 보기"}
           >

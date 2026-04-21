@@ -67,9 +67,9 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="mt-5 text-base md:text-lg opacity-70 max-w-xl mx-auto"
+            className="mt-5 text-base md:text-lg opacity-70 max-w-xl mx-auto break-keep"
           >
-            강의안·논문·노트를 한 장의 그래프로. Deepen은 개념의 연결을 찾아줍니다.
+            흩어진 강의안·논문·필기를, 개념이 연결된 한 장의 그래프로.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}

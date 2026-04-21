@@ -28,13 +28,13 @@ export default function FilterBar({ activeFilters, onToggle }: Props) {
           <button
             key={type}
             onClick={() => onToggle(type)}
-            className={`flex items-center gap-1.5 h-7 px-2.5 rounded-full text-[11px] font-semibold transition-all cursor-pointer shadow-sm ${
-              active ? "opacity-100" : "opacity-60"
+            className={`flex items-center gap-1.5 h-7 px-2.5 rounded-full text-[11px] font-semibold transition-all cursor-pointer backdrop-blur-md ${
+              active ? "opacity-100" : "opacity-70"
             }`}
             style={{
-              border: `1px solid ${active ? color + "40" : "#E8E8F0"}`,
-              background: active ? color + "10" : "#FFFFFF",
-              color: active ? color : "#8888A0",
+              border: `1px solid ${active ? color + "55" : "rgba(255,255,255,0.1)"}`,
+              background: active ? color + "1a" : "rgba(13,20,18,0.8)",
+              color: active ? color : "rgba(255,255,255,0.5)",
             }}
           >
             <span

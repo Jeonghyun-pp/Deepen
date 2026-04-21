@@ -54,12 +54,12 @@ export default function GraphStatusBar({
   );
 
   return (
-    <div className="absolute bottom-4 left-4 right-4 z-10 flex items-center justify-center gap-3 px-5 py-2.5 bg-white/90 backdrop-blur-sm rounded-2xl border border-border/60 shadow-lg text-xs">
+    <div className="absolute bottom-4 left-4 right-4 z-10 flex items-center justify-center gap-3 px-5 py-2.5 bg-[color:var(--v2-ink)]/80 backdrop-blur-md rounded-2xl border border-white/10 text-xs">
       {/* Layout Dropdown */}
       <div ref={dropdownRef} className="relative">
         <button
           onClick={() => setLayoutOpen(!layoutOpen)}
-          className="flex items-center gap-1 h-7 px-2.5 rounded-xl text-[11px] font-semibold text-text-secondary hover:bg-black/5 transition-all"
+          className="flex items-center gap-1 h-7 px-2.5 rounded-xl text-[11px] font-semibold text-white/75 hover:bg-white/5 transition-all"
         >
           <LayoutGrid size={11} />
           <span>{currentLayout?.label}</span>
@@ -67,19 +67,19 @@ export default function GraphStatusBar({
         </button>
 
         {layoutOpen && (
-          <div className="absolute left-0 bottom-9 bg-white border border-border rounded-xl shadow-lg py-1 min-w-[140px] z-20">
+          <div className="absolute left-0 bottom-9 bg-[color:var(--v2-ink-soft)]/95 backdrop-blur-md border border-white/10 rounded-xl shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)] py-1 min-w-[140px] z-20">
             {availableLayouts.map((l) => (
               <button
                 key={l.id}
                 onClick={() => { onLayoutChange(l.id); setLayoutOpen(false); }}
                 className={`w-full text-left px-3 py-1.5 text-[11px] transition-colors ${
                   layoutId === l.id
-                    ? "text-coral font-bold bg-coral-light/40"
-                    : "text-text-secondary hover:bg-coral-light/20"
+                    ? "text-[color:var(--v2-green-soft)] font-bold bg-[color:var(--v2-green)]/15"
+                    : "text-white/75 hover:bg-white/5"
                 }`}
               >
                 {l.label}
-                {l.dim === "2d" && <span className="text-text-muted ml-1">(2D)</span>}
+                {l.dim === "2d" && <span className="text-white/50 ml-1">(2D)</span>}
               </button>
             ))}
           </div>
@@ -87,18 +87,18 @@ export default function GraphStatusBar({
       </div>
 
       {/* Divider */}
-      <div className="w-px h-4 bg-border/60" />
+      <div className="w-px h-4 bg-white/10" />
 
       {/* 2D / 3D Toggle */}
-      <div className="flex rounded-lg overflow-hidden border border-border/60">
+      <div className="flex rounded-lg overflow-hidden border border-white/10">
         {(["2d", "3d"] as ViewMode[]).map((mode) => (
           <button
             key={mode}
             onClick={() => onViewModeChange(mode)}
             className={`h-7 px-2.5 text-[11px] font-bold transition-all cursor-pointer ${
               viewMode === mode
-                ? "bg-coral text-white"
-                : "text-text-muted hover:text-text-secondary"
+                ? "bg-[color:var(--v2-green)] text-black"
+                : "text-white/50 hover:text-white/75"
             }`}
           >
             {mode.toUpperCase()}
@@ -107,15 +107,15 @@ export default function GraphStatusBar({
       </div>
 
       {/* Relevance Density Toggle */}
-      <div className="flex rounded-lg overflow-hidden border border-border/60">
+      <div className="flex rounded-lg overflow-hidden border border-white/10">
         {(["default", "full"] as RelevanceDensity[]).map((d) => (
           <button
             key={d}
             onClick={() => onRelevanceDensityChange(d)}
             className={`h-7 px-2.5 text-[11px] font-bold transition-all cursor-pointer ${
               relevanceDensity === d
-                ? "bg-coral text-white"
-                : "text-text-muted hover:text-text-secondary"
+                ? "bg-[color:var(--v2-green)] text-black"
+                : "text-white/50 hover:text-white/75"
             }`}
           >
             {d === "default" ? "기본" : "전체"}
@@ -124,7 +124,7 @@ export default function GraphStatusBar({
       </div>
 
       {/* Divider */}
-      <div className="w-px h-4 bg-border/60" />
+      <div className="w-px h-4 bg-white/10" />
 
       {/* Local Mode */}
       <button
@@ -132,8 +132,8 @@ export default function GraphStatusBar({
         title="로컬 모드"
         className={`flex items-center gap-1 h-7 px-2.5 rounded-lg text-[11px] font-semibold transition-all ${
           localMode
-            ? "bg-coral text-white"
-            : "text-text-muted hover:bg-black/5"
+            ? "bg-[color:var(--v2-green)] text-black"
+            : "text-white/50 hover:bg-white/5"
         }`}
       >
         <Compass size={11} />
@@ -144,7 +144,7 @@ export default function GraphStatusBar({
       <button
         onClick={onFit}
         title="전체 보기"
-        className="flex items-center h-7 px-2.5 rounded-lg text-[11px] font-semibold text-text-muted hover:bg-black/5 transition-all"
+        className="flex items-center h-7 px-2.5 rounded-lg text-[11px] font-semibold text-white/50 hover:bg-white/5 transition-all"
       >
         <Maximize2 size={11} />
       </button>

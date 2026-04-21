@@ -75,22 +75,22 @@ export default function FloatingMemo({ node, screenX, screenY, onClose, onSave, 
   return createPortal(
     <div
       ref={ref}
-      className="fixed z-[9999] w-[280px] bg-white rounded-2xl border border-border shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150"
+      className="fixed z-[9999] w-[280px] bg-[color:var(--v2-ink-soft)]/95 backdrop-blur-md rounded-2xl border border-white/10 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.8)] overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150"
       style={{ left: pos.x, top: pos.y }}
     >
       {/* Header */}
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-gray-50/80">
+      <div className="flex items-center gap-2 px-3 py-2 border-b border-white/10 bg-white/5">
         <span
           className="w-2 h-2 rounded-full shrink-0"
           style={{ background: color }}
         />
-        <span className="text-xs font-semibold text-text-primary truncate flex-1">
+        <span className="text-xs font-semibold text-white truncate flex-1">
           {node.label}
         </span>
-        <span className="text-[9px] text-text-muted">{TYPE_LABELS[node.type]}</span>
+        <span className="text-[9px] text-white/50">{TYPE_LABELS[node.type]}</span>
         <button
           onClick={onClose}
-          className="p-0.5 rounded text-text-muted hover:text-text-primary transition-colors"
+          className="p-0.5 rounded text-white/50 hover:text-white transition-colors"
         >
           <X size={12} />
         </button>
@@ -101,7 +101,7 @@ export default function FloatingMemo({ node, screenX, screenY, onClose, onSave, 
         <div className="px-3 pt-2">
           <button
             onClick={() => { onOpenDoc(node.id, node.label); onClose(); }}
-            className="w-full flex items-center justify-center gap-1.5 h-8 rounded-xl bg-violet-50 border border-violet-200/60 text-xs font-semibold text-violet-600 hover:bg-violet-100 hover:border-violet-300 transition-colors"
+            className="w-full flex items-center justify-center gap-1.5 h-8 rounded-xl bg-violet-400/10 border border-violet-400/30 text-xs font-semibold text-violet-300 hover:bg-violet-400/15 hover:border-violet-400/50 transition-colors"
           >
             <FileText size={12} />
             문서 열기
@@ -124,20 +124,20 @@ export default function FloatingMemo({ node, screenX, screenY, onClose, onSave, 
           }}
           placeholder="이 노드에 대한 메모..."
           rows={3}
-          className="w-full bg-amber-50/50 rounded-xl p-2.5 text-sm text-text-primary outline-none border border-amber-200/60 focus:border-amber-400 transition-colors resize-none placeholder:text-text-muted/50"
+          className="w-full bg-amber-400/5 rounded-xl p-2.5 text-sm text-white outline-none border border-amber-400/20 focus:border-amber-400/50 transition-colors resize-none placeholder:text-white/40"
         />
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between px-3 py-2 border-t border-border bg-gray-50/50">
-        <div className="flex items-center gap-1 text-[10px] text-text-muted">
+      <div className="flex items-center justify-between px-3 py-2 border-t border-white/10 bg-white/5">
+        <div className="flex items-center gap-1 text-[10px] text-white/50">
           <NotebookPen size={10} />
           <span>Enter로 저장</span>
         </div>
         <button
           onClick={handleSave}
           disabled={!text.trim()}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-coral text-white hover:bg-coral-dark disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-[color:var(--v2-green)] text-black hover:bg-[color:var(--v2-green-soft)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           <Send size={10} />
           저장

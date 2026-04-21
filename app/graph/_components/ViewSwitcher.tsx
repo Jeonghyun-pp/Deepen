@@ -10,13 +10,13 @@ export default function ViewSwitcher() {
   const isWhiteboard = pathname?.startsWith("/graph/whiteboard");
 
   return (
-    <div className="fixed top-3 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1 rounded-full border border-border bg-white/90 backdrop-blur px-1 py-1 shadow-sm">
+    <div className="fixed top-3 left-1/2 -translate-x-1/2 z-40 flex items-center gap-1 rounded-full border border-white/10 bg-[color:var(--v2-ink-soft)]/85 backdrop-blur-md px-1 py-1">
       <Link
         href="/graph"
         className={`px-3 py-1 text-xs rounded-full transition ${
           !isWhiteboard
-            ? "bg-black text-white"
-            : "text-text-muted hover:text-text"
+            ? "bg-[color:var(--v2-green)] text-black"
+            : "text-white/50 hover:text-white/80"
         }`}
       >
         Graph
@@ -25,8 +25,8 @@ export default function ViewSwitcher() {
         href="/graph/whiteboard"
         className={`px-3 py-1 text-xs rounded-full transition ${
           isWhiteboard
-            ? "bg-black text-white"
-            : "text-text-muted hover:text-text"
+            ? "bg-[color:var(--v2-green)] text-black"
+            : "text-white/50 hover:text-white/80"
         }`}
       >
         Whiteboard

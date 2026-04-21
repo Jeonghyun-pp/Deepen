@@ -84,19 +84,19 @@ function EditableLabel({
           if (e.key === "Escape") { setDraft(value); setEditing(false); }
         }}
         onBlur={() => { onSave(draft); setEditing(false); }}
-        className="text-[10px] px-1.5 py-0.5 rounded border border-coral outline-none bg-white w-full"
+        className="text-[10px] px-1.5 py-0.5 rounded border border-[color:var(--v2-green-soft)]/40 outline-none bg-white/5 text-white w-full"
       />
     );
   }
 
   return (
     <div className="flex items-center gap-1">
-      <span className="text-[10px] text-text-muted truncate">
+      <span className="text-[10px] text-white/50 truncate">
         {value || "관계 미정의"}
       </span>
       <button
         onClick={() => setEditing(true)}
-        className="text-[9px] text-coral hover:underline shrink-0"
+        className="text-[9px] text-[color:var(--v2-green-soft)] hover:underline shrink-0"
       >
         편집
       </button>
@@ -128,10 +128,10 @@ function NodeDetailContent({
   if (!node) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-3 px-6">
-        <div className="w-12 h-12 rounded-2xl bg-coral-light flex items-center justify-center">
-          <BookOpen size={20} className="text-coral" />
+        <div className="w-12 h-12 rounded-2xl bg-[color:var(--v2-green)]/15 flex items-center justify-center">
+          <BookOpen size={20} className="text-[color:var(--v2-green-soft)]" />
         </div>
-        <p className="text-xs text-text-muted text-center leading-relaxed">
+        <p className="text-xs text-white/50 text-center leading-relaxed">
           그래프에서 노드를 클릭하면<br />상세 정보가 표시됩니다
         </p>
       </div>
@@ -151,23 +151,23 @@ function NodeDetailContent({
   return (
     <div className="flex flex-col">
       {/* Node Header */}
-      <div className="px-4 py-4 border-b border-border">
+      <div className="px-4 py-4 border-b border-white/10">
         <span
           className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full mb-2"
           style={{
-            background: NODE_COLORS[node.type] + "15",
+            background: NODE_COLORS[node.type] + "1f",
             color: NODE_COLORS[node.type],
           }}
         >
           {TYPE_LABELS[node.type]}
         </span>
-        <h3 className="text-sm font-bold leading-snug text-text-primary">
+        <h3 className="text-sm font-bold leading-snug text-white">
           {node.label}
         </h3>
       </div>
 
       {/* Action buttons */}
-      <div className="px-4 py-2 border-b border-border flex flex-col gap-1.5">
+      <div className="px-4 py-2 border-b border-white/10 flex flex-col gap-1.5">
         {(node.type === "paper" || node.type === "document" || (node.type === "memo" && hasNote?.(node.id))) && (
           <button
             onClick={() => {
@@ -177,7 +177,7 @@ function NodeDetailContent({
                 onOpenNoteTab?.(node.id, node.label);
               }
             }}
-            className="w-full flex items-center justify-center gap-1.5 h-8 rounded-xl border border-coral/30 text-xs font-semibold text-coral hover:bg-coral-light transition-colors"
+            className="w-full flex items-center justify-center gap-1.5 h-8 rounded-xl border border-[color:var(--v2-green-soft)]/40 text-xs font-semibold text-[color:var(--v2-green-soft)] hover:bg-[color:var(--v2-green)]/15 transition-colors"
           >
             <ExternalLink size={12} />
             탭에서 열기
@@ -186,7 +186,7 @@ function NodeDetailContent({
         {onCreateRoadmapFromNode && (
           <button
             onClick={() => onCreateRoadmapFromNode(node.id)}
-            className="w-full flex items-center justify-center gap-1.5 h-8 rounded-xl border border-[color:var(--v2-green)]/30 bg-[color:var(--v2-mint)]/60 text-xs font-semibold text-[color:var(--v2-green-deep)] hover:bg-[color:var(--v2-mint)] transition-colors"
+            className="w-full flex items-center justify-center gap-1.5 h-8 rounded-xl border border-[color:var(--v2-green-soft)]/40 bg-[color:var(--v2-green)]/12 text-xs font-semibold text-[color:var(--v2-green-soft)] hover:bg-[color:var(--v2-green)]/20 transition-colors"
             title="이 노드를 이해하기 위한 prereq chain 자동 생성"
           >
             <Map size={12} />
@@ -197,7 +197,7 @@ function NodeDetailContent({
 
       {/* Meta */}
       {node.meta && (
-        <div className="flex flex-wrap gap-x-4 gap-y-1 px-4 py-3 text-xs text-text-secondary border-b border-border">
+        <div className="flex flex-wrap gap-x-4 gap-y-1 px-4 py-3 text-xs text-white/75 border-b border-white/10">
           {node.meta.authors && <span>{node.meta.authors}</span>}
           {node.meta.year && <span>{node.meta.year}</span>}
           {node.meta.citations != null && (
@@ -207,8 +207,8 @@ function NodeDetailContent({
       )}
 
       {/* Content */}
-      <div className="px-4 py-3 border-b border-border">
-        <p className="text-xs leading-relaxed text-text-secondary">
+      <div className="px-4 py-3 border-b border-white/10">
+        <p className="text-xs leading-relaxed text-white/75">
           {node.content}
         </p>
       </div>
@@ -218,8 +218,8 @@ function NodeDetailContent({
 
       {/* Concept Evolution (concept 노드만) */}
       {node.type === "concept" && node.meta?.contexts && node.meta.contexts.length > 0 && (
-        <div className="px-4 py-3 border-b border-border">
-          <h4 className="text-xs font-bold mb-2 text-text-muted">개념 진화</h4>
+        <div className="px-4 py-3 border-b border-white/10">
+          <h4 className="text-xs font-bold mb-2 text-white/50">개념 진화</h4>
           <ConceptTimeline
             entries={node.meta.contexts}
             onPaperClick={onNodeClick}
@@ -229,24 +229,24 @@ function NodeDetailContent({
 
       {/* Connections with editable labels */}
       <div className="px-4 py-3">
-        <h4 className="text-xs font-bold mb-2 text-text-muted">
+        <h4 className="text-xs font-bold mb-2 text-white/50">
           연결 ({connections.length})
         </h4>
         <div className="flex flex-col gap-1">
           {connections.map(({ node: cn, edgeType }) => {
             const edge = findEdge(cn.id);
             return (
-              <div key={cn.id + edgeType} className="px-3 py-2 rounded-xl bg-coral-light/30">
+              <div key={cn.id + edgeType} className="px-3 py-2 rounded-xl bg-white/5">
                 <button
                   onClick={() => onNodeClick(cn.id)}
-                  className="flex items-center gap-2 text-left text-text-primary hover:text-coral transition-colors w-full"
+                  className="flex items-center gap-2 text-left text-white hover:text-[color:var(--v2-green-soft)] transition-colors w-full"
                 >
                   <span
                     className="w-1.5 h-1.5 rounded-full shrink-0"
                     style={{ background: NODE_COLORS[cn.type] }}
                   />
                   <span className="text-xs truncate flex-1">{cn.label}</span>
-                  <span className="text-[10px] text-text-muted shrink-0">
+                  <span className="text-[10px] text-white/50 shrink-0">
                     {EDGE_TYPE_LABELS[edgeType as keyof typeof EDGE_TYPE_LABELS] ?? edgeType}
                   </span>
                 </button>
@@ -270,17 +270,17 @@ function NodeDetailContent({
 function EditorContent() {
   return (
     <div className="flex flex-col h-full">
-      <div className="px-4 py-3 border-b border-border">
-        <p className="text-xs text-text-muted">선택한 노드에 대한 메모를 작성하세요</p>
+      <div className="px-4 py-3 border-b border-white/10">
+        <p className="text-xs text-white/50">선택한 노드에 대한 메모를 작성하세요</p>
       </div>
       <div className="flex-1 p-4">
         <textarea
           placeholder="여기에 메모를 입력..."
-          className="w-full h-full min-h-[200px] bg-coral-light/20 rounded-xl p-3 text-sm text-text-primary placeholder:text-text-muted outline-none border border-border focus:border-coral transition-colors resize-none"
+          className="w-full h-full min-h-[200px] bg-white/5 rounded-xl p-3 text-sm text-white placeholder:text-white/40 outline-none border border-white/10 focus:border-[color:var(--v2-green-soft)]/40 transition-colors resize-none"
         />
       </div>
-      <div className="px-4 py-3 border-t border-border">
-        <button className="w-full px-4 py-2 rounded-xl bg-coral text-white text-sm font-bold hover:bg-coral-dark transition-colors">
+      <div className="px-4 py-3 border-t border-white/10">
+        <button className="w-full px-4 py-2 rounded-xl bg-[color:var(--v2-green)] text-black text-sm font-bold hover:bg-[color:var(--v2-green-soft)] transition-colors">
           메모 저장
         </button>
       </div>
@@ -323,13 +323,13 @@ export default function RightPanel({
 
   return (
     <aside
-      className="flex flex-col shrink-0 transition-all duration-200 overflow-hidden bg-white/75 backdrop-blur-md rounded-2xl shadow-sm"
+      className="flex flex-col shrink-0 transition-all duration-200 overflow-hidden bg-[color:var(--v2-ink-soft)]/80 backdrop-blur-md rounded-2xl border border-white/5"
       style={{
         width: open ? 340 : 0,
       }}
     >
       {/* Tab Header */}
-      <div className="flex items-center justify-between px-2 h-12 border-b border-border shrink-0">
+      <div className="flex items-center justify-between px-2 h-12 border-b border-white/10 shrink-0">
         <div className="flex items-center gap-0.5">
           {Object.entries(TAB_CONFIG).map(([key, { icon: TabIcon, label }]) => (
             <button
@@ -338,8 +338,8 @@ export default function RightPanel({
               title={label}
               className={`flex items-center gap-1.5 h-8 px-2.5 rounded-xl text-xs font-semibold transition-colors ${
                 activeTab === key
-                  ? "bg-coral-light text-coral"
-                  : "text-text-muted hover:text-text-secondary hover:bg-coral-light/30"
+                  ? "bg-[color:var(--v2-green)]/15 text-[color:var(--v2-green-soft)]"
+                  : "text-white/50 hover:text-white/75 hover:bg-white/5"
               }`}
             >
               <TabIcon size={13} />
@@ -349,7 +349,7 @@ export default function RightPanel({
         </div>
         <button
           onClick={onClose}
-          className="p-1 rounded-xl text-text-muted hover:text-text-secondary transition-colors"
+          className="p-1 rounded-xl text-white/50 hover:text-white/75 transition-colors"
         >
           <X size={16} />
         </button>
@@ -401,10 +401,10 @@ export default function RightPanel({
 
       {/* Export button */}
       {onExport && (
-        <div className="px-4 py-3 border-t border-border shrink-0">
+        <div className="px-4 py-3 border-t border-white/10 shrink-0">
           <button
             onClick={onExport}
-            className="w-full flex items-center justify-center gap-2 h-9 rounded-xl border border-border text-xs font-semibold text-text-secondary hover:border-coral hover:text-coral transition-colors"
+            className="w-full flex items-center justify-center gap-2 h-9 rounded-xl border border-white/10 text-xs font-semibold text-white/75 hover:border-[color:var(--v2-green-soft)]/40 hover:text-[color:var(--v2-green-soft)] transition-colors"
           >
             <Download size={13} />
             내보내기
