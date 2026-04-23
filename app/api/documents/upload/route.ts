@@ -62,9 +62,9 @@ export async function POST(request: Request) {
       .returning()
 
     // 백그라운드 처리 — Next.js after()로 응답 이후 실행 (Vercel serverless 호환)
-    after(async () => {
-      await runPipeline(created.id, user.id, storagePath)
-    })
+    // after()는 콜백이 반환한 Promise를 waitUntil로 연장한다. runPipeline이
+    // Promise를 반환하지 않으면 Vercel이 바로 함수를 종료해 파이프라인이 실행되지 않는다.
+    after(() => runPipeline(created.id, user.id, storagePath))
 
     return Response.json(created, { status: 202 })
   } catch (e) {
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
 }
 
 function runPipeline(documentId: string, userId: string, storagePath: string) {
-  processDocument(documentId, userId, storagePath).catch(async (e) => {
+  return processDocument(documentId, userId, storagePath).catch(async (e) => {
     console.error("[runPipeline] fatal:", e)
     await db
       .update(documents)
