@@ -26,6 +26,7 @@ import {
   type ExtractedNode,
   type ExtractedEdge,
 } from "./extract-nodes"
+import { filterNoiseNodes } from "./filter-nodes"
 import { findFuzzyMatch, normalizeLabel } from "./dedup"
 import { recordTokenUsage } from "@/lib/db/token-usage"
 
@@ -115,8 +116,18 @@ export async function processDocument(
 
     // 5) DB insert: nodes + mappings
     const allExtracted: ExtractedNode[] = sectionResults.flat()
+
+    // 5a) Stage 3.5 — 정규식 노이즈 필터 (변수·공식 표기·금액 예시 제거)
+    const { kept: cleanExtracted, removed: filteredOut } =
+      filterNoiseNodes(allExtracted)
+    if (filteredOut.length > 0) {
+      console.log(
+        `[processDocument ${documentId}] regex filter: ${allExtracted.length} → ${cleanExtracted.length} (-${filteredOut.length})`
+      )
+    }
+
     const { insertedCount: totalNodes, resolvedIdByKey } =
-      await insertNodesAndMappings(userId, allExtracted, chunkIdByOrdinal)
+      await insertNodesAndMappings(userId, cleanExtracted, chunkIdByOrdinal)
 
     // 6) Tier 1 엣지: LLM이 같은 섹션 안에서 뽑은 prerequisite / contains
     await insertTypedEdges(userId, sectionEdges, resolvedIdByKey)
