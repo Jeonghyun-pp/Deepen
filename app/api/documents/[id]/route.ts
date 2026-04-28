@@ -1,24 +1,16 @@
 import { and, eq, inArray, notInArray } from "drizzle-orm"
 import { db } from "@/lib/db"
-import {
-  chunkNodeMappings,
-  chunks,
-  documents,
-  nodes,
-} from "@/lib/db/schema"
-import { requireUser } from "@/lib/auth/require-user"
+import { chunkNodeMappings, chunks, documents, nodes } from "@/lib/db/schema"
+import { apiError, withAuth } from "@/lib/api/handler"
 import { createSupabaseAdminClient } from "@/lib/supabase/admin"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
-export async function GET(
-  _request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { user } = await requireUser()
-    const { id } = await params
+export const GET = withAuth<{ id: string }>(
+  "GET /api/documents/[id]",
+  async (_request, { user, params }) => {
+    const { id } = params
 
     const [doc] = await db
       .select()
@@ -26,16 +18,10 @@ export async function GET(
       .where(and(eq(documents.id, id), eq(documents.userId, user.id)))
       .limit(1)
 
-    if (!doc) {
-      return Response.json({ error: "not_found" }, { status: 404 })
-    }
+    if (!doc) return apiError.notFound()
     return Response.json(doc)
-  } catch (e) {
-    if (e instanceof Response) return e
-    console.error("[GET /api/documents/[id]]", e)
-    return Response.json({ error: "internal_error" }, { status: 500 })
-  }
-}
+  },
+)
 
 /**
  * 문서 삭제 + cascade:
@@ -43,22 +29,17 @@ export async function GET(
  *   2) Storage PDF 파일 제거
  *   3) documents row DELETE (chunks, mappings는 schema FK cascade로 자동 삭제)
  */
-export async function DELETE(
-  _request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { user } = await requireUser()
-    const { id } = await params
+export const DELETE = withAuth<{ id: string }>(
+  "DELETE /api/documents/[id]",
+  async (_request, { user, params }) => {
+    const { id } = params
 
     const [doc] = await db
       .select()
       .from(documents)
       .where(and(eq(documents.id, id), eq(documents.userId, user.id)))
       .limit(1)
-    if (!doc) {
-      return Response.json({ error: "not_found" }, { status: 404 })
-    }
+    if (!doc) return apiError.notFound()
 
     const docChunks = await db
       .select({ id: chunks.id })
@@ -114,9 +95,5 @@ export async function DELETE(
       .where(and(eq(documents.id, id), eq(documents.userId, user.id)))
 
     return Response.json({ ok: true })
-  } catch (e) {
-    if (e instanceof Response) return e
-    console.error("[DELETE /api/documents/[id]]", e)
-    return Response.json({ error: "internal_error" }, { status: 500 })
-  }
-}
+  },
+)
