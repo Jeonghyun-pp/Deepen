@@ -129,6 +129,32 @@ export default function GraphShell() {
     graphRef.current?.fitView();
   }, []);
 
+  // 노드 삭제 — 서버 cascade 후 로컬 store에서도 제거
+  const handleNodeDelete = useCallback(
+    async (id: string) => {
+      const node = gd.fullData.nodes.find((n) => n.id === id);
+      if (!node) return;
+      if (
+        !window.confirm(
+          `"${node.label}" 노드를 삭제할까요?\n연결된 엣지도 함께 삭제됩니다.`,
+        )
+      ) {
+        return;
+      }
+      try {
+        const res = await fetch(`/api/nodes/${id}`, {
+          method: "DELETE",
+          credentials: "include",
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        gd.removeNode(id);
+      } catch (e) {
+        alert(`삭제 실패: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    },
+    [gd],
+  );
+
   // 새 문서 처리 완료 시 그래프 재동기화
   const handleDocumentReady = useCallback(async () => {
     try {
@@ -419,6 +445,7 @@ export default function GraphShell() {
           if (gd.activeTab.type !== "graph") gd.setActiveTabId("graph");
           setTimeout(() => graphRef.current?.fitView(), 250);
         }}
+        onDeleteNode={handleNodeDelete}
         onDocumentReady={handleDocumentReady}
       />
 

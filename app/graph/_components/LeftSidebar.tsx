@@ -8,6 +8,7 @@ import {
   NotebookPen,
   Map as MapIcon,
   X,
+  FileText,
 } from "lucide-react";
 import type { GraphNode, NodeType, NoteDocument, Roadmap } from "../_data/types";
 import { NODE_COLORS, TYPE_LABELS } from "../_data/colors";
@@ -99,6 +100,14 @@ export default function LeftSidebar({
       <div className="flex items-center justify-between px-4 h-12 border-b border-white/10 shrink-0">
         <Link href="/" className="text-lg font-extrabold text-[color:var(--v2-green-soft)]">
           Deepen
+        </Link>
+        <Link
+          href="/documents"
+          className="flex items-center gap-1 text-[11px] text-white/50 hover:text-white transition-colors"
+          title="내 문서 관리"
+        >
+          <FileText size={12} />
+          내 문서
         </Link>
       </div>
 

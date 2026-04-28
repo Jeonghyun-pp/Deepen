@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, BookOpen, PenLine, MessageCircle, Upload, Download, ExternalLink, Map, type LucideIcon } from "lucide-react";
+import { X, BookOpen, PenLine, MessageCircle, Upload, Download, ExternalLink, Map, Trash2, type LucideIcon } from "lucide-react";
 import type { GraphNode } from "../_data/types";
 import { NODE_COLORS, TYPE_LABELS, EDGE_TYPE_LABELS } from "../_data/colors";
 import ConceptTimeline from "./ConceptTimeline";
@@ -52,6 +52,8 @@ interface Props {
   hasNote?: (nodeId: string) => boolean;
   // create roadmap from this node
   onCreateRoadmapFromNode?: (nodeId: string) => void;
+  // delete this node (서버 + 로컬 store)
+  onDeleteNode?: (nodeId: string) => void | Promise<void>;
   // upload tab — 새 문서가 ready 되면 그래프 refetch 트리거
   onDocumentReady?: (doc: DbDocument) => void;
 }
@@ -114,6 +116,7 @@ function NodeDetailContent({
   onOpenNoteTab,
   hasNote,
   onCreateRoadmapFromNode,
+  onDeleteNode,
 }: {
   node: GraphNode | null;
   connections: ConnectedNode[];
@@ -124,6 +127,7 @@ function NodeDetailContent({
   onOpenNoteTab?: (noteId: string, label: string) => void;
   hasNote?: (nodeId: string) => boolean;
   onCreateRoadmapFromNode?: (nodeId: string) => void;
+  onDeleteNode?: (nodeId: string) => void | Promise<void>;
 }) {
   if (!node) {
     return (
@@ -263,6 +267,20 @@ function NodeDetailContent({
           })}
         </div>
       </div>
+
+      {/* Danger zone — 노드 삭제 */}
+      {onDeleteNode && (
+        <div className="px-4 py-3 mt-2 border-t border-white/10">
+          <button
+            onClick={() => onDeleteNode(node.id)}
+            className="w-full flex items-center justify-center gap-1.5 h-8 rounded-xl border border-red-500/30 text-xs font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
+            title="이 노드와 연결된 모든 엣지를 삭제합니다"
+          >
+            <Trash2 size={12} />
+            노드 삭제
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -318,6 +336,7 @@ export default function RightPanel({
   onOpenNoteTab,
   hasNote,
   onCreateRoadmapFromNode,
+  onDeleteNode,
   onDocumentReady,
 }: Props) {
 
@@ -379,6 +398,7 @@ export default function RightPanel({
                 onOpenNoteTab={onOpenNoteTab}
                 hasNote={hasNote}
                 onCreateRoadmapFromNode={onCreateRoadmapFromNode}
+                onDeleteNode={onDeleteNode}
               />
             )}
           </>

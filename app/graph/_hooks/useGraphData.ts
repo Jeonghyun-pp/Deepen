@@ -412,6 +412,19 @@ export function useGraphData(initialData: GraphData) {
   const addNode = useCallback((node: GraphNode) => storeAddNode(node), [storeAddNode]);
   const addEdge = useCallback((edge: GraphEdge) => storeAddEdge(edge), [storeAddEdge]);
 
+  // 로컬 store 에서 노드 + 그 노드와 연결된 엣지 모두 제거.
+  // API DELETE 성공 후 호출 — 서버 cascade 결과를 클라에 반영.
+  const removeNode = useCallback(
+    (id: string) => {
+      setData((prev) => ({
+        nodes: prev.nodes.filter((n) => n.id !== id),
+        edges: prev.edges.filter((e) => e.source !== id && e.target !== id),
+      }));
+      if (selectedNodeId === id) storeSelectNode(null);
+    },
+    [setData, selectedNodeId, storeSelectNode],
+  );
+
   return {
     fullData: data,
     filteredData,
@@ -455,6 +468,7 @@ export function useGraphData(initialData: GraphData) {
     deleteRoadmap,
     addNode,
     addEdge,
+    removeNode,
     tabs,
     activeTab,
     activeTabId,
