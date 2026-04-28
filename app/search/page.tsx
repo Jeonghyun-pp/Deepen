@@ -4,9 +4,9 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, Sparkles, MapPin, FileText, ArrowRight } from "lucide-react";
-import { sampleGraphData } from "../graph/_data/sample-data";
 import { NODE_COLORS, TYPE_LABELS } from "../graph/_data/colors";
 import type { GraphNode, NodeType } from "../graph/_data/types";
+import { useInitialGraph } from "../graph/_hooks/useInitialGraph";
 
 interface RoadmapPreset {
   id: string;
@@ -39,11 +39,12 @@ const ROADMAP_PRESETS: RoadmapPreset[] = [
 export default function SearchPage() {
   const router = useRouter();
   const [query, setQuery] = useState("");
+  const { data } = useInitialGraph();
 
   const matches = useMemo(() => {
     const q = query.toLowerCase().trim();
     if (!q) return [] as GraphNode[];
-    return sampleGraphData.nodes
+    return data.nodes
       .filter(
         (n) =>
           n.label.toLowerCase().includes(q) ||
@@ -51,26 +52,25 @@ export default function SearchPage() {
           n.content.toLowerCase().includes(q),
       )
       .slice(0, 10);
-  }, [query]);
+  }, [query, data.nodes]);
 
   const recommendedPapers = useMemo(() => {
-    return [...sampleGraphData.nodes]
+    return [...data.nodes]
       .filter((n) => n.type === "paper")
       .sort((a, b) => (b.meta?.citations ?? 0) - (a.meta?.citations ?? 0))
       .slice(0, 6);
-  }, []);
+  }, [data.nodes]);
 
   const recommendedConcepts = useMemo(() => {
-    // 엣지 방향 count — 많이 참조되는 노드를 우선 추천
     const introCount = new Map<string, number>();
-    for (const e of sampleGraphData.edges) {
+    for (const e of data.edges) {
       introCount.set(e.target, (introCount.get(e.target) ?? 0) + 1);
     }
-    return [...sampleGraphData.nodes]
+    return [...data.nodes]
       .filter((n) => n.type === "concept" || n.type === "technique")
       .sort((a, b) => (introCount.get(b.id) ?? 0) - (introCount.get(a.id) ?? 0))
       .slice(0, 8);
-  }, []);
+  }, [data.nodes, data.edges]);
 
   const goToGraph = (nodeId: string) => {
     router.push(`/graph?focus=${encodeURIComponent(nodeId)}`);
