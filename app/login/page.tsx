@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, Suspense } from "react"
+import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { ArrowRight, Mail, CheckCircle2 } from "lucide-react"
 import { createSupabaseBrowserClient } from "@/lib/supabase/client"
@@ -139,12 +140,12 @@ export default function LoginPage() {
       />
 
       {/* Brand mark top-left */}
-      <a
+      <Link
         href="/"
         className="absolute top-6 left-8 text-xs font-extrabold tracking-[0.18em] opacity-80 hover:opacity-100 transition"
       >
         DEEPEN<span className="opacity-50">.LAB</span>
-      </a>
+      </Link>
 
       <Suspense
         fallback={<div className="text-sm text-white/50">…</div>}
