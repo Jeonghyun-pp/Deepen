@@ -13,6 +13,7 @@ import { requireUser } from "@/lib/auth/require-user"
 import { isAdminEmail } from "@/lib/auth/require-admin"
 import { db } from "@/lib/db"
 import { nodes } from "@/lib/db/schema"
+import { COPY } from "@/lib/ui/copy"
 import { LogoutButton } from "./LogoutButton"
 
 export const dynamic = "force-dynamic"
@@ -84,7 +85,7 @@ export default async function HomePage() {
             className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900"
             data-testid="empty-state"
           >
-            콘텐츠 시드 작업 중입니다 — 첫 풀이 가능 문제가 곧 추가됩니다.
+            {COPY.empty.seedNotReady}
             {isAdmin && (
               <>
                 {" "}
@@ -138,9 +139,10 @@ function UnitCard({
   const hasContent = itemCount > 0 && firstItemId
 
   if (hasContent) {
+    // 단원 진입 화면 (/v2/study/[unitId]) 경유 — Pattern 미리보기 후 풀이 시작.
     return (
       <Link
-        href={`/v2/solve/${firstItemId}`}
+        href="/v2/study/default"
         className="group block rounded-2xl border border-black/10 bg-white p-6 shadow-sm transition hover:border-black/30 hover:shadow-md"
         data-testid="unit-card-active"
       >
@@ -148,7 +150,7 @@ function UnitCard({
           label={label}
           patternCount={patternCount}
           itemCount={itemCount}
-          ctaLabel="시작하기 →"
+          ctaLabel="단원 열기 →"
         />
       </Link>
     )

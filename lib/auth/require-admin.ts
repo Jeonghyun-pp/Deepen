@@ -6,10 +6,10 @@
  */
 
 import { requireUser } from "./require-user"
+import { env } from "@/lib/env"
 
 function getAdminEmails(): string[] {
-  const raw = process.env.ADMIN_EMAILS ?? ""
-  return raw
+  return env.ADMIN_EMAILS
     .split(",")
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean)

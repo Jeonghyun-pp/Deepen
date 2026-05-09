@@ -149,7 +149,7 @@ export function CoachPanel({ itemId }: CoachPanelProps) {
 
   return (
     <aside
-      className="fixed inset-y-0 right-0 z-40 flex w-full max-w-md flex-col border-l border-black/10 bg-white shadow-2xl sm:w-[420px]"
+      className="fixed inset-0 z-40 flex flex-col bg-white shadow-2xl sm:inset-y-0 sm:left-auto sm:right-0 sm:w-[420px] sm:border-l sm:border-black/10"
       data-testid="coach-panel"
       aria-label="AI 코치 패널"
     >
@@ -190,7 +190,8 @@ export function CoachPanel({ itemId }: CoachPanelProps) {
           role="alert"
           data-testid="coach-quota-error"
         >
-          AI 코치는 평생 5회까지 무료에요. Pro 업그레이드 시 일 30회.
+          {/* lib/ui/copy.ts 의 quotaExceeded 와 동일 톤 */}
+          AI 코치는 평생 5회까지 무료에요. Pro 업그레이드 시 일 30회 사용 가능.
         </div>
       )}
 

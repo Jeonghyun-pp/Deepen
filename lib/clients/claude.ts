@@ -2,12 +2,13 @@
 // Anthropic SDK + 프롬프트 캐싱 + structured output
 
 import Anthropic from "@anthropic-ai/sdk";
+import { env } from "@/lib/env";
 
 const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+  apiKey: env.ANTHROPIC_API_KEY ?? "",
 });
 
-const DEFAULT_MODEL = process.env.CLAUDE_MODEL || "claude-sonnet-4-20250514";
+const DEFAULT_MODEL = env.CLAUDE_MODEL;
 
 /**
  * tool_use 강제. 응답이 정확히 하나의 tool_use 블록을 포함하도록.

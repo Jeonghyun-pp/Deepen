@@ -12,6 +12,7 @@ import {
   type RecapBuildCardResponse,
 } from "@/lib/api/schemas/recap"
 import { buildRecapCard } from "@/lib/recap/build-card"
+import { features } from "@/lib/env"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -19,6 +20,13 @@ export const dynamic = "force-dynamic"
 export const POST = withAuth(
   "POST /api/recap/build-card",
   async (request, { user }) => {
+    if (!features.aiCoach) {
+      return Response.json(
+        { error: "llm_unavailable", reason: "ANTHROPIC_API_KEY 미설정" },
+        { status: 503 },
+      )
+    }
+
     let body: ReturnType<typeof RecapBuildCardRequest.parse>
     try {
       body = RecapBuildCardRequest.parse(await request.json())

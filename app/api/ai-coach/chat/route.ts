@@ -20,6 +20,7 @@ import { COACH_TOOLS } from "@/lib/ai-coach/tools"
 import { assertQuota, recordAiCall, QuotaError } from "@/lib/ai-coach/quota"
 import { streamClaude } from "@/lib/clients/claude"
 import { buildRecapCard } from "@/lib/recap/build-card"
+import { features } from "@/lib/env"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -40,6 +41,14 @@ const sseEvent = (event: string, data: unknown): string =>
   `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`
 
 export const POST = withAuth("POST /api/ai-coach/chat", async (request, { user }) => {
+  // 환경 변수 누락 시 graceful 503
+  if (!features.aiCoach) {
+    return Response.json(
+      { error: "ai_coach_unavailable", reason: "ANTHROPIC_API_KEY 미설정" },
+      { status: 503 },
+    )
+  }
+
   let body: ReturnType<typeof CoachChatRequest.parse>
   try {
     body = CoachChatRequest.parse(await request.json())

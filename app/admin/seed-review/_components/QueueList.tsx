@@ -1,6 +1,7 @@
 "use client"
 
 import type { QueueNodeDto } from "@/lib/api/schemas/admin"
+import { COPY } from "@/lib/ui/copy"
 
 export interface QueueListProps {
   items: QueueNodeDto[]
@@ -10,11 +11,7 @@ export interface QueueListProps {
 
 export function QueueList({ items, selectedId, onSelect }: QueueListProps) {
   if (items.length === 0) {
-    return (
-      <p className="px-4 py-6 text-xs text-black/45">
-        대기 중인 draft 가 없어요. PDF 를 업로드하면 자동으로 채워집니다.
-      </p>
-    )
+    return <p className="px-4 py-6 text-xs text-black/45">{COPY.empty.noQueueItems}</p>
   }
   return (
     <ul className="flex-1 overflow-y-auto" data-testid="queue-list">
