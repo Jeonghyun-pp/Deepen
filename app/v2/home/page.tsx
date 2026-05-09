@@ -133,6 +133,10 @@ export default async function HomePage() {
             PDF 업로드
           </Link>
           <span className="text-black/25">·</span>
+          <Link href="/v2/stats" className="hover:text-black/80 hover:underline">
+            내 통계
+          </Link>
+          <span className="text-black/25">·</span>
           <Link href="/v2/billing" className="hover:text-black/80 hover:underline">
             요금
           </Link>

@@ -32,7 +32,6 @@ async function handle(request: Request) {
     process.env.NEXT_PUBLIC_APP_URL ?? "https://deepen.app"
 
   const now = new Date()
-  const weekStart = new Date(now.getTime() - ONE_WEEK_MS)
   const recipients = await getReportRecipients()
 
   let sent = 0
@@ -58,8 +57,6 @@ async function handle(request: Request) {
     try {
       const data = await buildParentReportData({
         userId: r.userId,
-        weekStart,
-        weekEnd: now,
         appUrl,
       })
       if (!data) {

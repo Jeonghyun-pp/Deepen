@@ -64,6 +64,13 @@
       "when": 1778349000000,
       "tag": "0008_parents_daily_challenges",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1778352000000,
+      "tag": "0009_pattern_state_snapshots",
+      "breakpoints": true
     }
   ]
 }

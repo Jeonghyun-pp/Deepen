@@ -137,6 +137,37 @@ export const dailyChallenges = pgTable(
 )
 
 // ============================================================
+// pattern_state_snapshots — M3.5. 매주 토 23:00 KST cron.
+// "지난 주 약점 N개 → 이번 주 N-2개" framing 의 truth source.
+// PK (user_id, snapshot_date, pattern_id).
+// ============================================================
+
+export const patternStateSnapshots = pgTable(
+  "pattern_state_snapshots",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** 'YYYY-MM-DD' (KST 토요일). */
+    snapshotDate: text("snapshot_date").notNull(),
+    patternId: uuid("pattern_id")
+      .notNull()
+      .references(() => nodes.id, { onDelete: "cascade" }),
+    theta: real("theta").notNull(),
+    attemptCount: integer("attempt_count").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    primaryKey({
+      columns: [t.userId, t.snapshotDate, t.patternId],
+    }),
+    index("pss_user_date_idx").on(t.userId, t.snapshotDate),
+  ],
+)
+
+// ============================================================
 // sessions — 에이전트 챗 세션
 // ============================================================
 
@@ -673,6 +704,8 @@ export type Invoice = typeof invoices.$inferSelect
 export type NewInvoice = typeof invoices.$inferInsert
 export type DailyChallenge = typeof dailyChallenges.$inferSelect
 export type NewDailyChallenge = typeof dailyChallenges.$inferInsert
+export type PatternStateSnapshot = typeof patternStateSnapshots.$inferSelect
+export type NewPatternStateSnapshot = typeof patternStateSnapshots.$inferInsert
 
 // sql helper re-export (마이그레이션 후처리에서 사용)
 export { sql }
