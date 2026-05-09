@@ -27,6 +27,8 @@ import { HintButton } from "../_components/HintButton"
 import { ChipBar, type ChipKey } from "../_components/ChipBar"
 import { ResultPanel } from "../_components/ResultPanel"
 import { RecapOverlay } from "../_components/RecapOverlay"
+import { CoachPanel } from "../_components/CoachPanel"
+import { useCoachStore } from "@/app/v2/_components/store/coach-store"
 
 interface Props {
   item: ItemResponse
@@ -43,17 +45,22 @@ export function SolveClient({ item }: Props) {
   const selfConfidence = useSolveStore((s) => s.selfConfidence)
   const reset = useSolveStore((s) => s.reset)
 
+  const setCoachOpen = useCoachStore((s) => s.setOpen)
+  const resetCoach = useCoachStore((s) => s.reset)
+
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<SubmitAttemptResponse | null>(null)
-  const [chipNotice, setChipNotice] = useState<ChipKey | null>(null)
   const [recapCandidate, setRecapCandidate] =
     useState<RecapDiagnoseCandidate | null>(null)
 
   useEffect(() => {
     begin(item.id)
-    return () => reset()
-  }, [item.id, begin, reset])
+    return () => {
+      reset()
+      resetCoach()
+    }
+  }, [item.id, begin, reset, resetCoach])
 
   const handleSubmit = async () => {
     if (!selectedAnswer || submitting) return
@@ -82,8 +89,10 @@ export function SolveClient({ item }: Props) {
     }
   }
 
-  const handleChip = (key: ChipKey) => {
-    setChipNotice(key)
+  const handleChip = (_key: ChipKey) => {
+    // 풀이 화면 본문에서 칩을 클릭하면 코치 패널을 연다.
+    // 실제 칩 호출은 CoachPanel 안 ChipBar 가 직접 /api/ai-coach/chat 호출.
+    setCoachOpen(true)
   }
 
   const handleNextItem = () => {
@@ -184,23 +193,7 @@ export function SolveClient({ item }: Props) {
         />
       )}
 
-      {chipNotice && (
-        <div
-          className="fixed inset-x-0 bottom-20 mx-auto w-fit rounded-full border border-black/10 bg-black px-4 py-2 text-xs text-white shadow-lg"
-          role="status"
-          data-testid="chip-notice"
-        >
-          코치 패널은 곧 열립니다 (M1.5).
-          <button
-            type="button"
-            onClick={() => setChipNotice(null)}
-            className="ml-3 text-white/60 hover:text-white"
-            aria-label="닫기"
-          >
-            ✕
-          </button>
-        </div>
-      )}
+      <CoachPanel itemId={item.id} />
     </main>
   )
 }

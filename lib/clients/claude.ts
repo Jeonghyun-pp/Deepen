@@ -33,6 +33,89 @@ export interface ClaudeToolCallResult<T> {
   model: string;
 }
 
+/**
+ * Streaming + tool_use 동시 지원.
+ * Spec: 05-llm-prompts §1 (코치 chat).
+ *
+ * 사용자 텍스트 응답은 delta 콜백으로 토큰 단위 전달. tool_use 는 완료
+ * 시점에 별도 콜백 (블록 단위 누적).
+ */
+export interface ClaudeStreamOptions {
+  systemPrompt: string
+  userPrompt: string
+  tools?: Array<{
+    name: string
+    description: string
+    input_schema: Record<string, unknown>
+  }>
+  maxTokens?: number
+  model?: string
+  onText?: (delta: string) => void
+  onToolUse?: (block: { name: string; input: unknown }) => void
+}
+
+export interface ClaudeStreamResult {
+  text: string
+  toolUses: Array<{ name: string; input: unknown }>
+  inputTokens: number
+  outputTokens: number
+  model: string
+}
+
+export async function streamClaude(
+  options: ClaudeStreamOptions,
+): Promise<ClaudeStreamResult> {
+  const { systemPrompt, userPrompt, tools, maxTokens = 1024 } = options
+  const model = options.model ?? DEFAULT_MODEL
+
+  const stream = await client.messages.stream({
+    model,
+    max_tokens: maxTokens,
+    system: [
+      {
+        type: "text",
+        text: systemPrompt,
+        cache_control: { type: "ephemeral" },
+      },
+    ],
+    ...(tools && tools.length
+      ? { tools: tools as Anthropic.Tool[] }
+      : {}),
+    messages: [{ role: "user", content: userPrompt }],
+  })
+
+  let text = ""
+  const toolUses: Array<{ name: string; input: unknown }> = []
+  // tool_use input 은 partial JSON 으로 stream 됨. 종료 후 final 메시지에서 꺼냄.
+
+  for await (const event of stream) {
+    if (
+      event.type === "content_block_delta" &&
+      event.delta.type === "text_delta"
+    ) {
+      text += event.delta.text
+      options.onText?.(event.delta.text)
+    }
+  }
+
+  const finalMessage = await stream.finalMessage()
+  for (const block of finalMessage.content) {
+    if (block.type === "tool_use") {
+      const tu = { name: block.name, input: block.input }
+      toolUses.push(tu)
+      options.onToolUse?.(tu)
+    }
+  }
+
+  return {
+    text,
+    toolUses,
+    inputTokens: finalMessage.usage.input_tokens,
+    outputTokens: finalMessage.usage.output_tokens,
+    model,
+  }
+}
+
 export async function callClaudeTool<T>(
   options: ClaudeToolCallOptions,
 ): Promise<ClaudeToolCallResult<T>> {
