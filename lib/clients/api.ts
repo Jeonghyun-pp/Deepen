@@ -9,6 +9,11 @@
 
 import type { SubmitAttemptRequest, SubmitAttemptResponse } from "@/lib/api/schemas/attempts"
 import type { ItemResponse } from "@/lib/api/schemas/items"
+import type {
+  ClassifyReasonsRequest,
+  ClassifyReasonsResponse,
+} from "@/lib/api/schemas/classify-reasons"
+import type { ReasonTag } from "@/lib/db/schema"
 
 export class ApiError extends Error {
   constructor(public code: string, public status: number, message?: string) {
@@ -52,3 +57,21 @@ export const submitAttempt = (payload: SubmitAttemptRequest) =>
     method: "POST",
     json: payload,
   })
+
+/**
+ * M2.4: 오답 attempt 직후 호출. AI 분류 + reasonTags merge.
+ * 실패 시 null (UI 는 룰 태그만 유지).
+ */
+export async function classifyReasonsFollowup(
+  payload: ClassifyReasonsRequest,
+): Promise<ReasonTag[] | null> {
+  try {
+    const res = await jsonRequest<ClassifyReasonsResponse>(
+      `/api/attempts/classify-reasons`,
+      { method: "POST", json: payload },
+    )
+    return res.mergedTags
+  } catch {
+    return null
+  }
+}

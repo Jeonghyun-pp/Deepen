@@ -104,11 +104,22 @@ export function ResultPanel({
           </p>
         )}
 
-        {tone === "wrong" && reasonTags.length > 0 && (
+        {tone === "wrong" && (reasonTags.length > 0 || result.attemptResult.reasonTagsPending) && (
           <div className="mt-4" data-testid="reason-tags">
-            <span className="text-[11px] uppercase tracking-wider text-black/45">
-              짚어 본 원인
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] uppercase tracking-wider text-black/45">
+                짚어 본 원인
+              </span>
+              {result.attemptResult.reasonTagsPending && (
+                <span
+                  className="inline-flex items-center gap-1 text-[10px] text-black/45"
+                  data-testid="reason-tags-pending"
+                >
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
+                  AI 분석 중…
+                </span>
+              )}
+            </div>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {reasonTags.map((tag) => {
                 const tone = REASON_TAG_TONE[tag] ?? "info"

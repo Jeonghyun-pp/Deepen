@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation"
 import type { ItemResponse } from "@/lib/api/schemas/items"
 import type { SubmitAttemptResponse } from "@/lib/api/schemas/attempts"
 import type { RecapDiagnoseCandidate } from "@/lib/api/schemas/recap"
-import { submitAttempt, ApiError } from "@/lib/clients/api"
+import { submitAttempt, classifyReasonsFollowup, ApiError } from "@/lib/clients/api"
 import { useSolveStore } from "@/app/v2/_components/store/solve-store"
 import { ItemBody } from "../_components/ItemBody"
 import { ConfidenceSlider } from "../_components/ConfidenceSlider"
@@ -90,6 +90,29 @@ export function SolveClient({ item, userId }: Props) {
       }
       const response = await submitAttempt(payload)
       setResult(response)
+
+      // M2.4: 오답 + AI 가용 시 follow-up classify-reasons (비동기, 응답 갱신)
+      if (response.attemptResult.reasonTagsPending) {
+        void classifyReasonsFollowup({
+          itemId: item.id,
+          attemptTimestamp: response.attemptResult.attemptTimestamp,
+          ocrSteps: ocrResult?.steps,
+        }).then((mergedTags) => {
+          if (!mergedTags) return
+          setResult((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  attemptResult: {
+                    ...prev.attemptResult,
+                    reasonTags: mergedTags,
+                    reasonTagsPending: false,
+                  },
+                }
+              : prev,
+          )
+        })
+      }
     } catch (e) {
       if (e instanceof ApiError) {
         setError(e.code)

@@ -92,6 +92,10 @@ export const AttemptResultPayload = z.object({
   confidenceScore: z.number(),
   timeZ: z.number(),
   reasonTags: z.array(ReasonTag),
+  /** result_history append 된 attempt 의 timestamp (M2.4 follow-up classify 식별용). */
+  attemptTimestamp: z.string(),
+  /** 오답이고 ANTHROPIC_API_KEY 가 있어 AI 7태그 분류가 가능한 경우 true. */
+  reasonTagsPending: z.boolean(),
   correctAnswer: z.string(),
   explanation: z.string(),
 })

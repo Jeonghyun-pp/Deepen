@@ -232,6 +232,9 @@ export const POST = withAuth("POST /api/attempts", async (request, { user }) => 
       confidenceScore,
       timeZ,
       reasonTags,
+      attemptTimestamp: persisted.timestamp,
+      // 오답일 때만 AI 분류 가능. M2.4: 클라가 follow-up classify-reasons 호출.
+      reasonTagsPending: label === "wrong",
       correctAnswer: item.itemAnswer ?? "",
       explanation: item.itemSolution ?? "",
     },
