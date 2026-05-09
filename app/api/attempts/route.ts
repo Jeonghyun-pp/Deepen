@@ -36,6 +36,7 @@ import {
 } from "@/lib/grading/score"
 import { updateElo } from "@/lib/grading/elo"
 import { getItemTimeStat } from "@/lib/grading/time-stats"
+import { diagnoseQ1 } from "@/lib/recap/diagnose"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -196,11 +197,34 @@ export const POST = withAuth("POST /api/attempts", async (request, { user }) => 
     })
   }
 
-  // 8) diagnosis stub — M1.4 본격
-  const diagnosis = { recapNeeded: false } as const
+  // 8) diagnosis (M1.4 — Q1 단순 진단). 실전 모드는 recap 차단 (06-state-machines).
+  let diagnosis: SubmitAttemptResponse["diagnosis"] = {
+    recapNeeded: false,
+    candidatePrereq: [],
+  }
+  if (body.mode === "practice" && (label === "wrong" || label === "unsure")) {
+    const d = await diagnoseQ1({
+      userId: user.id,
+      currentItemId: body.itemId,
+    })
+    diagnosis = {
+      recapNeeded: d.recapNeeded,
+      candidatePrereq: d.candidates.map((c) => ({
+        patternId: c.patternId,
+        patternLabel: c.patternLabel,
+        grade: c.grade,
+        deficitProb: c.deficitProb,
+      })),
+    }
+  }
 
-  // 9) nextAction stub — M1.6 본격
-  const nextAction = { type: "next_item" as const }
+  // 9) nextAction — recap 필요면 'recap', 아니면 'next_item' (M1.6 정책 본격).
+  const nextAction = diagnosis.recapNeeded
+    ? ({
+        type: "recap" as const,
+        payload: { candidates: diagnosis.candidatePrereq },
+      })
+    : ({ type: "next_item" as const })
 
   const response: SubmitAttemptResponse = {
     attemptResult: {

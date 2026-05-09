@@ -9,6 +9,72 @@ const client = new Anthropic({
 
 const DEFAULT_MODEL = process.env.CLAUDE_MODEL || "claude-sonnet-4-20250514";
 
+/**
+ * tool_use 강제. 응답이 정확히 하나의 tool_use 블록을 포함하도록.
+ * Spec: docs/build-spec/05-llm-prompts.md (모든 LLM 호출은 가능하면 tool_use).
+ */
+export interface ClaudeToolCallOptions {
+  systemPrompt: string;
+  userPrompt: string;
+  tool: {
+    name: string;
+    description: string;
+    input_schema: Record<string, unknown>;
+  };
+  maxTokens?: number;
+  /** 선택. 다른 모델 명시 (예: haiku for classification). */
+  model?: string;
+}
+
+export interface ClaudeToolCallResult<T> {
+  data: T;
+  inputTokens: number;
+  outputTokens: number;
+  model: string;
+}
+
+export async function callClaudeTool<T>(
+  options: ClaudeToolCallOptions,
+): Promise<ClaudeToolCallResult<T>> {
+  const { systemPrompt, userPrompt, tool, maxTokens = 1024 } = options;
+  const model = options.model ?? DEFAULT_MODEL;
+
+  const response = await client.messages.create({
+    model,
+    max_tokens: maxTokens,
+    system: [
+      {
+        type: "text",
+        text: systemPrompt,
+        cache_control: { type: "ephemeral" },
+      },
+    ],
+    tools: [
+      {
+        name: tool.name,
+        description: tool.description,
+        input_schema: tool.input_schema as Anthropic.Tool["input_schema"],
+      },
+    ],
+    tool_choice: { type: "tool", name: tool.name },
+    messages: [{ role: "user", content: userPrompt }],
+  });
+
+  const toolUseBlock = response.content.find((b) => b.type === "tool_use");
+  if (!toolUseBlock || toolUseBlock.type !== "tool_use") {
+    throw new Error(
+      `Claude returned no tool_use block (stop_reason=${response.stop_reason})`,
+    );
+  }
+
+  return {
+    data: toolUseBlock.input as T,
+    inputTokens: response.usage.input_tokens,
+    outputTokens: response.usage.output_tokens,
+    model,
+  };
+}
+
 interface ClaudeCallOptions {
   systemPrompt: string;
   userPrompt: string;

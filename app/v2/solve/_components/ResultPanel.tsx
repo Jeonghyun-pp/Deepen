@@ -137,16 +137,15 @@ export function ResultPanel({
         )}
 
         <footer className="mt-6 flex flex-wrap items-center justify-end gap-2">
-          {tone === "wrong" && (
+          {(tone === "wrong" || tone === "unsure") && onOpenRecap && (
             <button
               type="button"
               onClick={onOpenRecap}
-              disabled={!onOpenRecap}
               data-testid="open-recap"
-              className="rounded-md border border-black/15 bg-white px-4 py-2 text-sm text-black/75 hover:bg-black/[0.03] disabled:opacity-40 disabled:cursor-not-allowed"
+              className="rounded-md border border-amber-300 bg-amber-100 px-4 py-2 text-sm font-medium text-amber-900 hover:bg-amber-200"
               aria-label="리캡 보기"
             >
-              리캡 보기 (M1.4)
+              리캡 보기
             </button>
           )}
           <button

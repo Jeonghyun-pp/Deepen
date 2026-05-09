@@ -1,13 +1,14 @@
 "use client"
 
 /**
- * 풀이 화면 클라 컴포넌트 — 상태·제출·결과 흐름.
- * Spec: docs/build-spec/07-q1-build.md M1.3 SolveClient.
+ * 풀이 화면 클라 컴포넌트 — 상태·제출·결과·리캡 흐름.
+ * Spec: docs/build-spec/07-q1-build.md M1.3·M1.4.
  *
  * 흐름:
  *   begin(itemId) → 보기 선택 → 자신감 → 제출
  *   → /api/attempts → ResultPanel 오버레이
- *   → "다음 문제" 클릭 → 단순 history.back() (M1.6 추천 정책 도입 전)
+ *   → "리캡 보기" (recapNeeded 시) → RecapOverlay → 퀴즈 통과 → 같은 itemId 재도전
+ *   → 또는 "다음 문제" → router.back()
  *
  * 5칩 클릭은 placeholder modal — 실 호출은 M1.5.
  */
@@ -16,6 +17,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import type { ItemResponse } from "@/lib/api/schemas/items"
 import type { SubmitAttemptResponse } from "@/lib/api/schemas/attempts"
+import type { RecapDiagnoseCandidate } from "@/lib/api/schemas/recap"
 import { submitAttempt, ApiError } from "@/lib/clients/api"
 import { useSolveStore } from "@/app/v2/_components/store/solve-store"
 import { ItemBody } from "../_components/ItemBody"
@@ -24,6 +26,7 @@ import { Timer } from "../_components/Timer"
 import { HintButton } from "../_components/HintButton"
 import { ChipBar, type ChipKey } from "../_components/ChipBar"
 import { ResultPanel } from "../_components/ResultPanel"
+import { RecapOverlay } from "../_components/RecapOverlay"
 
 interface Props {
   item: ItemResponse
@@ -44,6 +47,8 @@ export function SolveClient({ item }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<SubmitAttemptResponse | null>(null)
   const [chipNotice, setChipNotice] = useState<ChipKey | null>(null)
+  const [recapCandidate, setRecapCandidate] =
+    useState<RecapDiagnoseCandidate | null>(null)
 
   useEffect(() => {
     begin(item.id)
@@ -85,6 +90,30 @@ export function SolveClient({ item }: Props) {
     setResult(null)
     // M1.6 추천 정책 도입 전: 단순히 뒤로 (보통 그래프 화면)
     router.back()
+  }
+
+  const handleOpenRecap = () => {
+    const cand = result?.diagnosis.candidatePrereq?.[0]
+    if (!cand) return
+    // RecapDiagnoseCandidate shape (signature 없음) — overlay 가 BuildCard 호출 시 patternId 만 필요.
+    setRecapCandidate({
+      patternId: cand.patternId,
+      patternLabel: cand.patternLabel,
+      grade: cand.grade,
+      deficitProb: cand.deficitProb,
+    })
+  }
+
+  const handleRecapPassed = () => {
+    // 통과 후 카드 onReturn 클릭 시 onClose → 같은 itemId 재도전 (begin 다시).
+    // 통과 즉시 재도전을 강제하지 않고 학생이 "원래 문제로 돌아가기" 누를 때 reset.
+  }
+
+  const handleRecapClose = () => {
+    setRecapCandidate(null)
+    setResult(null)
+    // 같은 itemId 로 재도전 — 카운터·타이머 reset.
+    begin(item.id)
   }
 
   const canSubmit = !!selectedAnswer && !submitting
@@ -132,12 +161,26 @@ export function SolveClient({ item }: Props) {
         </button>
       </footer>
 
-      {result && (
+      {result && !recapCandidate && (
         <ResultPanel
           result={result}
           onNextItem={handleNextItem}
           onClose={() => setResult(null)}
-          // onOpenRecap 은 M1.4 부터 활성. Q1 엔 disabled.
+          onOpenRecap={
+            result.diagnosis.recapNeeded &&
+            result.diagnosis.candidatePrereq?.[0]
+              ? handleOpenRecap
+              : undefined
+          }
+        />
+      )}
+
+      {recapCandidate && (
+        <RecapOverlay
+          candidate={recapCandidate}
+          triggerItemId={item.id}
+          onPassed={handleRecapPassed}
+          onClose={handleRecapClose}
         />
       )}
 
