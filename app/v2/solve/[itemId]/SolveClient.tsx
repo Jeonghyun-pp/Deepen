@@ -28,6 +28,7 @@ import { ChipBar, type ChipKey } from "../_components/ChipBar"
 import { ResultPanel } from "../_components/ResultPanel"
 import { RecapOverlay } from "../_components/RecapOverlay"
 import { CoachPanel } from "../_components/CoachPanel"
+import { GraphPanel } from "../_components/GraphPanel"
 import { useCoachStore } from "@/app/v2/_components/store/coach-store"
 
 interface Props {
@@ -47,6 +48,7 @@ export function SolveClient({ item }: Props) {
 
   const setCoachOpen = useCoachStore((s) => s.setOpen)
   const resetCoach = useCoachStore((s) => s.reset)
+  const highlightNodeIds = useCoachStore((s) => s.highlightNodeIds)
 
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -141,7 +143,12 @@ export function SolveClient({ item }: Props) {
         </div>
       </header>
 
-      <ItemBody item={item} />
+      <div className="grid gap-6 sm:grid-cols-[1fr_220px]">
+        <ItemBody item={item} />
+        <div className="hidden sm:block">
+          <GraphPanel itemId={item.id} highlightNodeIds={highlightNodeIds} />
+        </div>
+      </div>
 
       <section className="flex flex-col gap-4 rounded-lg border border-black/5 bg-white/60 p-4">
         <ConfidenceSlider />
