@@ -42,6 +42,9 @@ const schema = z.object({
   // App URL (선택, 메일/cron 콜백용)
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
 
+  // Cron 인증 — 프로덕션 cron 호출 시 Authorization: Bearer ${CRON_SECRET} 검증 (M3.3+).
+  CRON_SECRET: z.string().min(1).optional(),
+
   // OpenAlex (옛 PDF 메타데이터 보강 — 옵션). 검증 없이 통과 (구 product 잔재).
   OPENALEX_EMAIL: z.string().optional(),
 })

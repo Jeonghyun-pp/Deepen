@@ -209,6 +209,83 @@ export async function pickPracticeDefault(args: {
   }
 }
 
+/**
+ * M3.3 — practice 모드 ranking. baseItemId 의 cosine top-50 → 가중합 rerank →
+ * 상위 1개. baseItemId 임베딩 없으면 null 반환 (호출자가 default 로 fallback).
+ */
+export async function pickRankedNextForPractice(args: {
+  userId: string
+  baseItemId: string
+  excludeItemId?: string
+}): Promise<{
+  itemId: string
+  difficulty: number | null
+  scoreBreakdown: import("./score").ScoreBreakdown
+} | null> {
+  const { searchSimilarItems } = await import("@/lib/embeddings/cosine-search")
+  const { enrichItems, loadUserState } = await import("./enrich")
+  const { rankScore } = await import("./score")
+
+  // base 임베딩 확인
+  const [baseRow] = await db
+    .select({ embedding: nodes.textEmbedding })
+    .from(nodes)
+    .where(eq(nodes.id, args.baseItemId))
+    .limit(1)
+  if (!baseRow || !baseRow.embedding) return null
+
+  const RAW_K = 50
+  const candidates = await searchSimilarItems(args.baseItemId, RAW_K)
+  const filtered = args.excludeItemId
+    ? candidates.filter((c) => c.id !== args.excludeItemId)
+    : candidates
+  if (filtered.length === 0) return null
+
+  const enrichIds = [args.baseItemId, ...filtered.map((c) => c.id)]
+  const enriched = await enrichItems(enrichIds)
+  const base = enriched.get(args.baseItemId)
+  if (!base) return null
+
+  const userState = await loadUserState(args.userId)
+
+  let bestId: string | null = null
+  let bestDifficulty: number | null = null
+  let bestBreakdown: ReturnType<typeof rankScore> | null = null
+  let bestTotal = -Infinity
+
+  for (const c of filtered) {
+    const meta = enriched.get(c.id)
+    if (!meta) continue
+    const br = rankScore({
+      item: {
+        id: c.id,
+        signature: meta.signature,
+        patternIds: meta.patternIds,
+        requiresPrereq: meta.requiresPrereq,
+        cosineSimilarity: c.similarity,
+      },
+      base: {
+        signature: base.signature,
+        requiresPrereq: base.requiresPrereq,
+      },
+      user: userState,
+    })
+    if (br.total > bestTotal) {
+      bestTotal = br.total
+      bestId = c.id
+      bestDifficulty = c.itemDifficulty
+      bestBreakdown = br
+    }
+  }
+
+  if (!bestId || !bestBreakdown) return null
+  return {
+    itemId: bestId,
+    difficulty: bestDifficulty,
+    scoreBreakdown: bestBreakdown,
+  }
+}
+
 // ============================================================
 // helpers
 // ============================================================

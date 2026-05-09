@@ -11,6 +11,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:studio": "drizzle-kit studio",
+    "backfill:embeddings": "tsx scripts/backfill-embeddings.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },

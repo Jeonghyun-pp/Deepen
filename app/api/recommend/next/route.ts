@@ -18,6 +18,7 @@ import {
 import {
   pickChallengeItem,
   pickPracticeDefault,
+  pickRankedNextForPractice,
   pickRetryItem,
 } from "@/lib/recommend/policy"
 
@@ -32,6 +33,25 @@ export const POST = withAuth(
       body = NextRecommendRequest.parse(await request.json())
     } catch {
       return apiError.badRequest("validation_failed")
+    }
+
+    // M3.3: practice + baseItemId 면 ranked. base 임베딩 없으면 default fallback.
+    if (body.mode === "practice" && body.baseItemId) {
+      const ranked = await pickRankedNextForPractice({
+        userId: user.id,
+        baseItemId: body.baseItemId,
+        excludeItemId: body.excludeItemId,
+      })
+      if (ranked) {
+        const r: NextRecommendResponse = {
+          itemId: ranked.itemId,
+          reason: "ranked",
+          difficulty: ranked.difficulty,
+          scoreBreakdown: ranked.scoreBreakdown,
+        }
+        return Response.json(r, { status: 200 })
+      }
+      // 아래 default fallback 으로 fall-through
     }
 
     let pick: Awaited<ReturnType<typeof pickPracticeDefault>>

@@ -12,7 +12,11 @@ import {
   primaryKey,
   index,
   pgEnum,
+  vector,
 } from "drizzle-orm/pg-core"
+
+/** M3.3 — text-embedding-3-large @ 1536 dim. */
+export const EMBEDDING_DIMENSIONS = 1536
 
 // Supabase가 관리하는 auth.users 참조용 shadow 정의.
 // 직접 이 테이블에 쓰지 않고 FK 대상으로만 사용한다.
@@ -265,6 +269,11 @@ export const nodes = pgTable(
     itemAnswer: text("item_answer"),
 
     status: nodeStatusEnum("status").notNull().default("published"),
+
+    // M3.3 — pgvector cosine 검색용. NULL = 임베딩 미부여.
+    textEmbedding: vector("text_embedding", {
+      dimensions: EMBEDDING_DIMENSIONS,
+    }),
 
     meta: jsonb("meta").$type<Record<string, unknown>>(),
     whiteboardPos: jsonb("whiteboard_pos").$type<{ x: number; y: number }>(),
