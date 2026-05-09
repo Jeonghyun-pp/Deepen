@@ -57,6 +57,13 @@
       "when": 1778345000000,
       "tag": "0007_pgvector",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1778349000000,
+      "tag": "0008_parents_daily_challenges",
+      "breakpoints": true
     }
   ]
 }

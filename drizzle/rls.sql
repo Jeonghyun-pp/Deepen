@@ -73,7 +73,8 @@ begin
   foreach t in array array[
     'sessions', 'documents', 'document_jobs', 'document_processing_events',
     'chunks', 'edges', 'chunk_node_mappings', 'token_usage',
-    'user_item_history', 'pattern_state', 'ai_coach_calls'
+    'user_item_history', 'pattern_state', 'ai_coach_calls',
+    'daily_challenges'
   ]
   loop
     execute format('drop policy if exists "%I self all" on public.%I', t, t);

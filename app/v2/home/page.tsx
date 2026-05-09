@@ -16,6 +16,7 @@ import { nodes } from "@/lib/db/schema"
 import { COPY } from "@/lib/ui/copy"
 import { getActiveTier, getUsageStat } from "@/lib/billing/quota"
 import { QuotaCard } from "@/app/v2/billing/_components/QuotaCard"
+import { DailyChallengeBadge } from "@/app/v2/_components/DailyChallengeBadge"
 import { LogoutButton } from "./LogoutButton"
 
 export const dynamic = "force-dynamic"
@@ -57,6 +58,7 @@ export default async function HomePage() {
             DEEPEN
           </Link>
           <div className="flex items-center gap-3 text-xs text-black/55">
+            <DailyChallengeBadge />
             <QuotaCard
               tier={tier}
               used={usage.used}
@@ -133,6 +135,13 @@ export default async function HomePage() {
           <span className="text-black/25">·</span>
           <Link href="/v2/billing" className="hover:text-black/80 hover:underline">
             요금
+          </Link>
+          <span className="text-black/25">·</span>
+          <Link
+            href="/v2/settings/parents"
+            className="hover:text-black/80 hover:underline"
+          >
+            보호자 리포트
           </Link>
         </section>
       </div>

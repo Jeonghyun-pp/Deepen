@@ -11,6 +11,7 @@
 import { sql } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { embedNodesById } from "@/lib/embeddings/embed-node"
+import { checkCronAuth } from "@/lib/api/cron-auth"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -18,21 +19,10 @@ export const dynamic = "force-dynamic"
 const MAX_BATCHES_PER_INVOCATION = 5
 const BATCH_SIZE = 100
 
-function unauthorized() {
-  return Response.json({ error: "unauthorized" }, { status: 401 })
-}
-
 async function handle(request: Request) {
-  const cronSecret = process.env.CRON_SECRET
-  if (cronSecret) {
-    const auth = request.headers.get("authorization") ?? ""
-    if (!auth.startsWith("Bearer ") || auth.slice(7) !== cronSecret) {
-      return unauthorized()
-    }
-  }
-  // CRON_SECRET 미설정 시 dev/staging 만 허용
-  else if (process.env.NODE_ENV === "production") {
-    return unauthorized()
+  const auth = checkCronAuth(request)
+  if (!auth.ok) {
+    return Response.json({ error: auth.error }, { status: 401 })
   }
 
   if (!process.env.OPENAI_API_KEY) {

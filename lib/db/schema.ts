@@ -79,15 +79,62 @@ export const chunkContentTypeEnum = pgEnum("chunk_content_type", [
 // users — public.users (auth.users 확장)
 // ============================================================
 
-export const users = pgTable("users", {
-  id: uuid("id")
-    .primaryKey()
-    .references(() => authUsers.id, { onDelete: "cascade" }),
-  displayName: text("display_name"),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-})
+export const users = pgTable(
+  "users",
+  {
+    id: uuid("id")
+      .primaryKey()
+      .references(() => authUsers.id, { onDelete: "cascade" }),
+    displayName: text("display_name"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    // M3.4 — 보호자 (옵션 A: users 테이블 확장).
+    parentEmail: text("parent_email"),
+    parentConsentAt: timestamp("parent_consent_at", { withTimezone: true }),
+    parentUnsubscribedAt: timestamp("parent_unsubscribed_at", {
+      withTimezone: true,
+    }),
+    /** 매주 cron 멱등성용 — 같은 ISO week 에 두 번 발송 방지. */
+    lastParentReportSentAt: timestamp("last_parent_report_sent_at", {
+      withTimezone: true,
+    }),
+  },
+  (t) => [index("users_parent_consent_idx").on(t.parentConsentAt)],
+)
+
+// ============================================================
+// daily_challenges — M3.4. 매일 cron 결과 캐시 + 멱등성.
+// (user_id, generated_for_date) PK. items jsonb = 3개 challenge entry.
+// ============================================================
+
+export interface DailyChallengeItem {
+  itemId: string
+  patternId: string
+  patternLabel: string
+}
+
+export const dailyChallenges = pgTable(
+  "daily_challenges",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** ISO date 'YYYY-MM-DD' (KST 기준 발급일). */
+    generatedForDate: text("generated_for_date").notNull(),
+    items: jsonb("items").$type<DailyChallengeItem[]>().notNull(),
+    /** Haiku 가 생성한 short copy ('판별식 마무리 가자!' 등). */
+    copy: text("copy"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.generatedForDate] }),
+    index("daily_challenges_date_idx").on(t.generatedForDate),
+  ],
+)
 
 // ============================================================
 // sessions — 에이전트 챗 세션
@@ -624,6 +671,8 @@ export type Subscription = typeof subscriptions.$inferSelect
 export type NewSubscription = typeof subscriptions.$inferInsert
 export type Invoice = typeof invoices.$inferSelect
 export type NewInvoice = typeof invoices.$inferInsert
+export type DailyChallenge = typeof dailyChallenges.$inferSelect
+export type NewDailyChallenge = typeof dailyChallenges.$inferInsert
 
 // sql helper re-export (마이그레이션 후처리에서 사용)
 export { sql }
