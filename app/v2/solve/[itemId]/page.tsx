@@ -20,12 +20,20 @@ import { SolveClient } from "./SolveClient"
 
 interface Props {
   params: Promise<{ itemId: string }>
+  searchParams: Promise<{ mode?: string }>
 }
 
 export const dynamic = "force-dynamic"
 
-export default async function SolvePage({ params }: Props) {
+const ALLOWED_MODES = new Set(["practice", "exam", "recovery"])
+
+export default async function SolvePage({ params, searchParams }: Props) {
   const { itemId } = await params
+  const sp = await searchParams
+  const mode =
+    sp.mode && ALLOWED_MODES.has(sp.mode)
+      ? (sp.mode as "practice" | "exam" | "recovery")
+      : "practice"
 
   // RLS 정책 (status='published' OR user_id=auth.uid()) 통과 보장 위해
   // Supabase 세션 컨텍스트로 쿼리. requireUser 가 미인증 시 redirect.
@@ -71,5 +79,5 @@ export default async function SolvePage({ params }: Props) {
     patternIds: patternRows.map((r) => r.patternId),
   }
 
-  return <SolveClient item={itemPayload} userId={user.id} />
+  return <SolveClient item={itemPayload} userId={user.id} mode={mode} />
 }

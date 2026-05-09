@@ -95,6 +95,8 @@ end $$;
 drop policy if exists "nodes self all"     on public.nodes;
 drop policy if exists "nodes select"       on public.nodes;
 drop policy if exists "nodes write"        on public.nodes;
+drop policy if exists "nodes update"       on public.nodes;
+drop policy if exists "nodes delete"       on public.nodes;
 
 create policy "nodes select"
   on public.nodes
@@ -146,7 +148,45 @@ create policy "documents owner all"
   );
 
 -- ------------------------------------------------------------
--- 5. Storage 버킷 — 펜슬 풀이 drawing (private, M2.1)
+-- 5. View — user_wrong_note (M2.5 recovery 모드).
+--    Spec: 02-schema.md §2.
+--    파생 in_wrong_note:
+--      - result_history 에 wrong 1+ 존재
+--      - AND 마지막 wrong 이후 연속 정답 < 3
+-- ------------------------------------------------------------
+
+create or replace view public.user_wrong_note as
+select
+  uih.user_id,
+  uih.item_id,
+  uih.seen_count,
+  uih.last_solved_at,
+  uih.marked_difficult
+from public.user_item_history uih
+where exists (
+  select 1
+  from jsonb_array_elements(uih.result_history) elem
+  where elem->>'label' = 'wrong'
+)
+and (
+  select count(*)
+  from jsonb_array_elements(uih.result_history) with ordinality r(val, ord)
+  where r.ord > coalesce(
+    (
+      select max(ord2)
+      from jsonb_array_elements(uih.result_history) with ordinality r2(v2, ord2)
+      where v2->>'label' = 'wrong'
+    ),
+    0
+  )
+  and r.val->>'label' = 'correct'
+) < 3;
+
+-- View 는 RLS 가 직접 적용되지 않음 — 기반 테이블 (user_item_history) 의
+-- "self all" 정책이 자동으로 view 에도 적용된다.
+
+-- ------------------------------------------------------------
+-- 6. Storage 버킷 — 펜슬 풀이 drawing (private, M2.1)
 --    경로 규약: drawings/{user_id}/{item_id}.json (tldraw snapshot)
 -- ------------------------------------------------------------
 

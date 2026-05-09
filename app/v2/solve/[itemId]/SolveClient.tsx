@@ -38,10 +38,20 @@ import type { OcrResponse } from "@/lib/api/schemas/ocr"
 interface Props {
   item: ItemResponse
   userId: string
+  /** 'practice' | 'exam' | 'recovery' (M2.5). default 'practice'. */
+  mode?: "practice" | "exam" | "recovery"
+  /** exam 모드 — 자동 SUBMIT 시간 ms. 없으면 difficulty 기반 fallback. */
+  examTimeMs?: number
 }
 
-export function SolveClient({ item, userId }: Props) {
+export function SolveClient({
+  item,
+  userId,
+  mode = "practice",
+  examTimeMs,
+}: Props) {
   const router = useRouter()
+  const isExam = mode === "exam"
 
   const begin = useSolveStore((s) => s.begin)
   const elapsedMs = useSolveStore((s) => s.elapsedMs)
@@ -82,10 +92,11 @@ export function SolveClient({ item, userId }: Props) {
         itemId: item.id,
         selectedAnswer,
         timeMs: elapsedMs(),
-        hintsUsed,
-        aiQuestions,
+        // exam 시 hints/ai 강제 0 (서버도 거절하지만 클라 측에서도 lock)
+        hintsUsed: isExam ? 0 : hintsUsed,
+        aiQuestions: isExam ? 0 : aiQuestions,
         selfConfidence,
-        mode: "practice" as const,
+        mode,
         ...(pencilPng ? { ocrImageBase64: pencilPng } : {}),
       }
       const response = await submitAttempt(payload)
@@ -179,11 +190,31 @@ export function SolveClient({ item, userId }: Props) {
         <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-black/55">
           <span>풀이</span>
           <span className="text-black/30">·</span>
-          <span>연습 모드</span>
+          <span>
+            {mode === "exam"
+              ? "실전 모드"
+              : mode === "recovery"
+                ? "오답복구"
+                : "연습 모드"}
+          </span>
         </div>
         <div className="flex items-center gap-3">
-          <HintButton />
-          <Timer />
+          {!isExam && <HintButton />}
+          {isExam ? (
+            <ExamTimerInline
+              startedAt={Date.now()}
+              examTimeMs={
+                examTimeMs ?? 60_000 + (item.itemDifficulty ?? 0.5) * 120_000
+              }
+              onTimeUp={() => {
+                if (!submitting && selectedAnswer) {
+                  void handleSubmit()
+                }
+              }}
+            />
+          ) : (
+            <Timer />
+          )}
         </div>
       </header>
 
@@ -315,7 +346,44 @@ export function SolveClient({ item, userId }: Props) {
         />
       )}
 
-      <CoachPanel itemId={item.id} />
+      {!isExam && <CoachPanel itemId={item.id} />}
     </main>
+  )
+}
+
+/** exam 모드 카운트다운 — 0 도달 시 자동 SUBMIT 트리거. */
+function ExamTimerInline({
+  startedAt,
+  examTimeMs,
+  onTimeUp,
+}: {
+  startedAt: number
+  examTimeMs: number
+  onTimeUp: () => void
+}) {
+  const [remaining, setRemaining] = useState(examTimeMs)
+  useEffect(() => {
+    const tick = () => {
+      const left = Math.max(0, examTimeMs - (Date.now() - startedAt))
+      setRemaining(left)
+      if (left === 0) onTimeUp()
+    }
+    tick()
+    const id = setInterval(tick, 250)
+    return () => clearInterval(id)
+  }, [startedAt, examTimeMs, onTimeUp])
+
+  const sec = Math.floor(remaining / 1000)
+  const m = Math.floor(sec / 60)
+  const s = sec % 60
+  const danger = remaining < 10_000
+  return (
+    <div
+      className={`font-mono text-sm tabular-nums ${danger ? "text-rose-700 animate-pulse" : "text-black/70"}`}
+      data-testid="exam-timer"
+      aria-label="실전 모드 잔여 시간"
+    >
+      {m}:{String(s).padStart(2, "0")}
+    </div>
   )
 }

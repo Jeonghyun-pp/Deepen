@@ -52,6 +52,14 @@ export const POST = withAuth("POST /api/attempts", async (request, { user }) => 
     return apiError.badRequest("validation_failed")
   }
 
+  // M2.5 server-side mode enforcement.
+  // exam: ai_questions·hints 0 강제. 위변조 거절.
+  if (body.mode === "exam") {
+    if (body.aiQuestions > 0 || body.hintsUsed > 0) {
+      return apiError.badRequest("exam_mode_forbids_ai_or_hints")
+    }
+  }
+
   // 1) Item 조회 — type='item' + status='published'
   const [item] = await db
     .select({
@@ -197,12 +205,14 @@ export const POST = withAuth("POST /api/attempts", async (request, { user }) => 
     })
   }
 
-  // 8) diagnosis (M1.4 — Q1 단순 진단). 실전 모드는 recap 차단 (06-state-machines).
+  // 8) diagnosis (M1.4 + M2.3). 실전·챌린지 모드는 recap 차단 (06-state-machines).
   let diagnosis: SubmitAttemptResponse["diagnosis"] = {
     recapNeeded: false,
     candidatePrereq: [],
   }
-  if (body.mode === "practice" && (label === "wrong" || label === "unsure")) {
+  const recapAllowed =
+    body.mode === "practice" || body.mode === "recovery" || body.mode === "retry"
+  if (recapAllowed && (label === "wrong" || label === "unsure")) {
     const d = await diagnose({
       userId: user.id,
       currentItemId: body.itemId,

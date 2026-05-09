@@ -15,6 +15,7 @@ import { requireUser } from "@/lib/auth/require-user"
 import { db } from "@/lib/db"
 import { nodes, patternState } from "@/lib/db/schema"
 import { StudyMiniGraph } from "./StudyMiniGraph"
+import { ModeSelector } from "./ModeSelector"
 
 export const dynamic = "force-dynamic"
 
@@ -119,6 +120,7 @@ export default async function StudyUnitPage({ params }: Props) {
           </div>
 
           <aside className="flex flex-col gap-3">
+            <ModeSelector unitId={unitId} firstItemId={firstItem?.id ?? null} />
             <div className="rounded-xl border border-black/10 bg-white p-4">
               <p className="text-[11px] uppercase tracking-widest text-black/45">
                 학습 지도
