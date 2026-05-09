@@ -8,7 +8,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client"
 
 function LoginForm() {
   const searchParams = useSearchParams()
-  const redirect = searchParams.get("redirect") ?? "/graph"
+  const redirect = searchParams.get("redirect") ?? "/v2/home"
 
   const [email, setEmail] = useState("")
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(

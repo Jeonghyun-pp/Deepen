@@ -97,10 +97,25 @@ export function SolveClient({ item }: Props) {
     setCoachOpen(true)
   }
 
-  const handleNextItem = () => {
+  const handleNextItem = async () => {
     setResult(null)
-    // M1.6 추천 정책 도입 전: 단순히 뒤로 (보통 그래프 화면)
-    router.back()
+    // 다음 published Item 요청. 마지막이면 home 으로.
+    try {
+      const params = new URLSearchParams({ excludeItemId: item.id })
+      const res = await fetch(`/api/units/next-item?${params}`, {
+        credentials: "include",
+      })
+      if (res.ok) {
+        const data = (await res.json()) as { itemId: string | null }
+        if (data.itemId && data.itemId !== item.id) {
+          router.push(`/v2/solve/${data.itemId}`)
+          return
+        }
+      }
+    } catch {
+      /* fall through */
+    }
+    router.push("/v2/home")
   }
 
   const handleOpenRecap = () => {
