@@ -1,4 +1,4 @@
-import type { GraphData } from "@/app/graph/_data/types";
+import type { GraphData } from "@/lib/graph/data/types";
 import { count, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { nodes as nodesTable, edges as edgesTable } from "@/lib/db/schema";

@@ -1,4 +1,4 @@
-import type { GraphData } from "@/app/graph/_data/types";
+import type { GraphData } from "@/lib/graph/data/types";
 
 export interface ToolContext {
   graphData: GraphData;

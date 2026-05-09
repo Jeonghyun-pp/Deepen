@@ -5,7 +5,7 @@ import type {
   ToolResult,
   ApprovalItem,
 } from "./types";
-import type { GraphData } from "@/app/graph/_data/types";
+import type { GraphData } from "@/lib/graph/data/types";
 import { buildSystemPrompt } from "./prompt";
 import { callOpenAIWithTools } from "../clients/openai";
 import { TOOLS, getToolSchemas } from "./tools";

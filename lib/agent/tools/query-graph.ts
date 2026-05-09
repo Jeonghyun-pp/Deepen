@@ -1,6 +1,6 @@
 import type { Tool } from "./types";
-import type { GraphNode, GraphEdge, EdgeType, NodeType } from "@/app/graph/_data/types";
-import { getNeighbors, findNodeByLabel } from "@/app/graph/_data/projection";
+import type { GraphNode, GraphEdge, EdgeType, NodeType } from "@/lib/graph/data/types";
+import { getNeighbors, findNodeByLabel } from "@/lib/graph/data/projection";
 
 interface Args extends Record<string, unknown> {
   nodeId?: string;

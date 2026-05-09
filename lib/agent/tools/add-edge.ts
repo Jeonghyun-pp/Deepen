@@ -1,5 +1,5 @@
 import type { Tool } from "./types";
-import type { EdgeType, GraphEdge } from "@/app/graph/_data/types";
+import type { EdgeType, GraphEdge } from "@/lib/graph/data/types";
 import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { edges, nodes } from "@/lib/db/schema";

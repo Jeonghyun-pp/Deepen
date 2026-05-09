@@ -1,4 +1,4 @@
-import type { GraphData, GraphNode, GraphEdge } from "@/app/graph/_data/types"
+import type { GraphData, GraphNode, GraphEdge } from "@/lib/graph/data/types"
 import type { Node as DbNode, Edge as DbEdge } from "@/lib/db/schema"
 
 export function dbNodeToGraphNode(row: DbNode): GraphNode {

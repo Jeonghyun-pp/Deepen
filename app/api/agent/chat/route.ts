@@ -1,6 +1,6 @@
 import { runAgent } from "@/lib/agent/runner";
 import type { Message } from "@/lib/agent/types";
-import type { GraphData } from "@/app/graph/_data/types";
+import type { GraphData } from "@/lib/graph/data/types";
 import { requireUser } from "@/lib/auth/require-user";
 
 export const runtime = "nodejs";

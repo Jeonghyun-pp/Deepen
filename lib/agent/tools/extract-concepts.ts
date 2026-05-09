@@ -1,5 +1,5 @@
 import type { Tool } from "./types";
-import { findNodeByLabel } from "@/app/graph/_data/projection";
+import { findNodeByLabel } from "@/lib/graph/data/projection";
 
 interface Args extends Record<string, unknown> {
   paperId?: string;

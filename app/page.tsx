@@ -1,1 +1,5 @@
-export { default } from "./landing-v2/page";
+import { redirect } from "next/navigation";
+
+export default function RootPage() {
+  redirect("/v2");
+}

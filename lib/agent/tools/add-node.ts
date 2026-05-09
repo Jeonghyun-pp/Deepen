@@ -1,5 +1,5 @@
 import type { Tool } from "./types";
-import type { NodeType, GraphNode } from "@/app/graph/_data/types";
+import type { NodeType, GraphNode } from "@/lib/graph/data/types";
 import { db } from "@/lib/db";
 import { nodes } from "@/lib/db/schema";
 

@@ -1,5 +1,5 @@
 import type { Tool } from "./types";
-import { getPathBetween, findNodeByLabel } from "@/app/graph/_data/projection";
+import { getPathBetween, findNodeByLabel } from "@/lib/graph/data/projection";
 
 interface Args extends Record<string, unknown> {
   startId?: string;
