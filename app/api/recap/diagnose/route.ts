@@ -8,7 +8,7 @@ import {
   RecapDiagnoseRequest,
   type RecapDiagnoseResponse,
 } from "@/lib/api/schemas/recap"
-import { diagnoseQ1 } from "@/lib/recap/diagnose"
+import { diagnose } from "@/lib/recap/diagnose"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -23,7 +23,7 @@ export const POST = withAuth(
       return apiError.badRequest("validation_failed")
     }
 
-    const diagnosis = await diagnoseQ1({
+    const diagnosis = await diagnose({
       userId: user.id,
       currentItemId: body.currentItemId,
     })

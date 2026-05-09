@@ -36,7 +36,7 @@ import {
 } from "@/lib/grading/score"
 import { updateElo } from "@/lib/grading/elo"
 import { getItemTimeStat } from "@/lib/grading/time-stats"
-import { diagnoseQ1 } from "@/lib/recap/diagnose"
+import { diagnose } from "@/lib/recap/diagnose"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -203,7 +203,7 @@ export const POST = withAuth("POST /api/attempts", async (request, { user }) => 
     candidatePrereq: [],
   }
   if (body.mode === "practice" && (label === "wrong" || label === "unsure")) {
-    const d = await diagnoseQ1({
+    const d = await diagnose({
       userId: user.id,
       currentItemId: body.itemId,
     })

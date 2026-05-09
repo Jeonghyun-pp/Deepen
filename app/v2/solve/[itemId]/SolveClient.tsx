@@ -58,8 +58,8 @@ export function SolveClient({ item, userId }: Props) {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<SubmitAttemptResponse | null>(null)
-  const [recapCandidate, setRecapCandidate] =
-    useState<RecapDiagnoseCandidate | null>(null)
+  const [recapCandidates, setRecapCandidates] =
+    useState<RecapDiagnoseCandidate[] | null>(null)
   const [pencilPng, setPencilPng] = useState<string | null>(null)
   const [ocrResult, setOcrResult] = useState<OcrResponse | null>(null)
   const [ocrPending, setOcrPending] = useState(false)
@@ -129,24 +129,20 @@ export function SolveClient({ item, userId }: Props) {
   }
 
   const handleOpenRecap = () => {
-    const cand = result?.diagnosis.candidatePrereq?.[0]
-    if (!cand) return
-    // RecapDiagnoseCandidate shape (signature 없음) — overlay 가 BuildCard 호출 시 patternId 만 필요.
-    setRecapCandidate({
-      patternId: cand.patternId,
-      patternLabel: cand.patternLabel,
-      grade: cand.grade,
-      deficitProb: cand.deficitProb,
-    })
-  }
-
-  const handleRecapPassed = () => {
-    // 통과 후 카드 onReturn 클릭 시 onClose → 같은 itemId 재도전 (begin 다시).
-    // 통과 즉시 재도전을 강제하지 않고 학생이 "원래 문제로 돌아가기" 누를 때 reset.
+    const cands = result?.diagnosis.candidatePrereq ?? []
+    if (cands.length === 0) return
+    setRecapCandidates(
+      cands.map((c) => ({
+        patternId: c.patternId,
+        patternLabel: c.patternLabel,
+        grade: c.grade,
+        deficitProb: c.deficitProb,
+      })),
+    )
   }
 
   const handleRecapClose = () => {
-    setRecapCandidate(null)
+    setRecapCandidates(null)
     setResult(null)
     // 같은 itemId 로 재도전 — 카운터·타이머 reset.
     begin(item.id)
@@ -271,25 +267,27 @@ export function SolveClient({ item, userId }: Props) {
         </button>
       </footer>
 
-      {result && !recapCandidate && (
+      {result && !recapCandidates && (
         <ResultPanel
           result={result}
           onNextItem={handleNextItem}
           onClose={() => setResult(null)}
           onOpenRecap={
             result.diagnosis.recapNeeded &&
-            result.diagnosis.candidatePrereq?.[0]
+            (result.diagnosis.candidatePrereq?.length ?? 0) > 0
               ? handleOpenRecap
               : undefined
           }
         />
       )}
 
-      {recapCandidate && (
+      {recapCandidates && (
         <RecapOverlay
-          candidate={recapCandidate}
+          candidates={recapCandidates}
           triggerItemId={item.id}
-          onPassed={handleRecapPassed}
+          onAllPassed={() => {
+            /* 모두 통과 → onClose 가 자동 호출되며 재도전 흐름 진입 */
+          }}
           onClose={handleRecapClose}
         />
       )}

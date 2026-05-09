@@ -16,12 +16,13 @@
  *   - cumulative deficit_log 누적은 미적용 (M2.3 prereq_deficit_log 도입 시).
  */
 
-import { and, eq, gte, inArray, sql } from "drizzle-orm"
+import { and, count, eq, gte, inArray, sql } from "drizzle-orm"
 import { db } from "@/lib/db"
 import {
   edges,
   nodes,
   patternState,
+  prereqDeficitLog,
   userItemHistory,
 } from "@/lib/db/schema"
 import {
@@ -30,6 +31,11 @@ import {
   type Diagnosis,
   type DiagnosisCandidate,
 } from "./types"
+import { runBN } from "./bn-inference"
+import { buildRecapSequence } from "./sequence-builder"
+
+/** attempt count 임계 — 이 이상이면 BN 본격 (M2.3). 미만이면 Q1 단순 룰. */
+const BN_TOGGLE_ATTEMPT_THRESHOLD = 5
 
 const RECENT_WINDOW_DAYS = 7
 const RECENT_WRONG_CAP = 3
@@ -209,4 +215,138 @@ export function deficitScore(args: {
     (1 - args.theta) * 0.7 +
     Math.min(args.recentWrong / RECENT_WRONG_CAP, 1) * 0.3
   )
+}
+
+// ============================================================
+// M2.3 Q2 본격 BN 진단
+// ============================================================
+
+async function getUserAttemptCount(userId: string): Promise<number> {
+  const [row] = await db
+    .select({ value: count() })
+    .from(userItemHistory)
+    .where(eq(userItemHistory.userId, userId))
+  return Number(row?.value ?? 0)
+}
+
+async function fetchPatternMetas(
+  patternIds: string[],
+): Promise<Map<string, PatternMeta>> {
+  if (patternIds.length === 0) return new Map()
+  const rows = await db
+    .select({
+      id: nodes.id,
+      label: nodes.label,
+      grade: nodes.grade,
+      signature: nodes.signature,
+    })
+    .from(nodes)
+    .where(and(inArray(nodes.id, patternIds), eq(nodes.type, "pattern")))
+  return new Map(
+    rows.map((r) => [
+      r.id,
+      {
+        id: r.id,
+        label: r.label,
+        grade: r.grade,
+        signature: (r.signature as string[] | null) ?? null,
+      },
+    ]),
+  )
+}
+
+async function logCumulativeDeficit(args: {
+  userId: string
+  triggerItemId: string
+  cumulative: Map<string, number>
+  evidenceCount: number
+}): Promise<void> {
+  const rows = [...args.cumulative.entries()]
+    .filter(([, prob]) => prob >= 0.5) // 의미 있는 결손만 시계열 기록
+    .map(([patternId, deficitProbability]) => ({
+      userId: args.userId,
+      patternId,
+      triggerItemId: args.triggerItemId,
+      deficitProbability,
+      evidenceCount: args.evidenceCount,
+    }))
+  if (rows.length === 0) return
+  try {
+    await db.insert(prereqDeficitLog).values(rows)
+  } catch (e) {
+    console.warn("[diagnose] prereq_deficit_log 기록 실패", e)
+  }
+}
+
+export async function diagnoseQ2(args: {
+  userId: string
+  currentItemId: string
+}): Promise<Diagnosis> {
+  const bn = await runBN({
+    userId: args.userId,
+    currentItemId: args.currentItemId,
+  })
+
+  // Pattern→Pattern prereq edges (sequence-builder 토폴로지 정렬용)
+  const allPrereqEdges = await db
+    .select({ source: edges.sourceNodeId, target: edges.targetNodeId })
+    .from(edges)
+    .innerJoin(nodes, eq(nodes.id, edges.sourceNodeId))
+    .where(and(eq(edges.type, "prerequisite"), eq(nodes.type, "pattern")))
+
+  const sequence = buildRecapSequence({
+    immediate: bn.immediate,
+    patternEdges: allPrereqEdges,
+  })
+
+  // 누적 결손 prereq_deficit_log 기록 (비동기 실패 허용)
+  void logCumulativeDeficit({
+    userId: args.userId,
+    triggerItemId: args.currentItemId,
+    cumulative: bn.cumulative,
+    evidenceCount: bn.cumulative.size,
+  })
+
+  if (sequence.patternIds.length === 0) {
+    return { recapNeeded: false, candidates: [] }
+  }
+
+  const metas = await fetchPatternMetas(sequence.patternIds)
+  const candidates: DiagnosisCandidate[] = sequence.patternIds.map((pid) => {
+    const meta = metas.get(pid)
+    const prob =
+      bn.immediate.find((x) => x.patternId === pid)?.prob ??
+      bn.cumulative.get(pid) ??
+      0.5
+    return {
+      patternId: pid,
+      patternLabel: meta?.label ?? "",
+      grade: meta?.grade ?? null,
+      signature: meta?.signature ?? null,
+      deficitProb: prob,
+    }
+  })
+
+  return { recapNeeded: true, candidates }
+}
+
+/**
+ * Q1/Q2 진단 toggle. attempt count >= 5 면 BN, 미만이면 단순 룰.
+ * Spec: 04-algorithms §3.3 cold-start.
+ */
+export async function diagnose(args: {
+  userId: string
+  currentItemId: string
+}): Promise<Diagnosis> {
+  const attemptCount = await getUserAttemptCount(args.userId)
+  if (attemptCount >= BN_TOGGLE_ATTEMPT_THRESHOLD) {
+    try {
+      return await diagnoseQ2(args)
+    } catch (e) {
+      // BN 실패 (예: too_large) → Q1 단순 룰 fallback
+      console.warn("[diagnose] BN 실패 → Q1 fallback", e)
+      return diagnoseQ1(args)
+    }
+  }
+  return diagnoseQ1(args)
 }

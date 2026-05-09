@@ -486,6 +486,37 @@ export const aiCoachCalls = pgTable(
 )
 
 // ============================================================
+// prereq_deficit_log — Phase 3 BN 누적 결손 (M2.3).
+// 02-schema.md §5. (userId, patternId) 마다 attempt 별 새 row.
+// 조회 시 MAX(deficit_probability) over 최근 30일.
+// ============================================================
+
+export const prereqDeficitLog = pgTable(
+  "prereq_deficit_log",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    patternId: uuid("pattern_id")
+      .notNull()
+      .references(() => nodes.id, { onDelete: "cascade" }),
+    triggerItemId: uuid("trigger_item_id").references(() => nodes.id, {
+      onDelete: "set null",
+    }),
+    deficitProbability: real("deficit_probability").notNull(),
+    evidenceCount: integer("evidence_count").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("pdl_user_pattern_idx").on(t.userId, t.patternId),
+    index("pdl_user_created_idx").on(t.userId, t.createdAt),
+  ]
+)
+
+// ============================================================
 // 타입 export — API 레이어에서 재사용
 // ============================================================
 
@@ -516,6 +547,8 @@ export type PatternStateRow = typeof patternState.$inferSelect
 export type NewPatternState = typeof patternState.$inferInsert
 export type AiCoachCall = typeof aiCoachCalls.$inferSelect
 export type NewAiCoachCall = typeof aiCoachCalls.$inferInsert
+export type PrereqDeficitLogRow = typeof prereqDeficitLog.$inferSelect
+export type NewPrereqDeficitLog = typeof prereqDeficitLog.$inferInsert
 
 // sql helper re-export (마이그레이션 후처리에서 사용)
 export { sql }
