@@ -1,22 +1,19 @@
 /**
- * /v2/exam/[unitId] — 실전 모드 entry.
+ * /v2/exam/[unitId] — 실전 모드 batch 진입.
  * Spec: docs/build-spec/06-state-machines.md §2, M2.5.
  *
- * Q2 (M2.5) 단순화: 단원의 첫 published Item 을 mode='exam' 으로 redirect.
- *                   batch (N개 연속 풀이) 는 후속 작업.
+ * 흐름:
+ *   1. 5문제 선택 (cooling_window 7일 + in_wrong_note 제외 + 무작위)
+ *   2. /v2/solve/[firstId]?mode=exam&batch=<csv>&idx=0 redirect
+ *   3. SolveClient 가 batch params 따라 다음 item 으로 자동 진행
+ *   4. 마지막 idx=4 attempt 후 /v2/exam/[unitId]/result?items=<csv>
  *
- * exam UX (현재 작동):
- *   - SolveClient 가 mode='exam' 보면 ExamTimerInline 활성 + CoachPanel·
- *     HintButton 비활성. attempts payload mode='exam'.
- *   - 서버가 ai_questions·hints > 0 거절. recap 차단. 일반 채점 결과 표시.
- *
- * 후속:
- *   - batch (5문제 연속) + BatchResult 페이지
- *   - 시간 다 되면 자동 다음 문제로 이동
+ * Q2 단순화: 콘텐츠 5개 미만이면 가능한 만큼만 batch. 서버측 mode 강제는
+ *           /api/attempts 가 처리.
  */
 
 import { redirect } from "next/navigation"
-import { and, asc, eq } from "drizzle-orm"
+import { sql } from "drizzle-orm"
 import { requireUser } from "@/lib/auth/require-user"
 import { db } from "@/lib/db"
 import { nodes } from "@/lib/db/schema"
@@ -26,20 +23,49 @@ interface Props {
 }
 
 export const dynamic = "force-dynamic"
+export const EXAM_BATCH_SIZE = 5
 
 export default async function ExamPage({ params }: Props) {
-  await params // unitId 는 Q2 단일 단원 가정으로 무시 (필터 X)
-  await requireUser()
+  await params // unitId Q2 단일 가정으로 무시
+  const { user } = await requireUser()
 
-  const [first] = await db
-    .select({ id: nodes.id })
-    .from(nodes)
-    .where(and(eq(nodes.type, "item"), eq(nodes.status, "published")))
-    .orderBy(asc(nodes.createdAt))
-    .limit(1)
+  // cooling_window 적용 무작위 N개
+  const rows = (await db.execute(sql`
+    SELECT n.id
+    FROM ${nodes} n
+    WHERE n.type = 'item'
+      AND n.status = 'published'
+      AND n.id NOT IN (
+        SELECT item_id FROM user_item_history
+        WHERE user_id = ${user.id}
+          AND last_solved_at > NOW() - INTERVAL '7 days'
+      )
+      AND n.id NOT IN (
+        SELECT item_id FROM public.user_wrong_note
+        WHERE user_id = ${user.id}
+      )
+    ORDER BY RANDOM()
+    LIMIT ${EXAM_BATCH_SIZE}
+  `)) as unknown as { id: string }[]
 
-  if (!first) {
+  // 부족하면 cooling/wrong filter 풀어서 재시도
+  let items = rows
+  if (items.length < EXAM_BATCH_SIZE) {
+    const fallback = (await db.execute(sql`
+      SELECT id FROM ${nodes}
+      WHERE type = 'item' AND status = 'published'
+      ORDER BY RANDOM()
+      LIMIT ${EXAM_BATCH_SIZE}
+    `)) as unknown as { id: string }[]
+    items = fallback
+  }
+
+  if (items.length === 0) {
     redirect("/v2/home")
   }
-  redirect(`/v2/solve/${first.id}?mode=exam`)
+
+  const batchCsv = items.map((r) => r.id).join(",")
+  redirect(
+    `/v2/solve/${items[0].id}?mode=exam&batch=${encodeURIComponent(batchCsv)}&idx=0`,
+  )
 }

@@ -20,7 +20,7 @@ import { SolveClient } from "./SolveClient"
 
 interface Props {
   params: Promise<{ itemId: string }>
-  searchParams: Promise<{ mode?: string }>
+  searchParams: Promise<{ mode?: string; batch?: string; idx?: string }>
 }
 
 export const dynamic = "force-dynamic"
@@ -34,6 +34,11 @@ export default async function SolvePage({ params, searchParams }: Props) {
     sp.mode && ALLOWED_MODES.has(sp.mode)
       ? (sp.mode as "practice" | "exam" | "recovery")
       : "practice"
+
+  // exam batch URL 파싱
+  const batch =
+    mode === "exam" && sp.batch ? sp.batch.split(",").filter(Boolean) : null
+  const batchIdx = sp.idx ? Number(sp.idx) : 0
 
   // RLS 정책 (status='published' OR user_id=auth.uid()) 통과 보장 위해
   // Supabase 세션 컨텍스트로 쿼리. requireUser 가 미인증 시 redirect.
@@ -79,5 +84,13 @@ export default async function SolvePage({ params, searchParams }: Props) {
     patternIds: patternRows.map((r) => r.patternId),
   }
 
-  return <SolveClient item={itemPayload} userId={user.id} mode={mode} />
+  return (
+    <SolveClient
+      item={itemPayload}
+      userId={user.id}
+      mode={mode}
+      batch={batch}
+      batchIdx={Number.isFinite(batchIdx) ? batchIdx : 0}
+    />
+  )
 }

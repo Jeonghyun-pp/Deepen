@@ -54,6 +54,8 @@ export interface ResultPanelProps {
   onNextItem: () => void
   onOpenRecap?: () => void // M1.4 부터 활성
   onClose: () => void
+  /** exam batch 컨텍스트 — 진행 인디케이터·CTA 라벨 변경. */
+  batchProgress?: { idx: number; total: number; isLast: boolean } | null
 }
 
 export function ResultPanel({
@@ -61,6 +63,7 @@ export function ResultPanel({
   onNextItem,
   onOpenRecap,
   onClose,
+  batchProgress = null,
 }: ResultPanelProps) {
   const tone: Tone = result.attemptResult.label
   const styles = TONE_STYLES[tone]
@@ -165,7 +168,11 @@ export function ResultPanel({
             data-testid="next-item"
             className={`rounded-md px-4 py-2 text-sm font-medium text-white shadow-sm transition ${styles.cta}`}
           >
-            다음 문제
+            {batchProgress
+              ? batchProgress.isLast
+                ? "결과 보기 →"
+                : `다음 ${batchProgress.idx + 2}/${batchProgress.total}`
+              : "다음 문제"}
           </button>
         </footer>
       </div>

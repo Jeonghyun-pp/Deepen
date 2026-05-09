@@ -42,6 +42,10 @@ interface Props {
   mode?: "practice" | "exam" | "recovery"
   /** exam 모드 — 자동 SUBMIT 시간 ms. 없으면 difficulty 기반 fallback. */
   examTimeMs?: number
+  /** exam batch — itemId 배열. null 이면 단일 attempt. */
+  batch?: string[] | null
+  /** 현재 batch 인덱스 (0-base). */
+  batchIdx?: number
 }
 
 export function SolveClient({
@@ -49,9 +53,13 @@ export function SolveClient({
   userId,
   mode = "practice",
   examTimeMs,
+  batch = null,
+  batchIdx = 0,
 }: Props) {
   const router = useRouter()
   const isExam = mode === "exam"
+  const isBatch = isExam && batch !== null && batch.length > 1
+  const isLastInBatch = isBatch && batchIdx >= (batch?.length ?? 0) - 1
 
   const begin = useSolveStore((s) => s.begin)
   const elapsedMs = useSolveStore((s) => s.elapsedMs)
@@ -143,7 +151,22 @@ export function SolveClient({
 
   const handleNextItem = async () => {
     setResult(null)
-    // 다음 published Item 요청. 마지막이면 home 으로.
+
+    // exam batch — 다음 idx 또는 마지막이면 result 페이지로
+    if (isBatch && batch) {
+      if (isLastInBatch) {
+        router.push(
+          `/v2/exam/default/result?items=${encodeURIComponent(batch.join(","))}`,
+        )
+        return
+      }
+      const nextId = batch[batchIdx + 1]
+      const csv = encodeURIComponent(batch.join(","))
+      router.push(`/v2/solve/${nextId}?mode=exam&batch=${csv}&idx=${batchIdx + 1}`)
+      return
+    }
+
+    // 일반: 다음 published Item 요청. 마지막이면 home 으로.
     try {
       const params = new URLSearchParams({ excludeItemId: item.id })
       const res = await fetch(`/api/units/next-item?${params}`, {
@@ -197,6 +220,14 @@ export function SolveClient({
                 ? "오답복구"
                 : "연습 모드"}
           </span>
+          {isBatch && batch && (
+            <>
+              <span className="text-black/30">·</span>
+              <span data-testid="batch-progress">
+                {batchIdx + 1}/{batch.length}
+              </span>
+            </>
+          )}
         </div>
         <div className="flex items-center gap-3">
           {!isExam && <HintButton />}
@@ -331,6 +362,11 @@ export function SolveClient({
             (result.diagnosis.candidatePrereq?.length ?? 0) > 0
               ? handleOpenRecap
               : undefined
+          }
+          batchProgress={
+            isBatch && batch
+              ? { idx: batchIdx, total: batch.length, isLast: isLastInBatch }
+              : null
           }
         />
       )}
