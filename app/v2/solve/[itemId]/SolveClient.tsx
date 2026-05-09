@@ -30,8 +30,10 @@ import { RecapOverlay } from "../_components/RecapOverlay"
 import { CoachPanel } from "../_components/CoachPanel"
 import { GraphPanel } from "../_components/GraphPanel"
 import { PencilPanel } from "./_components/PencilPanel"
+import { OcrResultPanel } from "./_components/OcrResultPanel"
 import { useCoachStore } from "@/app/v2/_components/store/coach-store"
 import { errorCopyForCode } from "@/lib/ui/copy"
+import type { OcrResponse } from "@/lib/api/schemas/ocr"
 
 interface Props {
   item: ItemResponse
@@ -59,6 +61,9 @@ export function SolveClient({ item, userId }: Props) {
   const [recapCandidate, setRecapCandidate] =
     useState<RecapDiagnoseCandidate | null>(null)
   const [pencilPng, setPencilPng] = useState<string | null>(null)
+  const [ocrResult, setOcrResult] = useState<OcrResponse | null>(null)
+  const [ocrPending, setOcrPending] = useState(false)
+  const [ocrError, setOcrError] = useState<string | null>(null)
 
   useEffect(() => {
     begin(item.id)
@@ -169,9 +174,70 @@ export function SolveClient({ item, userId }: Props) {
           <PencilPanel
             itemId={item.id}
             userId={userId}
-            onExport={(png) => setPencilPng(png)}
-            onClearAttachment={() => setPencilPng(null)}
+            onExport={async (png) => {
+              setPencilPng(png)
+              setOcrError(null)
+              if (!png) {
+                setOcrResult(null)
+                return
+              }
+              setOcrPending(true)
+              try {
+                const res = await fetch("/api/ocr", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  credentials: "include",
+                  body: JSON.stringify({
+                    itemId: item.id,
+                    imageBase64: png,
+                  }),
+                })
+                if (!res.ok) {
+                  const err = (await res.json().catch(() => ({}))) as {
+                    error?: string
+                  }
+                  setOcrError(err.error ?? `http_${res.status}`)
+                  return
+                }
+                const data = (await res.json()) as OcrResponse
+                setOcrResult(data)
+              } catch (e) {
+                setOcrError((e as Error).message ?? "network_error")
+              } finally {
+                setOcrPending(false)
+              }
+            }}
+            onClearAttachment={() => {
+              setPencilPng(null)
+              setOcrResult(null)
+              setOcrError(null)
+            }}
           />
+          {ocrPending && (
+            <p className="text-xs text-black/55" data-testid="ocr-pending">
+              풀이 분석 중…
+            </p>
+          )}
+          {ocrError && (
+            <div
+              className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800"
+              role="alert"
+              data-testid="ocr-error"
+            >
+              {errorCopyForCode(ocrError)}
+            </div>
+          )}
+          {ocrResult && !ocrPending && (
+            <OcrResultPanel
+              ocr={ocrResult}
+              onAcceptAndGrade={() => handleSubmit()}
+              onRedraw={() => {
+                setOcrResult(null)
+                setPencilPng(null)
+              }}
+              onDismiss={() => setOcrResult(null)}
+            />
+          )}
         </div>
         <div className="hidden sm:block">
           <GraphPanel itemId={item.id} highlightNodeIds={highlightNodeIds} />

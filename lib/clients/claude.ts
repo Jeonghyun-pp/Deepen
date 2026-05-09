@@ -117,6 +117,88 @@ export async function streamClaude(
   }
 }
 
+/**
+ * Vision tool_use — 이미지 + tool 강제 단일 호출.
+ * Spec: 05-llm-prompts §6 (OCR).
+ */
+export interface ClaudeVisionToolCallOptions {
+  systemPrompt: string
+  userPrompt: string
+  /** PNG base64 (raw 또는 data URL prefix 모두 허용). */
+  imageBase64: string
+  imageMediaType?: "image/png" | "image/jpeg" | "image/webp"
+  tool: {
+    name: string
+    description: string
+    input_schema: Record<string, unknown>
+  }
+  maxTokens?: number
+  model?: string
+}
+
+export async function callClaudeVisionTool<T>(
+  options: ClaudeVisionToolCallOptions,
+): Promise<ClaudeToolCallResult<T>> {
+  const { systemPrompt, userPrompt, imageBase64, tool, maxTokens = 2048 } =
+    options
+  const model = options.model ?? DEFAULT_MODEL
+  const mediaType = options.imageMediaType ?? "image/png"
+
+  const cleanBase64 = imageBase64.startsWith("data:")
+    ? imageBase64.slice(imageBase64.indexOf(",") + 1)
+    : imageBase64
+
+  const response = await client.messages.create({
+    model,
+    max_tokens: maxTokens,
+    system: [
+      {
+        type: "text",
+        text: systemPrompt,
+        cache_control: { type: "ephemeral" },
+      },
+    ],
+    tools: [
+      {
+        name: tool.name,
+        description: tool.description,
+        input_schema: tool.input_schema as Anthropic.Tool["input_schema"],
+      },
+    ],
+    tool_choice: { type: "tool", name: tool.name },
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "image",
+            source: {
+              type: "base64",
+              media_type: mediaType,
+              data: cleanBase64,
+            },
+          },
+          { type: "text", text: userPrompt },
+        ],
+      },
+    ],
+  })
+
+  const toolUseBlock = response.content.find((b) => b.type === "tool_use")
+  if (!toolUseBlock || toolUseBlock.type !== "tool_use") {
+    throw new Error(
+      `Claude Vision returned no tool_use block (stop_reason=${response.stop_reason})`,
+    )
+  }
+
+  return {
+    data: toolUseBlock.input as T,
+    inputTokens: response.usage.input_tokens,
+    outputTokens: response.usage.output_tokens,
+    model,
+  }
+}
+
 export async function callClaudeTool<T>(
   options: ClaudeToolCallOptions,
 ): Promise<ClaudeToolCallResult<T>> {
