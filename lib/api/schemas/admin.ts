@@ -45,6 +45,54 @@ export const SeedQueueResponse = z.object({
 })
 export type SeedQueueResponse = z.infer<typeof SeedQueueResponse>
 
+// ────────── POST /api/admin/nodes (신규 생성) ──────────
+
+export const CreateNodeRequest = z
+  .object({
+    type: z.enum(["pattern", "item"]),
+    label: z.string().min(1).max(500),
+    grade: z.string().nullable().optional(),
+    displayLayer: z.enum(["concept", "pattern"]).nullable().optional(),
+    signature: z.array(z.string()).nullable().optional(),
+    isKiller: z.boolean().optional(),
+    frequencyRank: z.number().int().nullable().optional(),
+    avgCorrectRate: z.number().nullable().optional(),
+    itemSource: z.string().nullable().optional(),
+    itemYear: z.number().int().nullable().optional(),
+    itemNumber: z.number().int().nullable().optional(),
+    itemDifficulty: z.number().min(0).max(1).nullable().optional(),
+    itemAnswer: z.string().nullable().optional(),
+    itemSolution: z.string().nullable().optional(),
+    itemChoices: z.array(z.string()).nullable().optional(),
+  })
+  .refine(
+    (v) => {
+      if (v.type === "pattern") {
+        const itemFields = [
+          v.itemSource,
+          v.itemYear,
+          v.itemNumber,
+          v.itemDifficulty,
+          v.itemAnswer,
+          v.itemSolution,
+          v.itemChoices,
+        ]
+        return itemFields.every(
+          (f) => f === undefined || f === null,
+        )
+      }
+      // item: signature·grade UI alias 등은 무시
+      return true
+    },
+    { message: "pattern_must_not_have_item_fields" },
+  )
+export type CreateNodeRequest = z.infer<typeof CreateNodeRequest>
+
+export const CreateNodeResponse = z.object({
+  node: QueueNodeDto,
+})
+export type CreateNodeResponse = z.infer<typeof CreateNodeResponse>
+
 // ────────── PATCH /api/admin/nodes/[id] ──────────
 
 export const PatchNodeRequest = z.object({

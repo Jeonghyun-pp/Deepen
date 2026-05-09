@@ -186,6 +186,40 @@ export function SeedReviewClient() {
     }
   }
 
+  const handleCreate = async (type: "pattern" | "item") => {
+    setBusy(true)
+    try {
+      const placeholder =
+        type === "pattern" ? "새 유형 (라벨 수정)" : "새 문제 (본문 입력)"
+      const res = await fetch("/api/admin/nodes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          type,
+          label: placeholder,
+          ...(type === "pattern" ? { displayLayer: "pattern" } : {}),
+        }),
+      })
+      if (!res.ok) {
+        const err = (await res.json()) as { error?: string }
+        flash(`생성 실패: ${err.error ?? res.status}`)
+        return
+      }
+      const data = (await res.json()) as {
+        node: { id: string }
+      }
+      // 새로 만든 draft 가 큐 맨 앞에 들어오도록 status 'draft' 강제
+      setStatusFilter("draft")
+      setTypeFilter(type)
+      await refreshQueue()
+      setSelectedId(data.node.id)
+      flash(`${type === "pattern" ? "Pattern" : "Item"} 생성됨 — 라벨 수정`)
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const counts = useMemo(() => {
     const total = queue.length
     const patternCount = queue.filter((q) => q.type === "pattern").length
@@ -197,10 +231,34 @@ export function SeedReviewClient() {
     <main className="grid h-screen grid-cols-1 overflow-hidden md:grid-cols-[380px_1fr]">
       <aside className="flex flex-col border-r border-black/5 bg-zinc-50">
         <header className="border-b border-black/5 px-4 py-3">
-          <h1 className="text-sm font-semibold text-black/85">
-            시드 검수 — Q1 임시
-          </h1>
-          <p className="mt-0.5 text-[11px] text-black/55">
+          <div className="flex items-center justify-between">
+            <h1 className="text-sm font-semibold text-black/85">
+              시드 검수 — Q1 임시
+            </h1>
+            <div className="flex gap-1">
+              <button
+                type="button"
+                onClick={() => handleCreate("pattern")}
+                disabled={busy}
+                data-testid="create-pattern"
+                className="rounded-md border border-blue-200 bg-blue-50 px-2 py-1 text-[11px] font-medium text-blue-800 hover:bg-blue-100 disabled:opacity-40"
+                aria-label="새 Pattern 생성"
+              >
+                + 유형
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCreate("item")}
+                disabled={busy}
+                data-testid="create-item"
+                className="rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-[11px] font-medium text-amber-800 hover:bg-amber-100 disabled:opacity-40"
+                aria-label="새 Item 생성"
+              >
+                + 문제
+              </button>
+            </div>
+          </div>
+          <p className="mt-1 text-[11px] text-black/55">
             보이는 항목 {counts.total}개 (Pattern {counts.pattern} · Item {counts.item}) / 전체 {total}개
           </p>
         </header>
