@@ -9,8 +9,10 @@ import { useEffect, useState } from "react"
 import type {
   EdgeDto,
   NodeDetailResponse,
+  NodeSearchHitDto,
   PatchNodeRequest,
 } from "@/lib/api/schemas/admin"
+import { NodeSearch } from "./NodeSearch"
 
 export interface NodeEditorProps {
   detail: NodeDetailResponse
@@ -433,24 +435,41 @@ function EdgeSection({
   onAddEdge: NodeEditorProps["onAddEdge"]
   onRemoveEdge: (id: string) => Promise<void>
 }) {
-  const [otherId, setOtherId] = useState("")
   const [edgeType, setEdgeType] = useState<"prerequisite" | "contains">(
-    currentNode.type === "pattern" ? "prerequisite" : "contains",
+    "prerequisite",
   )
-
   const isPattern = currentNode.type === "pattern"
 
-  const handleAdd = async () => {
-    if (!otherId) return
-    // 방향: prerequisite 은 양쪽 다 Pattern 이라 source=current 를 default 로 둠
-    //         contains 는 current(Pattern) → other(Item)
-    if (edgeType === "contains" && !isPattern) return
+  // Pattern 만 source 로 엣지 추가 가능 (prerequisite·contains 둘 다 source=Pattern).
+  if (!isPattern) {
+    return (
+      <section className="mt-4 rounded-lg border border-black/10 bg-zinc-50 p-4">
+        <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-black/65">
+          엣지 관리
+        </h2>
+        <p className="mb-3 text-xs text-black/55">
+          Item 은 source 가 될 수 없습니다. Item 에 Pattern 을 태깅하려면 그
+          Pattern 을 열어 contains 엣지로 추가하세요.
+        </p>
+        <EdgeList
+          title="이 Item 으로 들어오는"
+          rows={incoming}
+          onRemove={onRemoveEdge}
+          busy={busy}
+        />
+      </section>
+    )
+  }
+
+  const targetType: "pattern" | "item" =
+    edgeType === "prerequisite" ? "pattern" : "item"
+
+  const handleSelect = async (hit: NodeSearchHitDto) => {
     await onAddEdge({
       sourceNodeId: currentNode.id,
-      targetNodeId: otherId,
+      targetNodeId: hit.id,
       type: edgeType,
     })
-    setOtherId("")
   }
 
   return (
@@ -459,40 +478,42 @@ function EdgeSection({
         엣지 관리
       </h2>
 
-      {isPattern && (
-        <div className="mb-4 flex flex-wrap items-end gap-2">
-          <Field label="추가" hint="이 Pattern → 대상 노드">
-            <input
-              value={otherId}
-              onChange={(e) => setOtherId(e.target.value.trim())}
-              placeholder="다른 노드 UUID"
-              className="w-72 rounded-md border border-black/10 px-3 py-2 font-mono text-xs"
-            />
-          </Field>
+      <div className="mb-4 flex flex-col gap-2">
+        <div className="flex items-center gap-2 text-xs text-black/65">
+          <span className="font-medium">종류</span>
           <select
             value={edgeType}
             onChange={(e) =>
               setEdgeType(e.target.value as "prerequisite" | "contains")
             }
-            className="rounded-md border border-black/10 px-2 py-2 text-sm"
+            className="rounded-md border border-black/10 px-2 py-1.5 text-sm"
+            data-testid="edge-type-select"
           >
-            <option value="prerequisite">prerequisite (선행)</option>
+            <option value="prerequisite">prerequisite (선행 Pattern)</option>
             <option value="contains">contains (Item 포함)</option>
           </select>
-          <button
-            type="button"
-            onClick={handleAdd}
-            disabled={busy || !otherId}
-            className="rounded-md bg-black px-3 py-2 text-sm text-white disabled:opacity-40"
-          >
-            추가
-          </button>
         </div>
-      )}
+        <NodeSearch
+          type={targetType}
+          excludeId={currentNode.id}
+          placeholder={
+            edgeType === "prerequisite"
+              ? "선행으로 등록할 Pattern 검색"
+              : "이 Pattern 에 포함할 Item 검색"
+          }
+          onSelect={handleSelect}
+        />
+        <p className="text-[11px] text-black/45">
+          검색 후 항목을 클릭하면 즉시 엣지가 추가됩니다.
+          {edgeType === "prerequisite"
+            ? " 사이클은 자동 거부됩니다."
+            : ""}
+        </p>
+      </div>
 
-      <EdgeList title="이 노드에서 나가는" rows={outgoing} onRemove={onRemoveEdge} busy={busy} />
+      <EdgeList title="이 Pattern 에서 나가는" rows={outgoing} onRemove={onRemoveEdge} busy={busy} />
       <EdgeList
-        title="이 노드로 들어오는"
+        title="이 Pattern 으로 들어오는"
         rows={incoming}
         onRemove={onRemoveEdge}
         busy={busy}

@@ -82,6 +82,34 @@ export const EdgeDto = z.object({
 })
 export type EdgeDto = z.infer<typeof EdgeDto>
 
+// ────────── /api/admin/nodes/search ──────────
+
+export const NodeSearchRequest = z.object({
+  q: z.string().max(200).default(""),
+  type: z.enum(["pattern", "item"]).optional(),
+  status: z.enum(["draft", "published", "any"]).default("any"),
+  excludeId: z.string().uuid().optional(),
+  limit: z.number().int().positive().max(50).default(10),
+})
+export type NodeSearchRequest = z.infer<typeof NodeSearchRequest>
+
+export const NodeSearchHitDto = z.object({
+  id: z.string().uuid(),
+  type: z.enum(["pattern", "item"]),
+  label: z.string(),
+  grade: z.string().nullable(),
+  displayLayer: z.enum(["concept", "pattern"]).nullable(),
+  itemSource: z.string().nullable(),
+  itemNumber: z.number().int().nullable(),
+  status: z.enum(["draft", "published"]),
+})
+export type NodeSearchHitDto = z.infer<typeof NodeSearchHitDto>
+
+export const NodeSearchResponse = z.object({
+  hits: z.array(NodeSearchHitDto),
+})
+export type NodeSearchResponse = z.infer<typeof NodeSearchResponse>
+
 // ────────── 단일 노드 + 엣지 조회 ──────────
 
 export const NodeDetailResponse = z.object({
