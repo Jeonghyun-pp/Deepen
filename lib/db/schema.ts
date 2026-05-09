@@ -8,6 +8,7 @@ import {
   timestamp,
   jsonb,
   real,
+  boolean,
   primaryKey,
   index,
   pgEnum,
@@ -24,15 +25,13 @@ export const authUsers = authSchema.table("users", {
 // Enums
 // ============================================================
 
-export const nodeTypeEnum = pgEnum("node_type", [
-  "paper",
-  "concept",
-  "technique",
-  "application",
-  "question",
-  "memo",
-  "document",
-])
+// M1.1: Pattern only. concept/technique/application은 display_layer='concept'로 통합,
+// question은 'item'으로. paper/memo/document는 옛 product 잔재라 폐기.
+export const nodeTypeEnum = pgEnum("node_type", ["pattern", "item"])
+
+export const displayLayerEnum = pgEnum("display_layer", ["concept", "pattern"])
+
+export const nodeStatusEnum = pgEnum("node_status", ["draft", "published"])
 
 // 학습 관점에서 의미 있는 3종만 유지.
 // prerequisite: 방향 O, 학습 순서(DAG) 핵심. A를 알아야 B 이해.
@@ -50,6 +49,20 @@ export const documentStatusEnum = pgEnum("document_status", [
   "extracting",
   "ready",
   "failed",
+])
+
+export const documentJobStatusEnum = pgEnum("document_job_status", [
+  "queued",
+  "running",
+  "succeeded",
+  "failed",
+  "canceled",
+])
+
+export const processingEventLevelEnum = pgEnum("processing_event_level", [
+  "info",
+  "warn",
+  "error",
 ])
 
 export const chunkContentTypeEnum = pgEnum("chunk_content_type", [
@@ -154,19 +167,106 @@ export const chunks = pgTable(
 // nodes — 그래프 노드
 // ============================================================
 
-export const nodes = pgTable(
-  "nodes",
+// ============================================================
+// document_jobs - durable processing queue for uploaded PDFs
+// ============================================================
+
+export const documentJobs = pgTable(
+  "document_jobs",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
+    documentId: uuid("document_id")
+      .notNull()
+      .references(() => documents.id, { onDelete: "cascade" }),
+    type: text("type").notNull().default("process_document"),
+    status: documentJobStatusEnum("status").notNull().default("queued"),
+    attemptCount: integer("attempt_count").notNull().default(0),
+    maxAttempts: integer("max_attempts").notNull().default(3),
+    lockedAt: timestamp("locked_at", { withTimezone: true }),
+    lockedBy: text("locked_by"),
+    startedAt: timestamp("started_at", { withTimezone: true }),
+    finishedAt: timestamp("finished_at", { withTimezone: true }),
+    nextRunAt: timestamp("next_run_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    errorMessage: text("error_message"),
+    meta: jsonb("meta").$type<Record<string, unknown>>(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("document_jobs_user_idx").on(t.userId),
+    index("document_jobs_document_idx").on(t.documentId),
+    index("document_jobs_status_next_run_idx").on(t.status, t.nextRunAt),
+  ]
+)
+
+export const documentProcessingEvents = pgTable(
+  "document_processing_events",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    jobId: uuid("job_id")
+      .notNull()
+      .references(() => documentJobs.id, { onDelete: "cascade" }),
+    documentId: uuid("document_id")
+      .notNull()
+      .references(() => documents.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    step: text("step").notNull(),
+    level: processingEventLevelEnum("level").notNull().default("info"),
+    message: text("message").notNull(),
+    meta: jsonb("meta").$type<Record<string, unknown>>(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("document_processing_events_job_idx").on(t.jobId),
+    index("document_processing_events_document_idx").on(t.documentId),
+    index("document_processing_events_user_idx").on(t.userId),
+  ]
+)
+
+export const nodes = pgTable(
+  "nodes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    // null = 시스템 콘텐츠 (전 사용자 공유). 학생 본인 콘텐츠는 user_id 채움.
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+    type: nodeTypeEnum("type").notNull().default("pattern"),
     label: text("label").notNull(),
-    type: nodeTypeEnum("type").notNull().default("concept"),
     content: text("content").notNull().default(""),
     tldr: text("tldr"),
+
+    // Pattern 전용 (type='pattern')
+    grade: text("grade"), // '중2','중3','고1','수Ⅱ','미적분' 등
+    displayLayer: displayLayerEnum("display_layer"), // 'concept' | 'pattern' UI alias
+    signature: jsonb("signature").$type<string[]>(), // sub-skill 목록
+    isKiller: boolean("is_killer").notNull().default(false),
+    frequencyRank: integer("frequency_rank"), // 1=가장 빈출
+    avgCorrectRate: real("avg_correct_rate"),
+
+    // Item 전용 (type='item')
+    itemSource: text("item_source"), // '2025수능','2024_9모','EBS' 등
+    itemYear: integer("item_year"),
+    itemNumber: integer("item_number"),
+    itemDifficulty: real("item_difficulty"), // 0.0~1.0
+    itemSolution: text("item_solution"),
+    itemChoices: jsonb("item_choices").$type<string[]>(),
+    itemAnswer: text("item_answer"),
+
+    status: nodeStatusEnum("status").notNull().default("published"),
+
     meta: jsonb("meta").$type<Record<string, unknown>>(),
-    // Whiteboard 뷰 전용 좌표 — reagraph 뷰는 무시
     whiteboardPos: jsonb("whiteboard_pos").$type<{ x: number; y: number }>(),
     sectionId: text("section_id"),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -176,7 +276,11 @@ export const nodes = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (t) => [index("nodes_user_idx").on(t.userId)]
+  (t) => [
+    index("nodes_user_idx").on(t.userId),
+    index("nodes_type_status_idx").on(t.type, t.status),
+    index("nodes_grade_idx").on(t.grade),
+  ]
 )
 
 // ============================================================
@@ -267,6 +371,121 @@ export const tokenUsage = pgTable(
 )
 
 // ============================================================
+// user_item_history — 학습자 풀이 누적 (오답 노트 파생)
+// 알고리즘 5-0. result_history는 attempt별 append-only.
+// ============================================================
+
+export type AttemptResult = {
+  label: "correct" | "wrong" | "unsure"
+  confidenceScore: number
+  reasonTags: ReasonTag[]
+  signals: {
+    correct: boolean
+    timeMs: number
+    timeZ: number
+    hintsUsed: number
+    aiQuestions: number
+    selfConfidence: "sure" | "mid" | "unsure"
+  }
+  timestamp: string // ISO8601
+}
+
+export type ReasonTag =
+  | "time_overrun"
+  | "hint_dependent"
+  | "prereq_deficit"
+  | "concept_lack"
+  | "pattern_misrecognition"
+  | "approach_error"
+  | "calculation_error"
+  | "condition_misread"
+  | "graph_misread"
+  | "logic_leap"
+
+export const userItemHistory = pgTable(
+  "user_item_history",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    itemId: uuid("item_id")
+      .notNull()
+      .references(() => nodes.id, { onDelete: "cascade" }),
+    seenCount: integer("seen_count").notNull().default(0),
+    lastSolvedAt: timestamp("last_solved_at", { withTimezone: true }),
+    resultHistory: jsonb("result_history")
+      .$type<AttemptResult[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    markedDifficult: boolean("marked_difficult").notNull().default(false),
+    userMemo: text("user_memo"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.itemId] }),
+    index("uih_user_idx").on(t.userId),
+    index("uih_last_solved_idx").on(t.userId, t.lastSolvedAt),
+  ]
+)
+
+// ============================================================
+// pattern_state — Pattern Elo 숙련도 (알고리즘 2-2)
+// theta 0~1 정규화 (sigmoid from Elo). beta는 Pattern 난이도.
+// ============================================================
+
+export const patternState = pgTable(
+  "pattern_state",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    patternId: uuid("pattern_id")
+      .notNull()
+      .references(() => nodes.id, { onDelete: "cascade" }),
+    theta: real("theta").notNull().default(0.5),
+    beta: real("beta").notNull().default(0.5),
+    attemptCount: integer("attempt_count").notNull().default(0),
+    lastUpdatedAt: timestamp("last_updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.patternId] }),
+    index("pattern_state_user_idx").on(t.userId),
+    index("pattern_state_theta_idx").on(t.userId, t.theta),
+  ]
+)
+
+// ============================================================
+// ai_coach_calls — 사용량 로깅 (M1.5).
+// 티어별 quota function (check_ai_quota)는 M3.1에서 추가.
+// ============================================================
+
+export const aiCoachCalls = pgTable(
+  "ai_coach_calls",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    itemId: uuid("item_id").references(() => nodes.id, { onDelete: "set null" }),
+    callType: text("call_type").notNull(), // 'chat' | 'suggest_chip' | 'hint' | 'classify'
+    promptTokens: integer("prompt_tokens").notNull().default(0),
+    completionTokens: integer("completion_tokens").notNull().default(0),
+    costUsd: real("cost_usd"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("aic_user_created_idx").on(t.userId, t.createdAt)]
+)
+
+// ============================================================
 // 타입 export — API 레이어에서 재사용
 // ============================================================
 
@@ -274,15 +493,29 @@ export type User = typeof users.$inferSelect
 export type Session = typeof sessions.$inferSelect
 export type Document = typeof documents.$inferSelect
 export type Chunk = typeof chunks.$inferSelect
+export type DocumentJob = typeof documentJobs.$inferSelect
+export type DocumentProcessingEvent =
+  typeof documentProcessingEvents.$inferSelect
 export type Node = typeof nodes.$inferSelect
 export type Edge = typeof edges.$inferSelect
 export type ChunkNodeMapping = typeof chunkNodeMappings.$inferSelect
 export type TokenUsage = typeof tokenUsage.$inferSelect
 
 export type NewDocument = typeof documents.$inferInsert
+export type NewDocumentJob = typeof documentJobs.$inferInsert
+export type NewDocumentProcessingEvent =
+  typeof documentProcessingEvents.$inferInsert
 export type NewNode = typeof nodes.$inferInsert
 export type NewEdge = typeof edges.$inferInsert
 export type NewChunk = typeof chunks.$inferInsert
+
+// 학습자 상태 (M1.1)
+export type UserItemHistoryRow = typeof userItemHistory.$inferSelect
+export type NewUserItemHistory = typeof userItemHistory.$inferInsert
+export type PatternStateRow = typeof patternState.$inferSelect
+export type NewPatternState = typeof patternState.$inferInsert
+export type AiCoachCall = typeof aiCoachCalls.$inferSelect
+export type NewAiCoachCall = typeof aiCoachCalls.$inferInsert
 
 // sql helper re-export (마이그레이션 후처리에서 사용)
 export { sql }

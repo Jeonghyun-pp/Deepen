@@ -5,15 +5,7 @@ import { apiError, withAuth } from "@/lib/api/handler"
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
-const NODE_TYPES = [
-  "paper",
-  "concept",
-  "technique",
-  "application",
-  "question",
-  "memo",
-  "document",
-] as const
+const NODE_TYPES = ["pattern", "item"] as const
 type NodeType = (typeof NODE_TYPES)[number]
 
 export const POST = withAuth("POST /api/nodes", async (request, { user }) => {
@@ -22,7 +14,7 @@ export const POST = withAuth("POST /api/nodes", async (request, { user }) => {
   const label = typeof body.label === "string" ? body.label.trim() : ""
   if (!label) return apiError.badRequest("label_required")
 
-  const type: NodeType = NODE_TYPES.includes(body.type) ? body.type : "concept"
+  const type: NodeType = NODE_TYPES.includes(body.type) ? body.type : "pattern"
 
   const [created] = await db
     .insert(nodes)

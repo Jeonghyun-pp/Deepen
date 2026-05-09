@@ -38,11 +38,17 @@ insert into public.users (id)
 alter table public.users                enable row level security;
 alter table public.sessions             enable row level security;
 alter table public.documents            enable row level security;
+alter table public.document_jobs        enable row level security;
+alter table public.document_processing_events enable row level security;
 alter table public.chunks               enable row level security;
 alter table public.nodes                enable row level security;
 alter table public.edges                enable row level security;
 alter table public.chunk_node_mappings  enable row level security;
 alter table public.token_usage          enable row level security;
+-- M1.1 신규 테이블
+alter table public.user_item_history    enable row level security;
+alter table public.pattern_state        enable row level security;
+alter table public.ai_coach_calls       enable row level security;
 
 -- ------------------------------------------------------------
 -- 3. 정책: 자기 데이터만 select/insert/update/delete
@@ -60,12 +66,14 @@ create policy "users self write"
   using (id = auth.uid())
   with check (id = auth.uid());
 
--- 나머지 테이블 공통 패턴
+-- 나머지 테이블 공통 패턴 (nodes 제외 — 아래 별도 정책)
 do $$
 declare t text;
 begin
   foreach t in array array[
-    'sessions', 'documents', 'chunks', 'nodes', 'edges', 'chunk_node_mappings', 'token_usage'
+    'sessions', 'documents', 'document_jobs', 'document_processing_events',
+    'chunks', 'edges', 'chunk_node_mappings', 'token_usage',
+    'user_item_history', 'pattern_state', 'ai_coach_calls'
   ]
   loop
     execute format('drop policy if exists "%I self all" on public.%I', t, t);
@@ -78,6 +86,40 @@ begin
     $p$, t, t);
   end loop;
 end $$;
+
+-- ------------------------------------------------------------
+-- 3-b. nodes — published 콘텐츠는 모두에게 보임 + 시스템 콘텐츠(user_id IS NULL) 허용
+--      쓰기는 본인 user_id 만.  (M1.1 + A-1(B)/A-2(B))
+-- ------------------------------------------------------------
+
+drop policy if exists "nodes self all"     on public.nodes;
+drop policy if exists "nodes select"       on public.nodes;
+drop policy if exists "nodes write"        on public.nodes;
+
+create policy "nodes select"
+  on public.nodes
+  for select
+  using (
+    status = 'published'
+    or user_id = auth.uid()
+    or user_id is null
+  );
+
+create policy "nodes write"
+  on public.nodes
+  for insert
+  with check (user_id = auth.uid());
+
+create policy "nodes update"
+  on public.nodes
+  for update
+  using (user_id = auth.uid())
+  with check (user_id = auth.uid());
+
+create policy "nodes delete"
+  on public.nodes
+  for delete
+  using (user_id = auth.uid());
 
 -- ------------------------------------------------------------
 -- 4. Storage 버킷 — PDF 업로드용 (private)

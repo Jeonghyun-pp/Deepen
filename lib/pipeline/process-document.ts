@@ -220,7 +220,9 @@ async function insertNodesAndMappings(
     }
   }
 
-  // 3) 신규만 insert
+  // 3) 신규만 insert.
+  // M1.1 + A-2 결정: LLM 추출 type을 DB enum(pattern|item)으로 매핑하고
+  //                  status='draft'로 — 어드민 검수(M2.6) 대기.
   if (toInsert.length > 0) {
     const created = await db
       .insert(nodesTable)
@@ -228,7 +230,14 @@ async function insertNodesAndMappings(
         toInsert.map((n) => ({
           userId,
           label: n.label.trim(),
-          type: n.type,
+          type: n.type === "question" ? ("item" as const) : ("pattern" as const),
+          displayLayer:
+            n.type === "concept" ||
+            n.type === "technique" ||
+            n.type === "application"
+              ? ("concept" as const)
+              : ("pattern" as const),
+          status: "draft" as const,
           content: "",
           tldr: n.tldr,
         }))

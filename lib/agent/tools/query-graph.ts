@@ -28,15 +28,7 @@ export const queryGraphTool: Tool<Args> = {
       },
       type: {
         type: "string",
-        enum: [
-          "paper",
-          "concept",
-          "technique",
-          "application",
-          "question",
-          "memo",
-          "document",
-        ],
+        enum: ["pattern", "item"],
         description: "특정 타입의 노드만 필터링",
       },
       relationType: {

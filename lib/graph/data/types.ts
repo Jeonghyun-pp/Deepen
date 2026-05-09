@@ -1,11 +1,7 @@
-export type NodeType =
-  | "paper"
-  | "concept"
-  | "technique"
-  | "application"
-  | "question"
-  | "memo"
-  | "document";
+// M1.1: DB nodeType enum과 동기화. UI 시각 alias는 displayLayer로.
+export type NodeType = "pattern" | "item";
+
+export type DisplayLayer = "concept" | "pattern";
 
 // 학습 관점 3종 (DB edge_type enum과 동기화).
 // prerequisite: A → B 학습 순서 (DAG)

@@ -42,7 +42,7 @@ export const extractConceptsTool: Tool<Args> = {
     for (const e of outgoing) {
       const target = nodeById.get(e.target);
       if (!target) continue;
-      if (target.type !== "concept" && target.type !== "technique") continue;
+      if (target.type !== "pattern") continue;
       concepts.push({ node: target, note: e.note, type: e.type });
     }
 

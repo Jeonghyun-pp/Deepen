@@ -21,15 +21,7 @@ export const addNodeTool: Tool<Args> = {
       label: { type: "string", description: "노드 라벨" },
       type: {
         type: "string",
-        enum: [
-          "paper",
-          "concept",
-          "technique",
-          "application",
-          "question",
-          "memo",
-          "document",
-        ],
+        enum: ["pattern", "item"],
       },
       content: { type: "string", description: "상세 설명" },
       tldr: { type: "string", description: "1-line 요약" },
