@@ -26,9 +26,12 @@ export interface CoachState {
   highlightNodeIds: string[]
   similarItems: { patternId: string; itemIds: string[] } | null
   quotaError: { limit: number; used: number } | null
+  /** M2.6 듀얼 모드 — PDF 드래그 → 코치 input 자동 채움. */
+  inputPrefill: string | null
 
   setOpen: (v: boolean) => void
   begin: (itemId: string) => void
+  setInputPrefill: (text: string | null) => void
   pushUser: (content: string) => string
   pushAssistant: (id: string) => void
   appendDelta: (id: string, delta: string) => void
@@ -53,6 +56,7 @@ export const useCoachStore = create<CoachState>((set) => ({
   highlightNodeIds: [],
   similarItems: null,
   quotaError: null,
+  inputPrefill: null,
 
   setOpen: (v) => set({ open: v }),
   begin: (itemId) =>
@@ -63,7 +67,9 @@ export const useCoachStore = create<CoachState>((set) => ({
       highlightNodeIds: [],
       similarItems: null,
       quotaError: null,
+      inputPrefill: null,
     }),
+  setInputPrefill: (text) => set({ inputPrefill: text }),
   pushUser: (content) => {
     const id = newId()
     set((s) => ({
@@ -120,5 +126,6 @@ export const useCoachStore = create<CoachState>((set) => ({
       highlightNodeIds: [],
       similarItems: null,
       quotaError: null,
+      inputPrefill: null,
     }),
 }))

@@ -90,15 +90,24 @@ export default async function StudyUnitPage({ params }: Props) {
               단원 코드: <span className="font-mono">{unitId}</span>
             </p>
           </div>
-          {firstItem && (
+          <div className="flex flex-wrap items-center gap-2">
             <Link
-              href={`/v2/solve/${firstItem.id}`}
-              data-testid="start-solve"
-              className="rounded-full bg-black px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-black/85"
+              href={`/v2/study/${unitId}/dual`}
+              data-testid="open-dual"
+              className="rounded-full border border-black/15 bg-white px-4 py-2 text-xs font-medium text-black/70 hover:bg-black/[0.03]"
             >
-              풀이 시작 →
+              듀얼 모드 (PDF + 지도 + 코치) →
             </Link>
-          )}
+            {firstItem && (
+              <Link
+                href={`/v2/solve/${firstItem.id}`}
+                data-testid="start-solve"
+                className="rounded-full bg-black px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-black/85"
+              >
+                풀이 시작 →
+              </Link>
+            )}
+          </div>
         </header>
 
         <section className="grid gap-6 md:grid-cols-[1fr_320px]">

@@ -38,6 +38,8 @@ export function CoachPanel({ itemId }: CoachPanelProps) {
   const setHighlight = useCoachStore((s) => s.setHighlight)
   const setSimilar = useCoachStore((s) => s.setSimilar)
   const quotaError = useCoachStore((s) => s.quotaError)
+  const inputPrefill = useCoachStore((s) => s.inputPrefill)
+  const setInputPrefill = useCoachStore((s) => s.setInputPrefill)
   const setQuotaError = useCoachStore((s) => s.setQuotaError)
 
   const bumpAiQuestions = useSolveStore((s) => s.bumpAiQuestions)
@@ -48,6 +50,16 @@ export function CoachPanel({ itemId }: CoachPanelProps) {
   useEffect(() => {
     begin(itemId)
   }, [itemId, begin])
+
+  // M2.6 듀얼 모드: PDF 드래그 → coach-store.inputPrefill → input 자동 채움.
+  // 학생이 검토 후 Enter 로 send.
+  useEffect(() => {
+    if (inputPrefill) {
+      setInput(inputPrefill)
+      setOpen(true)
+      setInputPrefill(null)
+    }
+  }, [inputPrefill, setInputPrefill, setOpen])
 
   useEffect(() => {
     if (scrollRef.current) {
