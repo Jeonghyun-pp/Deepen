@@ -37,6 +37,15 @@ import {
 import { updateElo } from "@/lib/grading/elo"
 import { getItemTimeStat } from "@/lib/grading/time-stats"
 import { diagnose } from "@/lib/recap/diagnose"
+import { measureRetryEffect } from "@/lib/recap/retry-effect"
+import {
+  CHALLENGE_LEVEL_UP_STREAK,
+  CHALLENGE_DIFFICULTY_STEP,
+} from "@/lib/session/challenge-machine"
+import type {
+  ChallengeMeta,
+  RetryEffect,
+} from "@/lib/api/schemas/attempts"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -57,6 +66,27 @@ export const POST = withAuth("POST /api/attempts", async (request, { user }) => 
   if (body.mode === "exam") {
     if (body.aiQuestions > 0 || body.hintsUsed > 0) {
       return apiError.badRequest("exam_mode_forbids_ai_or_hints")
+    }
+  }
+
+  // M3.2 challenge: ai/hint 금지 + ctx 필요.
+  if (body.mode === "challenge") {
+    if (body.aiQuestions > 0 || body.hintsUsed > 0) {
+      return apiError.badRequest("challenge_mode_forbids_ai_or_hints")
+    }
+    if (!body.challenge) {
+      return apiError.badRequest("challenge_meta_required")
+    }
+  }
+
+  // M3.2 retry: meta 필요. 위변조 방지 — recapPatternIds 의 prereq_deficit_log
+  // 가 user 본인 것임을 RLS 가 보장하므로 추가 검증은 후속 (Q3 후속).
+  if (body.mode === "retry") {
+    if (!body.retry) {
+      return apiError.badRequest("retry_meta_required")
+    }
+    if (body.retry.storedItemId !== body.itemId) {
+      return apiError.badRequest("retry_item_mismatch")
     }
   }
 
@@ -228,13 +258,57 @@ export const POST = withAuth("POST /api/attempts", async (request, { user }) => 
     }
   }
 
-  // 9) nextAction — recap 필요면 'recap', 아니면 'next_item' (M1.6 정책 본격).
-  const nextAction = diagnosis.recapNeeded
-    ? ({
-        type: "recap" as const,
-        payload: { candidates: diagnosis.candidatePrereq },
+  // 9) M3.2 mode 별 후처리.
+  let challengeMeta: ChallengeMeta | null = null
+  let retryEffect: RetryEffect[] | null = null
+
+  if (body.mode === "challenge" && body.challenge) {
+    const correctNow = label === "correct"
+    const streak = correctNow ? body.challenge.consecutiveCorrect + 1 : 0
+    const consecutiveWrong = correctNow ? 0 : body.challenge.consecutiveWrong + 1
+    const leveledUp = streak >= CHALLENGE_LEVEL_UP_STREAK
+    const difficultyDelta = correctNow
+      ? CHALLENGE_DIFFICULTY_STEP
+      : -CHALLENGE_DIFFICULTY_STEP
+    challengeMeta = {
+      streak,
+      streakTarget: 5,
+      consecutiveWrong,
+      difficultyDelta,
+      leveledUp,
+    }
+  }
+
+  if (body.mode === "retry" && body.retry) {
+    try {
+      retryEffect = await measureRetryEffect({
+        userId: user.id,
+        triggerItemId: body.itemId,
+        recapPatternIds: body.retry.recapPatternIds,
       })
-    : ({ type: "next_item" as const })
+    } catch (e) {
+      console.warn("[attempts] retry effect 측정 실패", e)
+      retryEffect = []
+    }
+  }
+
+  // 10) nextAction — mode 별 분기.
+  const nextAction: SubmitAttemptResponse["nextAction"] = (() => {
+    // challenge: leveledUp → level_up, 2회 연속 wrong → session_end, else next_item
+    if (body.mode === "challenge" && challengeMeta) {
+      if (challengeMeta.leveledUp) return { type: "level_up" }
+      if (challengeMeta.consecutiveWrong >= 2)
+        return { type: "session_end" }
+      return { type: "next_item" }
+    }
+    if (diagnosis.recapNeeded) {
+      return {
+        type: "recap",
+        payload: { candidates: diagnosis.candidatePrereq },
+      }
+    }
+    return { type: "next_item" }
+  })()
 
   const response: SubmitAttemptResponse = {
     attemptResult: {
@@ -247,6 +321,8 @@ export const POST = withAuth("POST /api/attempts", async (request, { user }) => 
       reasonTagsPending: label === "wrong",
       correctAnswer: item.itemAnswer ?? "",
       explanation: item.itemSolution ?? "",
+      challenge: challengeMeta,
+      retryEffect,
     },
     masteryUpdate: masteryUpdates,
     diagnosis,

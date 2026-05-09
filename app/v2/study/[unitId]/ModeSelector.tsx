@@ -43,8 +43,9 @@ const MODES: ModeOption[] = [
   {
     key: "challenge",
     label: "챌린지",
-    desc: "유형 5연속 정답 도전",
+    desc: "유형 5연속 정답 도전 (각 Pattern 옆 →)",
     href: null,
+    // M3.2: 진입은 Pattern 카드의 "챌린지 →" 버튼으로 함. 모드 카드는 안내만.
     enabled: false,
   },
 ]
@@ -84,12 +85,22 @@ export function ModeSelector({ unitId, firstItemId }: ModeSelectorProps) {
                 key={m.key}
                 className="flex flex-col gap-0.5 rounded-lg border border-dashed border-black/10 bg-zinc-50 px-3 py-2.5 opacity-70"
                 data-testid={`mode-${m.key}-disabled`}
-                title={!m.enabled ? "Q3 예정" : "콘텐츠 시드 후 활성"}
+                title={
+                  m.key === "challenge"
+                    ? "Pattern 옆 '챌린지 →' 버튼으로 진입"
+                    : !m.enabled
+                      ? "Q3 예정"
+                      : "콘텐츠 시드 후 활성"
+                }
               >
                 <span className="text-sm font-medium text-black/55">
                   {m.label}
                   <span className="ml-1 text-[10px] text-black/35">
-                    {!m.enabled ? "Q3" : "준비 중"}
+                    {m.key === "challenge"
+                      ? "유형별 →"
+                      : !m.enabled
+                        ? "Q3"
+                        : "준비 중"}
                   </span>
                 </span>
                 <span className="text-[11px] text-black/45">{m.desc}</span>

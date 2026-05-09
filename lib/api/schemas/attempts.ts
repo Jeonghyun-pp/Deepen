@@ -38,6 +38,23 @@ export const ReasonTag = z.enum([
 ])
 export type ReasonTag = z.infer<typeof ReasonTag>
 
+/** M3.2: mode='retry' 시 BN re-run 대상 prereq 들. */
+export const RetryAttemptMeta = z.object({
+  source: z.literal("recap_retry"),
+  storedItemId: z.string().uuid(),
+  recapPatternIds: z.array(z.string().uuid()).max(20),
+})
+export type RetryAttemptMeta = z.infer<typeof RetryAttemptMeta>
+
+/** M3.2: mode='challenge' 시 머신 ctx — 서버 enforcement 검증용. */
+export const ChallengeAttemptMeta = z.object({
+  targetPatternId: z.string().uuid(),
+  consecutiveCorrect: z.number().int().nonnegative(),
+  consecutiveWrong: z.number().int().nonnegative(),
+  difficulty: z.number().min(0).max(1),
+})
+export type ChallengeAttemptMeta = z.infer<typeof ChallengeAttemptMeta>
+
 export const SubmitAttemptRequest = z.object({
   itemId: z.string().uuid(),
   selectedAnswer: z.string().min(1),
@@ -47,6 +64,9 @@ export const SubmitAttemptRequest = z.object({
   selfConfidence: SelfConfidence,
   mode: SessionMode,
   ocrImageBase64: z.string().optional(), // M2.2+
+  /** M3.2 mode 별 ctx. */
+  retry: RetryAttemptMeta.optional(),
+  challenge: ChallengeAttemptMeta.optional(),
 })
 export type SubmitAttemptRequest = z.infer<typeof SubmitAttemptRequest>
 
@@ -78,6 +98,7 @@ export const NextActionType = z.enum([
   "recap",
   "review",
   "session_end",
+  "level_up", // M3.2: challenge 5연속 정답
 ])
 export type NextActionType = z.infer<typeof NextActionType>
 
@@ -86,6 +107,26 @@ export const NextAction = z.object({
   payload: z.record(z.string(), z.unknown()).optional(),
 })
 export type NextAction = z.infer<typeof NextAction>
+
+/** M3.2: challenge 모드 attempt 응답 — streak/leveledUp 클라 머신 동기화용. */
+export const ChallengeMeta = z.object({
+  streak: z.number().int().nonnegative(),
+  streakTarget: z.literal(5),
+  consecutiveWrong: z.number().int().nonnegative(),
+  difficultyDelta: z.number(),
+  leveledUp: z.boolean(),
+})
+export type ChallengeMeta = z.infer<typeof ChallengeMeta>
+
+/** M3.2: retry recap 효과 측정 결과 (BN re-run 결과). */
+export const RetryEffect = z.object({
+  patternId: z.string().uuid(),
+  patternLabel: z.string(),
+  deficitBefore: z.number(),
+  deficitAfter: z.number(),
+  delta: z.number(),
+})
+export type RetryEffect = z.infer<typeof RetryEffect>
 
 export const AttemptResultPayload = z.object({
   label: AttemptLabel,
@@ -98,6 +139,9 @@ export const AttemptResultPayload = z.object({
   reasonTagsPending: z.boolean(),
   correctAnswer: z.string(),
   explanation: z.string(),
+  /** M3.2 — mode 별 부가 정보 (해당 모드일 때만 채워짐). */
+  challenge: ChallengeMeta.nullable().optional(),
+  retryEffect: z.array(RetryEffect).nullable().optional(),
 })
 export type AttemptResultPayload = z.infer<typeof AttemptResultPayload>
 

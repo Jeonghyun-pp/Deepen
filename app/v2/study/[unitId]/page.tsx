@@ -16,6 +16,7 @@ import { db } from "@/lib/db"
 import { nodes, patternState } from "@/lib/db/schema"
 import { StudyMiniGraph } from "./StudyMiniGraph"
 import { ModeSelector } from "./ModeSelector"
+import { ChallengeEntry } from "./ChallengeEntry"
 
 export const dynamic = "force-dynamic"
 
@@ -156,6 +157,7 @@ interface PatternRowMeta {
   isKiller: boolean
   frequencyRank: number | null
   avgCorrectRate: number | null
+  displayLayer: string | null
 }
 
 function PatternGroup({
@@ -239,6 +241,13 @@ function PatternGroup({
                   </>
                 )}
                 {!state && <span className="text-black/35">미시작</span>}
+                {p.displayLayer !== "concept" && (
+                  <ChallengeEntry
+                    patternId={p.id}
+                    patternLabel={p.label}
+                    userTheta={theta}
+                  />
+                )}
               </div>
             </li>
           )

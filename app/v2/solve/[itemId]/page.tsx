@@ -20,25 +20,71 @@ import { SolveClient } from "./SolveClient"
 
 interface Props {
   params: Promise<{ itemId: string }>
-  searchParams: Promise<{ mode?: string; batch?: string; idx?: string }>
+  searchParams: Promise<{
+    mode?: string
+    batch?: string
+    idx?: string
+    pattern?: string
+    label?: string
+    anchor?: string
+    streak?: string
+    wrong?: string
+    cleared?: string
+    /** mode='retry' 시 BN re-run 대상 Pattern ids (CSV). */
+    recap?: string
+  }>
 }
 
 export const dynamic = "force-dynamic"
 
-const ALLOWED_MODES = new Set(["practice", "exam", "recovery"])
+const ALLOWED_MODES = new Set([
+  "practice",
+  "exam",
+  "recovery",
+  "challenge",
+  "retry",
+])
 
 export default async function SolvePage({ params, searchParams }: Props) {
   const { itemId } = await params
   const sp = await searchParams
   const mode =
     sp.mode && ALLOWED_MODES.has(sp.mode)
-      ? (sp.mode as "practice" | "exam" | "recovery")
+      ? (sp.mode as
+          | "practice"
+          | "exam"
+          | "recovery"
+          | "challenge"
+          | "retry")
       : "practice"
 
   // exam batch URL 파싱
   const batch =
     mode === "exam" && sp.batch ? sp.batch.split(",").filter(Boolean) : null
   const batchIdx = sp.idx ? Number(sp.idx) : 0
+
+  // M3.2 challenge ctx — URL 에서 추출 (새로고침 견고성).
+  const challengeCtx =
+    mode === "challenge" && sp.pattern
+      ? {
+          targetPatternId: sp.pattern,
+          patternLabel: sp.label ?? "",
+          startingDifficulty: sp.anchor ? Number(sp.anchor) : 0.5,
+          consecutiveCorrect: sp.streak ? Number(sp.streak) : 0,
+          consecutiveWrong: sp.wrong ? Number(sp.wrong) : 0,
+          levelsCleared: sp.cleared ? Number(sp.cleared) : 0,
+        }
+      : null
+
+  // M3.2 retry ctx — recap=PID,PID,...
+  const retryCtx =
+    mode === "retry" && sp.recap
+      ? {
+          storedItemId: itemId,
+          recapPatternIds: sp.recap.split(",").filter(Boolean),
+          storedItemLabel: sp.label ?? "",
+        }
+      : null
 
   // RLS 정책 (status='published' OR user_id=auth.uid()) 통과 보장 위해
   // Supabase 세션 컨텍스트로 쿼리. requireUser 가 미인증 시 redirect.
@@ -91,6 +137,8 @@ export default async function SolvePage({ params, searchParams }: Props) {
       mode={mode}
       batch={batch}
       batchIdx={Number.isFinite(batchIdx) ? batchIdx : 0}
+      challengeCtx={challengeCtx}
+      retryCtx={retryCtx}
     />
   )
 }

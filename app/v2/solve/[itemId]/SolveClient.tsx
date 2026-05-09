@@ -31,21 +31,48 @@ import { CoachPanel } from "../_components/CoachPanel"
 import { GraphPanel } from "../_components/GraphPanel"
 import { PencilPanel } from "./_components/PencilPanel"
 import { OcrResultPanel } from "./_components/OcrResultPanel"
+import { ChallengeProgress } from "./_components/ChallengeProgress"
+import { RetryPrompt } from "./_components/RetryPrompt"
 import { useCoachStore } from "@/app/v2/_components/store/coach-store"
 import { errorCopyForCode } from "@/lib/ui/copy"
 import type { OcrResponse } from "@/lib/api/schemas/ocr"
+import type { NextRecommendResponse } from "@/lib/api/schemas/recommend"
+import {
+  challengeReducer,
+  initialChallengeState,
+  type ChallengeState,
+} from "@/lib/session/challenge-machine"
+
+interface ChallengeCtx {
+  targetPatternId: string
+  patternLabel: string
+  startingDifficulty: number
+  consecutiveCorrect: number
+  consecutiveWrong: number
+  levelsCleared: number
+}
+
+interface RetryCtx {
+  storedItemId: string
+  recapPatternIds: string[]
+  storedItemLabel: string
+}
 
 interface Props {
   item: ItemResponse
   userId: string
-  /** 'practice' | 'exam' | 'recovery' (M2.5). default 'practice'. */
-  mode?: "practice" | "exam" | "recovery"
+  /** 'practice' | 'exam' | 'recovery' | 'challenge' | 'retry' (M2.5/M3.2). default 'practice'. */
+  mode?: "practice" | "exam" | "recovery" | "challenge" | "retry"
   /** exam 모드 — 자동 SUBMIT 시간 ms. 없으면 difficulty 기반 fallback. */
   examTimeMs?: number
   /** exam batch — itemId 배열. null 이면 단일 attempt. */
   batch?: string[] | null
   /** 현재 batch 인덱스 (0-base). */
   batchIdx?: number
+  /** M3.2 challenge ctx (URL 직렬화). */
+  challengeCtx?: ChallengeCtx | null
+  /** M3.2 retry ctx (URL 직렬화). */
+  retryCtx?: RetryCtx | null
 }
 
 export function SolveClient({
@@ -55,11 +82,31 @@ export function SolveClient({
   examTimeMs,
   batch = null,
   batchIdx = 0,
+  challengeCtx = null,
+  retryCtx = null,
 }: Props) {
   const router = useRouter()
   const isExam = mode === "exam"
+  const isChallenge = mode === "challenge"
+  const isRetry = mode === "retry"
   const isBatch = isExam && batch !== null && batch.length > 1
   const isLastInBatch = isBatch && batchIdx >= (batch?.length ?? 0) - 1
+  const aiHintLocked = isExam || isChallenge
+
+  const [challengeState, setChallengeState] = useState<ChallengeState>(() => {
+    if (!isChallenge || !challengeCtx) return initialChallengeState
+    return {
+      name: "solving",
+      ctx: {
+        targetPatternId: challengeCtx.targetPatternId,
+        patternLabel: challengeCtx.patternLabel,
+        currentDifficulty: challengeCtx.startingDifficulty,
+        consecutiveCorrect: challengeCtx.consecutiveCorrect,
+        consecutiveWrong: challengeCtx.consecutiveWrong,
+        levelsCleared: challengeCtx.levelsCleared,
+      },
+    }
+  })
 
   const begin = useSolveStore((s) => s.begin)
   const elapsedMs = useSolveStore((s) => s.elapsedMs)
@@ -100,15 +147,42 @@ export function SolveClient({
         itemId: item.id,
         selectedAnswer,
         timeMs: elapsedMs(),
-        // exam 시 hints/ai 강제 0 (서버도 거절하지만 클라 측에서도 lock)
-        hintsUsed: isExam ? 0 : hintsUsed,
-        aiQuestions: isExam ? 0 : aiQuestions,
+        // exam/challenge 시 hints/ai 강제 0 (서버도 거절하지만 클라 측에서도 lock)
+        hintsUsed: aiHintLocked ? 0 : hintsUsed,
+        aiQuestions: aiHintLocked ? 0 : aiQuestions,
         selfConfidence,
         mode,
         ...(pencilPng ? { ocrImageBase64: pencilPng } : {}),
+        ...(isChallenge && challengeState.name === "solving"
+          ? {
+              challenge: {
+                targetPatternId: challengeState.ctx.targetPatternId,
+                consecutiveCorrect: challengeState.ctx.consecutiveCorrect,
+                consecutiveWrong: challengeState.ctx.consecutiveWrong,
+                difficulty: challengeState.ctx.currentDifficulty,
+              },
+            }
+          : {}),
+        ...(isRetry && retryCtx
+          ? {
+              retry: {
+                source: "recap_retry" as const,
+                storedItemId: retryCtx.storedItemId,
+                recapPatternIds: retryCtx.recapPatternIds,
+              },
+            }
+          : {}),
       }
       const response = await submitAttempt(payload)
       setResult(response)
+
+      // M3.2 challenge: reducer 로 ctx 갱신 → next item 라우팅 시 사용
+      if (isChallenge) {
+        const correct = response.attemptResult.label === "correct"
+        setChallengeState((prev) =>
+          challengeReducer(prev, { type: "ATTEMPT", correct }),
+        )
+      }
 
       // M2.4: 오답 + AI 가용 시 follow-up classify-reasons (비동기, 응답 갱신)
       if (response.attemptResult.reasonTagsPending) {
@@ -166,6 +240,59 @@ export function SolveClient({
       return
     }
 
+    // M3.2 retry: 단일 attempt → 단원 진입으로
+    if (isRetry) {
+      router.push("/v2/study/default")
+      return
+    }
+
+    // M3.2 challenge: 머신 상태로 다음 단계 결정
+    if (isChallenge) {
+      if (challengeState.name === "session_end") {
+        router.push("/v2/study/default")
+        return
+      }
+      // level_up 은 ResultPanel 의 별도 CTA 에서 처리하지만, "다음" 클릭이면
+      // 동일 흐름. session_end 와 동일하게 단원으로 (다음 Pattern 추천은 후속).
+      if (challengeState.name === "level_up") {
+        router.push("/v2/study/default?leveledUp=1")
+        return
+      }
+      // solving — 같은 Pattern, difficulty=ctx.currentDifficulty 로 다음 Item
+      try {
+        const res = await fetch("/api/recommend/next", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            mode: "challenge",
+            targetPatternId: challengeState.ctx.targetPatternId,
+            difficultyAnchor: challengeState.ctx.currentDifficulty,
+          }),
+        })
+        if (res.ok) {
+          const data = (await res.json()) as NextRecommendResponse
+          if (data.itemId) {
+            const params = new URLSearchParams({
+              mode: "challenge",
+              pattern: challengeState.ctx.targetPatternId,
+              label: challengeState.ctx.patternLabel,
+              anchor: String(challengeState.ctx.currentDifficulty),
+              streak: String(challengeState.ctx.consecutiveCorrect),
+              wrong: String(challengeState.ctx.consecutiveWrong),
+              cleared: String(challengeState.ctx.levelsCleared),
+            })
+            router.push(`/v2/solve/${data.itemId}?${params.toString()}`)
+            return
+          }
+        }
+      } catch {
+        /* fall through */
+      }
+      router.push("/v2/study/default")
+      return
+    }
+
     // 일반: 다음 published Item 요청. 마지막이면 home 으로.
     try {
       const params = new URLSearchParams({ excludeItemId: item.id })
@@ -205,6 +332,33 @@ export function SolveClient({
     begin(item.id)
   }
 
+  // M3.2 RetryPrompt 표시: recap 모두 통과 + recapPatternIds 있을 때.
+  const [recapAllPassed, setRecapAllPassed] = useState(false)
+  const showRetryPrompt =
+    recapAllPassed &&
+    !!recapCandidates &&
+    recapCandidates.length > 0
+
+  const enterRetryMode = () => {
+    if (!recapCandidates) return
+    const pids = recapCandidates.map((c) => c.patternId).join(",")
+    const params = new URLSearchParams({
+      mode: "retry",
+      recap: pids,
+      label: item.label,
+    })
+    setRecapCandidates(null)
+    setRecapAllPassed(false)
+    router.push(`/v2/solve/${item.id}?${params.toString()}`)
+  }
+
+  const skipRetry = () => {
+    setRecapCandidates(null)
+    setRecapAllPassed(false)
+    setResult(null)
+    begin(item.id)
+  }
+
   const canSubmit = !!selectedAnswer && !submitting
 
   return (
@@ -218,7 +372,11 @@ export function SolveClient({
               ? "실전 모드"
               : mode === "recovery"
                 ? "오답복구"
-                : "연습 모드"}
+                : mode === "challenge"
+                  ? "챌린지"
+                  : mode === "retry"
+                    ? "재도전"
+                    : "연습 모드"}
           </span>
           {isBatch && batch && (
             <>
@@ -230,7 +388,7 @@ export function SolveClient({
           )}
         </div>
         <div className="flex items-center gap-3">
-          {!isExam && <HintButton />}
+          {!aiHintLocked && <HintButton />}
           {isExam ? (
             <ExamTimerInline
               startedAt={Date.now()}
@@ -248,6 +406,31 @@ export function SolveClient({
           )}
         </div>
       </header>
+
+      {isChallenge && (
+        <ChallengeProgress
+          streak={challengeState.ctx.consecutiveCorrect}
+          patternLabel={challengeState.ctx.patternLabel || "유형 챌린지"}
+          consecutiveWrong={challengeState.ctx.consecutiveWrong}
+          difficulty={challengeState.ctx.currentDifficulty}
+          onAbort={() => router.push("/v2/study/default")}
+        />
+      )}
+
+      {isRetry && retryCtx && (
+        <div
+          className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+          data-testid="retry-banner"
+        >
+          <span className="font-medium">재도전</span> · 같은 문제로 결손이
+          메워졌는지 확인합니다.
+          {retryCtx.recapPatternIds.length > 0 && (
+            <span className="ml-2 text-[11px] text-amber-800/80">
+              리캡 {retryCtx.recapPatternIds.length}장 통과
+            </span>
+          )}
+        </div>
+      )}
 
       <div className="grid gap-6 sm:grid-cols-[1fr_220px]">
         <div className="flex flex-col gap-6">
@@ -371,18 +554,30 @@ export function SolveClient({
         />
       )}
 
-      {recapCandidates && (
+      {recapCandidates && !showRetryPrompt && (
         <RecapOverlay
           candidates={recapCandidates}
           triggerItemId={item.id}
-          onAllPassed={() => {
-            /* 모두 통과 → onClose 가 자동 호출되며 재도전 흐름 진입 */
+          onAllPassed={() => setRecapAllPassed(true)}
+          onClose={() => {
+            // 통과한 상태면 RetryPrompt 가 뜨도록 candidates 유지.
+            // 통과 X 면 기존 흐름 (begin reset).
+            if (recapAllPassed) return
+            handleRecapClose()
           }}
-          onClose={handleRecapClose}
         />
       )}
 
-      {!isExam && <CoachPanel itemId={item.id} />}
+      {showRetryPrompt && recapCandidates && (
+        <RetryPrompt
+          storedItemLabel={item.label}
+          recapCardsPassed={recapCandidates.length}
+          onRetry={enterRetryMode}
+          onSkip={skipRetry}
+        />
+      )}
+
+      {!aiHintLocked && <CoachPanel itemId={item.id} />}
     </main>
   )
 }
