@@ -14,6 +14,8 @@ import { isAdminEmail } from "@/lib/auth/require-admin"
 import { db } from "@/lib/db"
 import { nodes } from "@/lib/db/schema"
 import { COPY } from "@/lib/ui/copy"
+import { getActiveTier, getUsageStat } from "@/lib/billing/quota"
+import { QuotaCard } from "@/app/v2/billing/_components/QuotaCard"
 import { LogoutButton } from "./LogoutButton"
 
 export const dynamic = "force-dynamic"
@@ -41,6 +43,8 @@ export default async function HomePage() {
   const itemTotal = Number(itemCount?.value ?? 0)
   const patternTotal = Number(patternCount?.value ?? 0)
   const isAdmin = isAdminEmail(user.email)
+  const tier = await getActiveTier(user.id)
+  const usage = await getUsageStat(user.id)
 
   return (
     <main className="min-h-screen bg-zinc-50 px-6 py-10">
@@ -53,6 +57,13 @@ export default async function HomePage() {
             DEEPEN
           </Link>
           <div className="flex items-center gap-3 text-xs text-black/55">
+            <QuotaCard
+              tier={tier}
+              used={usage.used}
+              limit={usage.limit}
+              resetAtIso={usage.resetAtIso}
+              variant="mini"
+            />
             <span>{user.email}</span>
             <LogoutButton />
           </div>
@@ -118,6 +129,10 @@ export default async function HomePage() {
           )}
           <Link href="/upload" className="hover:text-black/80 hover:underline">
             PDF 업로드
+          </Link>
+          <span className="text-black/25">·</span>
+          <Link href="/v2/billing" className="hover:text-black/80 hover:underline">
+            요금
           </Link>
         </section>
       </div>

@@ -148,6 +148,65 @@ create policy "documents owner all"
   );
 
 -- ------------------------------------------------------------
+-- 4-b. check_ai_quota function — M3.1 결제·티어.
+--      Free 평생 5회 / Pro 일 30회 (KST 자정 reset) / Pro+ 무제한.
+-- ------------------------------------------------------------
+
+create or replace function public.check_ai_quota(p_user_id uuid)
+returns boolean
+language plpgsql
+stable
+as $$
+declare
+  v_tier text;
+  v_used_today int;
+  v_used_lifetime int;
+begin
+  select tier::text into v_tier
+    from public.subscriptions
+    where user_id = p_user_id and status = 'active'
+    order by created_at desc
+    limit 1;
+  if v_tier is null then v_tier := 'free'; end if;
+
+  if v_tier = 'pro_plus' then
+    return true;
+  end if;
+
+  if v_tier = 'pro' then
+    select count(*) into v_used_today
+      from public.ai_coach_calls
+      where user_id = p_user_id
+        and call_type in ('chat', 'suggest_chip')
+        and created_at >= (current_date at time zone 'Asia/Seoul');
+    return v_used_today < 30;
+  end if;
+
+  -- free
+  select count(*) into v_used_lifetime
+    from public.ai_coach_calls
+    where user_id = p_user_id
+      and call_type in ('chat', 'suggest_chip');
+  return v_used_lifetime < 5;
+end;
+$$;
+
+-- subscriptions·invoices RLS
+alter table public.subscriptions enable row level security;
+alter table public.invoices      enable row level security;
+
+drop policy if exists "subscriptions self all" on public.subscriptions;
+create policy "subscriptions self all"
+  on public.subscriptions for all
+  using (user_id = auth.uid())
+  with check (user_id = auth.uid());
+
+drop policy if exists "invoices self read" on public.invoices;
+create policy "invoices self read"
+  on public.invoices for select
+  using (user_id = auth.uid());
+
+-- ------------------------------------------------------------
 -- 5. View — user_wrong_note (M2.5 recovery 모드).
 --    Spec: 02-schema.md §2.
 --    파생 in_wrong_note:

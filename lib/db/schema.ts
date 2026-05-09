@@ -486,6 +486,68 @@ export const aiCoachCalls = pgTable(
 )
 
 // ============================================================
+// subscriptions · invoices — Q3 (M3.1) 결제.
+// 02-schema §7. Free 평생 5회 / Pro 일 30회 / Pro+ 무제한.
+// ============================================================
+
+export const subscriptionTierEnum = pgEnum("subscription_tier", [
+  "free",
+  "pro",
+  "pro_plus",
+])
+
+export const subscriptionStatusEnum = pgEnum("subscription_status", [
+  "active",
+  "past_due",
+  "canceled",
+  "expired",
+])
+
+export const subscriptions = pgTable(
+  "subscriptions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    tier: subscriptionTierEnum("tier").notNull().default("free"),
+    status: subscriptionStatusEnum("status").notNull().default("active"),
+    tossCustomerKey: text("toss_customer_key"),
+    tossBillingKey: text("toss_billing_key"),
+    currentPeriodEnd: timestamp("current_period_end", { withTimezone: true }),
+    canceledAt: timestamp("canceled_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("sub_user_idx").on(t.userId)]
+)
+
+export const invoices = pgTable(
+  "invoices",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    subscriptionId: uuid("subscription_id").references(() => subscriptions.id, {
+      onDelete: "set null",
+    }),
+    amountKrw: integer("amount_krw").notNull(),
+    status: text("status").notNull(), // 'paid' | 'failed' | 'refunded'
+    tossPaymentKey: text("toss_payment_key"),
+    paidAt: timestamp("paid_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("inv_user_idx").on(t.userId)]
+)
+
+// ============================================================
 // prereq_deficit_log — Phase 3 BN 누적 결손 (M2.3).
 // 02-schema.md §5. (userId, patternId) 마다 attempt 별 새 row.
 // 조회 시 MAX(deficit_probability) over 최근 30일.
@@ -549,6 +611,10 @@ export type AiCoachCall = typeof aiCoachCalls.$inferSelect
 export type NewAiCoachCall = typeof aiCoachCalls.$inferInsert
 export type PrereqDeficitLogRow = typeof prereqDeficitLog.$inferSelect
 export type NewPrereqDeficitLog = typeof prereqDeficitLog.$inferInsert
+export type Subscription = typeof subscriptions.$inferSelect
+export type NewSubscription = typeof subscriptions.$inferInsert
+export type Invoice = typeof invoices.$inferSelect
+export type NewInvoice = typeof invoices.$inferInsert
 
 // sql helper re-export (마이그레이션 후처리에서 사용)
 export { sql }

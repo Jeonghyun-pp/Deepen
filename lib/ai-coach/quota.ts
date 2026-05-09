@@ -1,49 +1,47 @@
 /**
- * AI 코치 사용량 캡 — Q1 단순화.
+ * AI 코치 사용량 캡 — M3.1 본격 (Postgres function 위임).
  *
- * Q1: 모든 사용자 free tier (결제 미연결). Free=평생 5회 hard cap.
- * M3.1: subscriptions 테이블 + check_ai_quota Postgres function 으로 본격
- *       (Pro 일 30회 / Pro+ 무제한).
- *
- * Spec: docs/build-spec/04-algorithms.md §9 (FREE_LIFETIME=5),
- *       03-api-contracts.md §3 (429 QUOTA_EXCEEDED).
+ * Q1 hard cap (Free 5회) 가 lib/ai-coach 안에 inline 으로 있던 것을
+ * lib/billing/quota.ts (Postgres check_ai_quota function 호출) 로 위임.
+ * recordAiCall (call log insert) 는 그대로 유지.
  */
 
-import { and, count, eq, inArray } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { aiCoachCalls } from "@/lib/db/schema"
+import {
+  assertAiQuota,
+  QuotaExceededError,
+  type UsageStat,
+} from "@/lib/billing/quota"
 
-export const FREE_LIFETIME_CAP = 5
-
+/** 후방 호환: 기존 라우트가 import 하던 이름 그대로. */
 export class QuotaError extends Error {
-  constructor(public limit: number, public used: number) {
+  constructor(public limit: number | "unlimited", public used: number) {
     super("quota_exceeded")
     this.name = "QuotaError"
   }
 }
 
-const COUNTABLE_TYPES = ["chat", "suggest_chip"] as const
-
-export async function getUsage(userId: string): Promise<number> {
-  const [{ value }] = await db
-    .select({ value: count() })
-    .from(aiCoachCalls)
-    .where(
-      and(
-        eq(aiCoachCalls.userId, userId),
-        inArray(aiCoachCalls.callType, COUNTABLE_TYPES as unknown as string[]),
-      ),
-    )
-  return Number(value)
-}
-
-export async function assertQuota(userId: string): Promise<void> {
-  const used = await getUsage(userId)
-  if (used >= FREE_LIFETIME_CAP) {
-    throw new QuotaError(FREE_LIFETIME_CAP, used)
+/**
+ * AI 코치 호출 직전 게이트. 통과 시 UsageStat 반환 (응답 메타용).
+ * Postgres check_ai_quota function 이 truth source — Free 5회 평생,
+ * Pro 30회/일 (KST 자정 reset), Pro+ 무제한.
+ */
+export async function assertQuota(userId: string): Promise<UsageStat> {
+  try {
+    return await assertAiQuota(userId)
+  } catch (e) {
+    if (e instanceof QuotaExceededError) {
+      throw new QuotaError(e.limit, e.used)
+    }
+    throw e
   }
 }
 
+/**
+ * AI 호출 후 ai_coach_calls 에 row insert.
+ * 실패해도 본 흐름 막지 않음 (console.warn).
+ */
 export async function recordAiCall(args: {
   userId: string
   itemId?: string
