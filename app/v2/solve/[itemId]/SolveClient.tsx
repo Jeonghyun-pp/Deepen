@@ -29,6 +29,7 @@ import { ResultPanel } from "../_components/ResultPanel"
 import { RecapOverlay } from "../_components/RecapOverlay"
 import { CoachPanel } from "../_components/CoachPanel"
 import { GraphPanel } from "../_components/GraphPanel"
+import { PencilPanel } from "./_components/PencilPanel"
 import { useCoachStore } from "@/app/v2/_components/store/coach-store"
 import { errorCopyForCode } from "@/lib/ui/copy"
 
@@ -56,6 +57,7 @@ export function SolveClient({ item }: Props) {
   const [result, setResult] = useState<SubmitAttemptResponse | null>(null)
   const [recapCandidate, setRecapCandidate] =
     useState<RecapDiagnoseCandidate | null>(null)
+  const [pencilPng, setPencilPng] = useState<string | null>(null)
 
   useEffect(() => {
     begin(item.id)
@@ -78,6 +80,7 @@ export function SolveClient({ item }: Props) {
         aiQuestions,
         selfConfidence,
         mode: "practice" as const,
+        ...(pencilPng ? { ocrImageBase64: pencilPng } : {}),
       }
       const response = await submitAttempt(payload)
       setResult(response)
@@ -160,7 +163,14 @@ export function SolveClient({ item }: Props) {
       </header>
 
       <div className="grid gap-6 sm:grid-cols-[1fr_220px]">
-        <ItemBody item={item} />
+        <div className="flex flex-col gap-6">
+          <ItemBody item={item} />
+          <PencilPanel
+            itemId={item.id}
+            onExport={(png) => setPencilPng(png)}
+            onClearAttachment={() => setPencilPng(null)}
+          />
+        </div>
         <div className="hidden sm:block">
           <GraphPanel itemId={item.id} highlightNodeIds={highlightNodeIds} />
         </div>
