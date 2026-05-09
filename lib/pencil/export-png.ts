@@ -38,7 +38,11 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   })
 }
 
-function base64ByteSize(dataUrl: string): number {
+/**
+ * data URL 또는 raw base64 문자열의 디코딩 후 byte size 계산.
+ * 단위 테스트 위해 export.
+ */
+export function base64ByteSize(dataUrl: string): number {
   // data:image/png;base64,XXXX
   const comma = dataUrl.indexOf(",")
   const base64 = comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl

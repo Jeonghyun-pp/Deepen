@@ -144,3 +144,25 @@ create policy "documents owner all"
     bucket_id = 'documents'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
+
+-- ------------------------------------------------------------
+-- 5. Storage 버킷 — 펜슬 풀이 drawing (private, M2.1)
+--    경로 규약: drawings/{user_id}/{item_id}.json (tldraw snapshot)
+-- ------------------------------------------------------------
+
+insert into storage.buckets (id, name, public)
+values ('drawings', 'drawings', false)
+on conflict (id) do nothing;
+
+drop policy if exists "drawings owner all" on storage.objects;
+create policy "drawings owner all"
+  on storage.objects
+  for all
+  using (
+    bucket_id = 'drawings'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  )
+  with check (
+    bucket_id = 'drawings'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );

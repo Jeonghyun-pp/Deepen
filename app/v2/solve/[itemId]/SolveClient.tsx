@@ -35,9 +35,10 @@ import { errorCopyForCode } from "@/lib/ui/copy"
 
 interface Props {
   item: ItemResponse
+  userId: string
 }
 
-export function SolveClient({ item }: Props) {
+export function SolveClient({ item, userId }: Props) {
   const router = useRouter()
 
   const begin = useSolveStore((s) => s.begin)
@@ -167,6 +168,7 @@ export function SolveClient({ item }: Props) {
           <ItemBody item={item} />
           <PencilPanel
             itemId={item.id}
+            userId={userId}
             onExport={(png) => setPencilPng(png)}
             onClearAttachment={() => setPencilPng(null)}
           />

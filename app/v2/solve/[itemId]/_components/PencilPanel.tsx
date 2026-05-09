@@ -5,19 +5,18 @@
  * Spec: docs/build-spec/08-q2-build.md M2.1.
  *
  * 흐름:
- *   1. PencilCanvasHost mount → editor 인스턴스 보관
- *   2. PencilToolbar 토글 → editor.setStyleForNextShapes 로 색·굵기 적용
- *   3. "풀이 첨부" → exportDrawingToPng → onExport(base64)
- *   4. SolveClient 가 attempts payload.ocrImageBase64 에 담아 제출.
+ *   1. mount 시 Storage 에서 snapshot 로드 → editor.loadSnapshot 으로 복원
+ *   2. PencilToolbar 토글 → editor.setStyleForNextShapes (Q2 polish)
+ *   3. drawing 변경 시 debounce 2s → Storage 자동 저장
+ *   4. "풀이 첨부" → exportDrawingToPng → onExport(base64)
+ *   5. SolveClient 가 attempts payload.ocrImageBase64 에 담아 제출
  *
- * Q1 (M2.1) 미루기:
- *   - Storage persistence (drawings/{userId}/{itemId}.json) → 후속
- *   - autosave debounce 2s → 후속
- *   - tldraw user preferences (pen-only 모드) → 후속
+ * 새로고침 후 같은 itemId 진입 → 자동 복원. 다른 사용자는 RLS 로 격리.
  */
 
-import { useCallback, useRef, useState } from "react"
-import type { Editor } from "tldraw"
+import { useCallback, useEffect, useRef, useState } from "react"
+import type { Editor, TLEditorSnapshot } from "tldraw"
+import { getSnapshot } from "tldraw"
 import { PencilCanvasHost } from "@/lib/pencil/canvas-host"
 import {
   exportDrawingToPng,
@@ -25,36 +24,94 @@ import {
   ExportTooLargeError,
 } from "@/lib/pencil/export-png"
 import {
+  loadDrawingSnapshot,
+  saveDrawingSnapshot,
+  deleteDrawingSnapshot,
+} from "@/lib/pencil/persistence"
+import {
   DEFAULT_COLOR,
   DEFAULT_SIZE,
-  PEN_COLORS,
-  PEN_SIZES,
   type PenColorKey,
   type PenSizeKey,
 } from "@/lib/pencil/tools-config"
 import { PencilToolbar } from "./PencilToolbar"
 
+const AUTOSAVE_DEBOUNCE_MS = 2000
+
 export interface PencilPanelProps {
   itemId: string
+  userId: string
   /** "풀이 첨부" 클릭 시 PNG base64 를 SolveClient 가 받는다. */
   onExport: (pngBase64: string | null) => void
   /** 빈 캔버스로 첨부 해제. */
   onClearAttachment?: () => void
 }
 
-export function PencilPanel({ itemId, onExport, onClearAttachment }: PencilPanelProps) {
+type LoadStatus = "idle" | "loading" | "loaded" | "error"
+
+export function PencilPanel({
+  itemId,
+  userId,
+  onExport,
+  onClearAttachment,
+}: PencilPanelProps) {
   const editorRef = useRef<Editor | null>(null)
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [color, setColor] = useState<PenColorKey>(DEFAULT_COLOR)
   const [size, setSize] = useState<PenSizeKey>(DEFAULT_SIZE)
   const [exporting, setExporting] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [attached, setAttached] = useState(false)
+  const [savedAt, setSavedAt] = useState<number | null>(null)
+
+  // 1) mount 시 1회 Storage 로드 (initialSnapshot prop 으로 host 에 전달)
+  const [loadStatus, setLoadStatus] = useState<LoadStatus>("idle")
+  const [initialSnapshot, setInitialSnapshot] =
+    useState<TLEditorSnapshot | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    setLoadStatus("loading")
+    ;(async () => {
+      try {
+        const snap = await loadDrawingSnapshot({ userId, itemId })
+        if (!cancelled) {
+          setInitialSnapshot(snap)
+          setLoadStatus("loaded")
+        }
+      } catch {
+        if (!cancelled) setLoadStatus("error")
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [userId, itemId])
+
+  // 2) 변경 시 debounced autosave
+  const handleChange = useCallback(
+    (editor: Editor) => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+      saveTimerRef.current = setTimeout(() => {
+        const snap = getSnapshot(editor.store)
+        void saveDrawingSnapshot({ userId, itemId, snapshot: snap }).then(
+          () => setSavedAt(Date.now()),
+        )
+      }, AUTOSAVE_DEBOUNCE_MS)
+    },
+    [userId, itemId],
+  )
+
+  // unmount 시 timer cleanup
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+    }
+  }, [])
 
   const handleMount = useCallback((editor: Editor) => {
     editorRef.current = editor
-    // tldraw v5 setStyleForNextShapes API 가 버전마다 변동되므로 색·굵기는
-    // 우리 툴바에서만 표시하고 실제 적용은 polish 단계에서 (Q1 데모는
-    // tldraw 기본 검정·중간 굵기). Q2 polish 에서 setStyle 호출 추가.
+    // 색·굵기 실 적용은 Q2 polish (setStyleForNextShapes API 변동).
   }, [])
 
   const handleClear = () => {
@@ -65,6 +122,9 @@ export function PencilPanel({ itemId, onExport, onClearAttachment }: PencilPanel
     setAttached(false)
     setErrorMsg(null)
     onClearAttachment?.()
+    // Storage 의 stored snapshot 도 정리
+    void deleteDrawingSnapshot({ userId, itemId })
+    setSavedAt(null)
   }
 
   const handleExport = async () => {
@@ -104,11 +164,29 @@ export function PencilPanel({ itemId, onExport, onClearAttachment }: PencilPanel
         onExport={handleExport}
       />
       <div className="relative h-[420px] w-full">
-        <PencilCanvasHost onMount={handleMount} />
+        {loadStatus === "loaded" && (
+          <PencilCanvasHost
+            onMount={handleMount}
+            onChange={handleChange}
+            initialSnapshot={initialSnapshot}
+          />
+        )}
+        {loadStatus === "loading" && (
+          <div className="flex h-full items-center justify-center text-xs text-black/45">
+            이전 풀이 불러오는 중…
+          </div>
+        )}
+        {loadStatus === "error" && (
+          <div className="flex h-full items-center justify-center text-xs text-rose-700">
+            풀이 데이터 로드 실패. 새로 시작합니다.
+          </div>
+        )}
       </div>
       <footer className="flex flex-wrap items-center justify-between gap-2 border-t border-black/5 bg-zinc-50 px-3 py-2 text-[11px] text-black/55">
         <span>
-          itemId <span className="font-mono text-[10px]">{itemId.slice(0, 8)}…</span>
+          {savedAt
+            ? `자동 저장됨 ${new Date(savedAt).toLocaleTimeString("ko-KR", { hour12: false })}`
+            : "자동 저장 대기"}
         </span>
         {attached && (
           <span

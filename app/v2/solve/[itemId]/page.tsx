@@ -29,7 +29,7 @@ export default async function SolvePage({ params }: Props) {
 
   // RLS 정책 (status='published' OR user_id=auth.uid()) 통과 보장 위해
   // Supabase 세션 컨텍스트로 쿼리. requireUser 가 미인증 시 redirect.
-  await requireUser()
+  const { user } = await requireUser()
 
   const [item] = await db
     .select()
@@ -71,5 +71,5 @@ export default async function SolvePage({ params }: Props) {
     patternIds: patternRows.map((r) => r.patternId),
   }
 
-  return <SolveClient item={itemPayload} />
+  return <SolveClient item={itemPayload} userId={user.id} />
 }
