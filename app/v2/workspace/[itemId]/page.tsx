@@ -1,0 +1,156 @@
+/**
+ * /v2/workspace/[itemId] — 통합 워크스페이스 (Phase 1A 셸).
+ *
+ * 13 lock 결정사항: project_workspace_v0_lock_decisions.md
+ * 시안: docs/workspace-mockup-2026-05-10.html
+ *
+ * Phase 1A 범위 (이번 커밋):
+ *   - 3-pane 셸 (좌 PDF chunks / 가운데 SolveClient hero / 우 CoachPanel)
+ *   - 헤더 (breadcrumb + AI 사용량 캡슐)
+ *   - 기존 컴포넌트 그대로 import — 시안과 visual 정합은 Phase 1B(PDF) 이후에.
+ *
+ * Phase 1B (다음): pdfjs-dist 도입 + 가운데 hero 를 SolveClient → PdfPageViewer 로 교체.
+ */
+
+import { notFound, redirect } from "next/navigation"
+import { and, asc, desc, eq } from "drizzle-orm"
+import { requireUser } from "@/lib/auth/require-user"
+import { db } from "@/lib/db"
+import { chunks, documents, edges, nodes, users } from "@/lib/db/schema"
+import { getActiveTier, getUsageStat } from "@/lib/billing/quota"
+import { createSupabaseAdminClient } from "@/lib/supabase/admin"
+import type { ItemResponse } from "@/lib/api/schemas/items"
+import { WorkspaceClient } from "./WorkspaceClient"
+
+export const dynamic = "force-dynamic"
+
+interface Props {
+  params: Promise<{ itemId: string }>
+  searchParams: Promise<{ mode?: string; doc?: string }>
+}
+
+export default async function WorkspacePage({ params, searchParams }: Props) {
+  const { itemId } = await params
+  const sp = await searchParams
+  const { user } = await requireUser()
+
+  // Onboarding gate (/v2/home 와 동일 패턴)
+  const [profile] = await db
+    .select({ onboardedAt: users.onboardedAt })
+    .from(users)
+    .where(eq(users.id, user.id))
+    .limit(1)
+  if (!profile?.onboardedAt) {
+    redirect("/v2/onboard/profile")
+  }
+
+  // Item — RLS published 통과
+  const [item] = await db
+    .select()
+    .from(nodes)
+    .where(
+      and(
+        eq(nodes.id, itemId),
+        eq(nodes.type, "item"),
+        eq(nodes.status, "published"),
+      ),
+    )
+    .limit(1)
+  if (!item) notFound()
+
+  const patternRows = await db
+    .select({ patternId: edges.sourceNodeId })
+    .from(edges)
+    .innerJoin(nodes, eq(nodes.id, edges.sourceNodeId))
+    .where(
+      and(
+        eq(edges.targetNodeId, itemId),
+        eq(edges.type, "contains"),
+        eq(nodes.type, "pattern"),
+      ),
+    )
+
+  // 좌 패널 chunks — 사용자 가장 최근 ready 문서 (sp.doc 우선)
+  let documentId: string | null = sp.doc ?? null
+  if (!documentId) {
+    const [first] = await db
+      .select({ id: documents.id })
+      .from(documents)
+      .where(
+        and(eq(documents.userId, user.id), eq(documents.status, "ready")),
+      )
+      .orderBy(desc(documents.createdAt))
+      .limit(1)
+    documentId = first?.id ?? null
+  }
+
+  let chunkRows: {
+    id: string
+    ordinal: number
+    sectionTitle: string | null
+    pageStart: number | null
+    content: string
+  }[] = []
+  let docTitle: string | null = null
+  let pdfSignedUrl: string | null = null
+  if (documentId) {
+    const [doc] = await db
+      .select({ title: documents.title, storagePath: documents.storagePath })
+      .from(documents)
+      .where(and(eq(documents.id, documentId), eq(documents.userId, user.id)))
+      .limit(1)
+    docTitle = doc?.title ?? null
+    if (doc?.storagePath) {
+      const admin = createSupabaseAdminClient()
+      const { data: signed } = await admin.storage
+        .from("documents")
+        .createSignedUrl(doc.storagePath, 3600)
+      pdfSignedUrl = signed?.signedUrl ?? null
+    }
+    if (docTitle) {
+      chunkRows = await db
+        .select({
+          id: chunks.id,
+          ordinal: chunks.ordinal,
+          sectionTitle: chunks.sectionTitle,
+          pageStart: chunks.pageStart,
+          content: chunks.content,
+        })
+        .from(chunks)
+        .where(eq(chunks.documentId, documentId))
+        .orderBy(asc(chunks.ordinal))
+        .limit(200)
+    }
+  }
+
+  const tier = await getActiveTier(user.id)
+  const usage = await getUsageStat(user.id)
+
+  const itemPayload: ItemResponse = {
+    id: item.id,
+    type: "item",
+    label: item.label,
+    itemSource: item.itemSource,
+    itemYear: item.itemYear,
+    itemNumber: item.itemNumber,
+    itemDifficulty: item.itemDifficulty,
+    itemChoices: (item.itemChoices as string[] | null) ?? null,
+    itemAnswer: item.itemAnswer,
+    itemSolution: item.itemSolution,
+    patternIds: patternRows.map((r) => r.patternId),
+  }
+
+  return (
+    <WorkspaceClient
+      item={itemPayload}
+      userId={user.id}
+      userEmail={user.email ?? ""}
+      tier={tier}
+      usage={usage}
+      chunks={chunkRows}
+      hasDocument={!!documentId}
+      docTitle={docTitle}
+      pdfSignedUrl={pdfSignedUrl}
+    />
+  )
+}

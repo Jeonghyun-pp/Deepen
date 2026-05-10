@@ -59,6 +59,13 @@ export default async function HomePage({ searchParams }: Props) {
     .orderBy(asc(nodes.createdAt))
     .limit(1)
 
+  // 워크스페이스 v0 lock #9 — 통합 워크스페이스로 redirect (오르조 '열자마자 풀이').
+  // dailyDone=1 (오늘의 도전 완료 직후 축하 배너) 또는 시드 0개 (UnitCard 빈 상태)
+  // 인 경우는 home 유지. 그 외엔 첫 published item 으로 redirect.
+  if (firstItem && !dailyDone) {
+    redirect(`/v2/workspace/${firstItem.id}`)
+  }
+
   const itemTotal = Number(itemCount?.value ?? 0)
   const patternTotal = Number(patternCount?.value ?? 0)
   const isAdmin = isAdminEmail(user.email)
