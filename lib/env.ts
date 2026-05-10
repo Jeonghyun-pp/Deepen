@@ -45,6 +45,12 @@ const schema = z.object({
   // Cron 인증 — 프로덕션 cron 호출 시 Authorization: Bearer ${CRON_SECRET} 검증 (M3.3+).
   CRON_SECRET: z.string().min(1).optional(),
 
+  // Toss Payments — M3.1 결제. 미설정 시 checkout/webhook 라우트가 dryRun 분기.
+  TOSS_CLIENT_KEY: z.string().min(1).optional(),
+  TOSS_SECRET_KEY: z.string().min(1).optional(),
+  /** Toss webhook signature 검증용 secret. 일반적으로 TOSS_SECRET_KEY 와 동일. */
+  TOSS_WEBHOOK_SECRET: z.string().min(1).optional(),
+
   // OpenAlex (옛 PDF 메타데이터 보강 — 옵션). 검증 없이 통과 (구 product 잔재).
   OPENALEX_EMAIL: z.string().optional(),
 })
@@ -79,4 +85,5 @@ export const features = {
   aiCoach: !!env.ANTHROPIC_API_KEY,
   pdfExtraction: !!env.OPENAI_API_KEY,
   adminConfigured: env.ADMIN_EMAILS.split(",").map((s) => s.trim()).filter(Boolean).length > 0,
+  tossLive: !!(env.TOSS_CLIENT_KEY && env.TOSS_SECRET_KEY),
 } as const

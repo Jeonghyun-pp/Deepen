@@ -78,6 +78,13 @@
       "when": 1778438400000,
       "tag": "0010_onboarded_at",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1778438500000,
+      "tag": "0011_billing_idempotency",
+      "breakpoints": true
     }
   ]
 }

@@ -11,15 +11,30 @@ import {
   formatKrw,
   type TierKey,
 } from "@/lib/billing/tier"
+import type { CheckoutResponse } from "@/lib/api/schemas/billing"
+import { loadTossPayments } from "@/lib/billing/toss-sdk-loader"
 
 export interface PriceTableProps {
   currentTier: TierKey
+  /** 활성 구독의 해지 예정 시각 (ISO). 있으면 "해지 예정" 안내. */
+  canceledAt?: string | null
+  currentPeriodEnd?: string | null
 }
 
-export function PriceTable({ currentTier }: PriceTableProps) {
+export function PriceTable({
+  currentTier,
+  canceledAt = null,
+  currentPeriodEnd = null,
+}: PriceTableProps) {
   const [pendingMessage, setPendingMessage] = useState<string | null>(null)
+  const [busyTier, setBusyTier] = useState<"pro" | "pro_plus" | "cancel" | null>(
+    null,
+  )
 
   const handleCheckout = async (tier: "pro" | "pro_plus") => {
+    if (busyTier) return
+    setBusyTier(tier)
+    setPendingMessage(null)
     try {
       const res = await fetch("/api/billing/checkout", {
         method: "POST",
@@ -31,17 +46,57 @@ export function PriceTable({ currentTier }: PriceTableProps) {
         setPendingMessage("결제 진입 실패. 잠시 후 다시 시도해 주세요.")
         return
       }
-      const data = (await res.json()) as {
-        tossPaymentUrl: string | null
-        pendingMessage: string | null
+      const data = (await res.json()) as CheckoutResponse
+
+      if (data.sdkConfig && data.orderId) {
+        const TossPayments = await loadTossPayments()
+        const inst = TossPayments(data.sdkConfig.clientKey)
+        await inst.requestPayment("카드", {
+          amount: data.sdkConfig.amountKrw,
+          orderId: data.orderId,
+          orderName: data.sdkConfig.orderName,
+          customerKey: data.sdkConfig.customerKey,
+          successUrl: data.sdkConfig.successUrl,
+          failUrl: data.sdkConfig.failUrl,
+        })
+        return
       }
+
       if (data.tossPaymentUrl) {
         window.location.href = data.tossPaymentUrl
         return
       }
       setPendingMessage(data.pendingMessage ?? "결제 곧 출시됩니다.")
+    } catch (e) {
+      setPendingMessage(
+        (e as Error).message === "toss_sdk_load_failed"
+          ? "결제 모듈을 불러오지 못했어요. 새로고침 후 다시 시도해 주세요."
+          : "네트워크 문제로 결제 진입에 실패했어요.",
+      )
+    } finally {
+      setBusyTier(null)
+    }
+  }
+
+  const handleCancel = async () => {
+    if (busyTier) return
+    if (!confirm("Pro 혜택은 다음 결제일까지 유지돼요. 정말 해지할까요?")) return
+    setBusyTier("cancel")
+    try {
+      const res = await fetch("/api/billing/cancel", {
+        method: "POST",
+        credentials: "include",
+      })
+      if (res.ok) {
+        // 페이지 새로고침 — server props 갱신.
+        window.location.reload()
+      } else {
+        setPendingMessage("해지 처리에 실패했어요. 잠시 후 다시 시도해 주세요.")
+      }
     } catch {
-      setPendingMessage("네트워크 문제로 결제 진입에 실패했어요.")
+      setPendingMessage("네트워크 문제로 해지에 실패했어요.")
+    } finally {
+      setBusyTier(null)
     }
   }
 
@@ -106,7 +161,7 @@ export function PriceTable({ currentTier }: PriceTableProps) {
               <button
                 type="button"
                 onClick={() => handleCheckout(key as "pro" | "pro_plus")}
-                disabled={isCurrent}
+                disabled={isCurrent || busyTier !== null}
                 data-testid={`checkout-${key}`}
                 className={`mt-5 rounded-md px-4 py-2 text-sm font-medium transition disabled:opacity-40 ${
                   key === "pro_plus"
@@ -114,12 +169,40 @@ export function PriceTable({ currentTier }: PriceTableProps) {
                     : "bg-black text-white hover:bg-black/85"
                 }`}
               >
-                {isCurrent ? "사용 중" : "업그레이드"}
+                {isCurrent
+                  ? "사용 중"
+                  : busyTier === key
+                    ? "결제창 여는 중…"
+                    : "업그레이드"}
               </button>
             )}
           </article>
         )
       })}
+
+      {currentTier !== "free" && !canceledAt && (
+        <div className="col-span-full flex items-center justify-end">
+          <button
+            type="button"
+            onClick={handleCancel}
+            disabled={busyTier !== null}
+            data-testid="cancel-subscription"
+            className="text-xs text-black/55 underline underline-offset-2 hover:text-rose-700 disabled:opacity-40"
+          >
+            {busyTier === "cancel" ? "해지 처리 중…" : "구독 해지"}
+          </button>
+        </div>
+      )}
+
+      {currentTier !== "free" && canceledAt && currentPeriodEnd && (
+        <div
+          className="col-span-full rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900"
+          data-testid="cancel-pending"
+        >
+          해지 예약됨 — {new Date(currentPeriodEnd).toLocaleDateString("ko-KR")}
+          까지 Pro 혜택이 유지된 후 자동 무료 전환됩니다.
+        </div>
+      )}
 
       {pendingMessage && (
         <div

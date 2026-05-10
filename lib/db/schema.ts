@@ -627,7 +627,10 @@ export const invoices = pgTable(
       onDelete: "set null",
     }),
     amountKrw: integer("amount_krw").notNull(),
-    status: text("status").notNull(), // 'paid' | 'failed' | 'refunded'
+    status: text("status").notNull(), // 'pending' | 'paid' | 'failed' | 'refunded'
+    /** 우리가 발급한 orderId — checkout 시점에 pending 행 생성. */
+    tossOrderId: text("toss_order_id"),
+    /** webhook 으로 받은 Toss paymentKey. */
     tossPaymentKey: text("toss_payment_key"),
     paidAt: timestamp("paid_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
