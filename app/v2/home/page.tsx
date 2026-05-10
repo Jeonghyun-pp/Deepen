@@ -8,11 +8,12 @@
  */
 
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { and, asc, count, eq } from "drizzle-orm"
 import { requireUser } from "@/lib/auth/require-user"
 import { isAdminEmail } from "@/lib/auth/require-admin"
 import { db } from "@/lib/db"
-import { nodes } from "@/lib/db/schema"
+import { nodes, users } from "@/lib/db/schema"
 import { COPY } from "@/lib/ui/copy"
 import { getActiveTier, getUsageStat } from "@/lib/billing/quota"
 import { QuotaCard } from "@/app/v2/billing/_components/QuotaCard"
@@ -21,8 +22,25 @@ import { LogoutButton } from "./LogoutButton"
 
 export const dynamic = "force-dynamic"
 
-export default async function HomePage() {
+interface Props {
+  searchParams: Promise<{ dailyDone?: string }>
+}
+
+export default async function HomePage({ searchParams }: Props) {
+  const sp = await searchParams
+  const dailyDone = sp.dailyDone === "1"
   const { user } = await requireUser()
+
+  // Phase A 끊김1 — 신규 사용자 onboard 게이트.
+  // public.users 행이 없거나 onboarded_at 이 null 이면 4-step 으로 redirect.
+  const [profile] = await db
+    .select({ onboardedAt: users.onboardedAt })
+    .from(users)
+    .where(eq(users.id, user.id))
+    .limit(1)
+  if (!profile?.onboardedAt) {
+    redirect("/v2/onboard/profile")
+  }
 
   const [patternCount] = await db
     .select({ value: count() })
@@ -48,16 +66,16 @@ export default async function HomePage() {
   const usage = await getUsageStat(user.id)
 
   return (
-    <main className="min-h-screen bg-zinc-50 px-6 py-10">
+    <main className="min-h-screen bg-zinc-50 px-4 py-8 sm:px-6 sm:py-10">
       <div className="mx-auto flex max-w-3xl flex-col gap-10">
-        <header className="flex items-center justify-between">
+        <header className="flex flex-wrap items-center justify-between gap-y-3 gap-x-3">
           <Link
             href="/"
             className="text-xs font-extrabold tracking-[0.18em] text-black/85"
           >
             DEEPEN
           </Link>
-          <div className="flex items-center gap-3 text-xs text-black/55">
+          <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-2 text-xs text-black/55">
             <DailyChallengeBadge />
             <QuotaCard
               tier={tier}
@@ -66,10 +84,26 @@ export default async function HomePage() {
               resetAtIso={usage.resetAtIso}
               variant="mini"
             />
-            <span>{user.email}</span>
+            <span className="hidden max-w-[160px] truncate sm:inline">{user.email}</span>
             <LogoutButton />
           </div>
         </header>
+
+        {dailyDone && (
+          <section
+            className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900"
+            data-testid="daily-done-banner"
+            role="status"
+          >
+            <span className="text-base">🎉</span>
+            <div className="flex-1">
+              <div className="font-semibold">오늘의 도전 완료!</div>
+              <div className="text-xs text-emerald-800/80">
+                약점 3문제를 끝까지 풀었어요. 내일 새 챌린지가 자동 생성됩니다.
+              </div>
+            </div>
+          </section>
+        )}
 
         <section className="flex flex-col gap-2">
           <span className="text-[11px] font-semibold uppercase tracking-widest text-black/45">
@@ -113,41 +147,37 @@ export default async function HomePage() {
           </section>
         )}
 
-        <section className="flex flex-wrap gap-2 border-t border-black/5 pt-6 text-xs text-black/55">
+        <nav
+          aria-label="보조 내비게이션"
+          className="flex flex-wrap gap-x-4 gap-y-2 border-t border-black/5 pt-6 text-xs text-black/55 sm:gap-x-3"
+        >
           <Link href="/v2/graph" className="hover:text-black/80 hover:underline">
             전체 학습 지도
           </Link>
-          <span className="text-black/25">·</span>
           {isAdmin && (
-            <>
-              <Link
-                href="/admin/seed-review"
-                className="hover:text-black/80 hover:underline"
-              >
-                어드민
-              </Link>
-              <span className="text-black/25">·</span>
-            </>
+            <Link
+              href="/admin/seed-review"
+              className="hover:text-black/80 hover:underline"
+            >
+              어드민
+            </Link>
           )}
           <Link href="/upload" className="hover:text-black/80 hover:underline">
             PDF 업로드
           </Link>
-          <span className="text-black/25">·</span>
           <Link href="/v2/stats" className="hover:text-black/80 hover:underline">
             내 통계
           </Link>
-          <span className="text-black/25">·</span>
           <Link href="/v2/billing" className="hover:text-black/80 hover:underline">
             요금
           </Link>
-          <span className="text-black/25">·</span>
           <Link
             href="/v2/settings/parents"
             className="hover:text-black/80 hover:underline"
           >
             보호자 리포트
           </Link>
-        </section>
+        </nav>
       </div>
     </main>
   )

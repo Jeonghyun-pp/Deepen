@@ -65,7 +65,7 @@ interface Props {
   mode?: "practice" | "exam" | "recovery" | "challenge" | "retry"
   /** exam 모드 — 자동 SUBMIT 시간 ms. 없으면 difficulty 기반 fallback. */
   examTimeMs?: number
-  /** exam batch — itemId 배열. null 이면 단일 attempt. */
+  /** batch — itemId 배열. exam 또는 daily(끊김2) chaining. null 이면 단일 attempt. */
   batch?: string[] | null
   /** 현재 batch 인덱스 (0-base). */
   batchIdx?: number
@@ -73,6 +73,8 @@ interface Props {
   challengeCtx?: ChallengeCtx | null
   /** M3.2 retry ctx (URL 직렬화). */
   retryCtx?: RetryCtx | null
+  /** 진입 출처. 'daily' 면 batch 종료 시 home?dailyDone=1 로 이동. */
+  from?: "daily" | null
 }
 
 export function SolveClient({
@@ -84,12 +86,14 @@ export function SolveClient({
   batchIdx = 0,
   challengeCtx = null,
   retryCtx = null,
+  from = null,
 }: Props) {
   const router = useRouter()
   const isExam = mode === "exam"
   const isChallenge = mode === "challenge"
   const isRetry = mode === "retry"
-  const isBatch = isExam && batch !== null && batch.length > 1
+  const isDaily = from === "daily"
+  const isBatch = batch !== null && batch.length > 1 && (isExam || isDaily)
   const isLastInBatch = isBatch && batchIdx >= (batch?.length ?? 0) - 1
   const aiHintLocked = isExam || isChallenge
 
@@ -226,17 +230,24 @@ export function SolveClient({
   const handleNextItem = async () => {
     setResult(null)
 
-    // exam batch — 다음 idx 또는 마지막이면 result 페이지로
+    // batch — exam(실전) 또는 daily(오늘의 도전) chaining.
     if (isBatch && batch) {
       if (isLastInBatch) {
-        router.push(
-          `/v2/exam/default/result?items=${encodeURIComponent(batch.join(","))}`,
-        )
+        if (isDaily) {
+          router.push("/v2/home?dailyDone=1")
+        } else {
+          router.push(
+            `/v2/exam/default/result?items=${encodeURIComponent(batch.join(","))}`,
+          )
+        }
         return
       }
       const nextId = batch[batchIdx + 1]
       const csv = encodeURIComponent(batch.join(","))
-      router.push(`/v2/solve/${nextId}?mode=exam&batch=${csv}&idx=${batchIdx + 1}`)
+      const params = isDaily
+        ? `from=daily&batch=${csv}&idx=${batchIdx + 1}`
+        : `mode=exam&batch=${csv}&idx=${batchIdx + 1}`
+      router.push(`/v2/solve/${nextId}?${params}`)
       return
     }
 
@@ -368,15 +379,17 @@ export function SolveClient({
           <span>풀이</span>
           <span className="text-black/30">·</span>
           <span>
-            {mode === "exam"
-              ? "실전 모드"
-              : mode === "recovery"
-                ? "오답복구"
-                : mode === "challenge"
-                  ? "챌린지"
-                  : mode === "retry"
-                    ? "재도전"
-                    : "연습 모드"}
+            {isDaily
+              ? "오늘의 도전"
+              : mode === "exam"
+                ? "실전 모드"
+                : mode === "recovery"
+                  ? "오답복구"
+                  : mode === "challenge"
+                    ? "챌린지"
+                    : mode === "retry"
+                      ? "재도전"
+                      : "연습 모드"}
           </span>
           {isBatch && batch && (
             <>

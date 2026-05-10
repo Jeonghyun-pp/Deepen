@@ -100,6 +100,9 @@ export const users = pgTable(
     lastParentReportSentAt: timestamp("last_parent_report_sent_at", {
       withTimezone: true,
     }),
+
+    // Phase A — 4-step onboard 완료 시각. null = 신규 사용자 (홈 진입 시 redirect).
+    onboardedAt: timestamp("onboarded_at", { withTimezone: true }),
   },
   (t) => [index("users_parent_consent_idx").on(t.parentConsentAt)],
 )

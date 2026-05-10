@@ -56,10 +56,18 @@ export function DailyChallengeBadge() {
   }
   if (!data || data.items.length === 0) return null
 
-  const firstId = data.items[0].itemId
+  const ids = data.items.map((it) => it.itemId)
+  const firstId = ids[0]
+  // 끊김2 fix — 3문제 chaining 위해 batch CSV + idx=0 동봉.
+  // SolveClient 가 from=daily 일 때 마지막 idx 도달 시 /v2/home?dailyDone=1 로 이동.
+  const params = new URLSearchParams({
+    from: "daily",
+    batch: ids.join(","),
+    idx: "0",
+  })
   return (
     <Link
-      href={`/v2/solve/${firstId}?from=daily`}
+      href={`/v2/solve/${firstId}?${params.toString()}`}
       data-testid="daily-challenge-badge"
       className="group inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-medium text-emerald-800 hover:bg-emerald-100"
       title={data.copy ?? `약점 ${data.items.length}문제 도전`}

@@ -71,6 +71,13 @@
       "when": 1778352000000,
       "tag": "0009_pattern_state_snapshots",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1778438400000,
+      "tag": "0010_onboarded_at",
+      "breakpoints": true
     }
   ]
 }

@@ -32,6 +32,8 @@ interface Props {
     cleared?: string
     /** mode='retry' 시 BN re-run 대상 Pattern ids (CSV). */
     recap?: string
+    /** 진입 출처. 'daily' = M3.4 데일리 챌린지 batch chaining. */
+    from?: string
   }>
 }
 
@@ -58,9 +60,12 @@ export default async function SolvePage({ params, searchParams }: Props) {
           | "retry")
       : "practice"
 
-  // exam batch URL 파싱
+  // batch URL 파싱 — exam 또는 daily(끊김2) 두 출처 모두 지원.
+  const fromDaily = sp.from === "daily"
   const batch =
-    mode === "exam" && sp.batch ? sp.batch.split(",").filter(Boolean) : null
+    (mode === "exam" || fromDaily) && sp.batch
+      ? sp.batch.split(",").filter(Boolean)
+      : null
   const batchIdx = sp.idx ? Number(sp.idx) : 0
 
   // M3.2 challenge ctx — URL 에서 추출 (새로고침 견고성).
@@ -139,6 +144,7 @@ export default async function SolvePage({ params, searchParams }: Props) {
       batchIdx={Number.isFinite(batchIdx) ? batchIdx : 0}
       challengeCtx={challengeCtx}
       retryCtx={retryCtx}
+      from={fromDaily ? "daily" : null}
     />
   )
 }
