@@ -19,13 +19,17 @@ import { useEffect } from "react"
 import Link from "next/link"
 import { Sparkles, Map } from "lucide-react"
 import { Group, Panel, Separator } from "react-resizable-panels"
+import { useQueryState, parseAsStringEnum } from "nuqs"
 import type { ItemResponse } from "@/lib/api/schemas/items"
 import type { TierKey } from "@/lib/billing/tier"
 import { ChunksPane } from "@/app/v2/study/[unitId]/dual/_components/ChunksPane"
 import { CoachPanel } from "@/app/v2/solve/_components/CoachPanel"
+import { GraphPanel } from "@/app/v2/solve/_components/GraphPanel"
 import { SolveClient } from "@/app/v2/solve/[itemId]/SolveClient"
 import { useCoachStore } from "@/app/v2/_components/store/coach-store"
 import { PdfPageViewer } from "./_components/PdfPageViewer"
+
+const rightParser = parseAsStringEnum(["coach", "graph"]).withDefault("coach")
 
 interface Chunk {
   id: string
@@ -60,6 +64,8 @@ export function WorkspaceClient({
 }: Props) {
   const setCoachOpen = useCoachStore((s) => s.setOpen)
   const setInputPrefill = useCoachStore((s) => s.setInputPrefill)
+  const highlightNodeIds = useCoachStore((s) => s.highlightNodeIds)
+  const [right, setRight] = useQueryState("right", rightParser)
 
   useEffect(() => {
     setCoachOpen(true)
@@ -98,10 +104,16 @@ export function WorkspaceClient({
         </div>
 
         <div className="flex items-center gap-2">
-          {/* 약점 framing — 그래프 강등 표면 1 (Phase 2: 클릭 시 우 패널 학습지도 swap) */}
+          {/* 약점 framing — 그래프 강등 표면 1. 클릭 → 우 패널 학습지도 swap (lock 2) */}
           <button
             type="button"
-            className="hidden md:flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-100"
+            onClick={() => void setRight(right === "graph" ? "coach" : "graph")}
+            aria-pressed={right === "graph"}
+            className={`hidden md:flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+              right === "graph"
+                ? "border-rose-300 bg-rose-100 text-rose-800 ring-2 ring-rose-200"
+                : "border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
+            }`}
             data-testid="weakness-chip"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
@@ -181,12 +193,12 @@ export function WorkspaceClient({
                   className="h-[40%] min-h-0 overflow-y-auto"
                   data-testid="hero-solve-region"
                 >
-                  <SolveClient item={item} userId={userId} mode="practice" />
+                  <SolveClient item={item} userId={userId} mode="practice" embedded />
                 </div>
               </>
             ) : (
               <div className="flex-1 overflow-y-auto">
-                <SolveClient item={item} userId={userId} mode="practice" />
+                <SolveClient item={item} userId={userId} mode="practice" embedded />
               </div>
             )}
           </section>
@@ -194,32 +206,64 @@ export function WorkspaceClient({
 
         <Separator className="w-px bg-black/8 hover:w-1 hover:bg-emerald-400/40 transition-all" />
 
-        {/* RIGHT — Coach (default) ↔ 학습 지도 (Phase 2 swap) */}
+        {/* RIGHT — Coach ↔ 학습 지도 swap (lock 2). nuqs ?right=coach|graph */}
         <Panel defaultSize={28} minSize={20} maxSize={40} id="right">
           <aside className="flex h-full flex-col border-l border-black/8 bg-white/85">
-            <div className="flex border-b border-black/5 shrink-0">
+            <div className="flex border-b border-black/5 shrink-0" role="tablist">
               <button
                 type="button"
-                className="flex flex-1 items-center justify-center gap-1.5 px-3 py-3 text-xs font-medium border-b-2 border-emerald-600 text-black"
+                role="tab"
+                aria-selected={right === "coach"}
+                onClick={() => void setRight("coach")}
+                className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-3 text-xs font-medium transition ${
+                  right === "coach"
+                    ? "border-b-2 border-emerald-600 text-black"
+                    : "text-black/45 hover:text-black/70"
+                }`}
                 data-testid="right-tab-coach"
               >
-                <Sparkles size={12} className="text-emerald-600" />
+                <Sparkles
+                  size={12}
+                  className={right === "coach" ? "text-emerald-600" : ""}
+                />
                 AI 코치
               </button>
               <button
                 type="button"
-                className="flex flex-1 items-center justify-center gap-1.5 px-3 py-3 text-xs font-medium text-black/40 hover:text-black/70 relative"
+                role="tab"
+                aria-selected={right === "graph"}
+                onClick={() => void setRight("graph")}
+                className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-3 text-xs font-medium transition relative ${
+                  right === "graph"
+                    ? "border-b-2 border-rose-500 text-black"
+                    : "text-black/45 hover:text-black/70"
+                }`}
                 data-testid="right-tab-graph"
-                title="Phase 2 — 학습 지도 swap"
-                disabled
               >
-                <Map size={12} />
+                <Map
+                  size={12}
+                  className={right === "graph" ? "text-rose-500" : ""}
+                />
                 학습 지도
-                <span className="absolute top-2 right-3 h-1.5 w-1.5 rounded-full bg-rose-400" />
+                {right !== "graph" && (
+                  <span className="absolute top-2 right-3 h-1.5 w-1.5 rounded-full bg-rose-400" />
+                )}
               </button>
             </div>
-            <div className="flex-1 overflow-hidden">
-              <CoachPanel itemId={item.id} />
+            <div
+              className="flex-1 overflow-hidden"
+              data-testid={`right-panel-${right}`}
+            >
+              {right === "coach" ? (
+                <CoachPanel itemId={item.id} />
+              ) : (
+                <div className="h-full overflow-y-auto p-3">
+                  <GraphPanel
+                    itemId={item.id}
+                    highlightNodeIds={highlightNodeIds}
+                  />
+                </div>
+              )}
             </div>
           </aside>
         </Panel>

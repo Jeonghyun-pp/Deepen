@@ -56,6 +56,8 @@ export interface ResultPanelProps {
   onClose: () => void
   /** exam batch 컨텍스트 — 진행 인디케이터·CTA 라벨 변경. */
   batchProgress?: { idx: number; total: number; isLast: boolean } | null
+  /** 워크스페이스 hero 영역 인라인 (lock 4: 모달 X). default false (모달). */
+  inline?: boolean
 }
 
 export function ResultPanel({
@@ -64,6 +66,7 @@ export function ResultPanel({
   onOpenRecap,
   onClose,
   batchProgress = null,
+  inline = false,
 }: ResultPanelProps) {
   const tone: Tone = result.attemptResult.label
   const styles = TONE_STYLES[tone]
@@ -72,14 +75,22 @@ export function ResultPanel({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center"
-      role="dialog"
-      aria-modal="true"
+      className={
+        inline
+          ? "flex w-full"
+          : "fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center"
+      }
+      role={inline ? "region" : "dialog"}
+      aria-modal={inline ? undefined : "true"}
       aria-label="채점 결과"
       data-testid="result-panel"
     >
       <div
-        className={`relative w-full max-w-2xl rounded-t-2xl border-t-4 sm:rounded-2xl ${styles.card} p-6 shadow-2xl`}
+        className={
+          inline
+            ? `relative w-full rounded-xl border ${styles.card} p-5`
+            : `relative w-full max-w-2xl rounded-t-2xl border-t-4 sm:rounded-2xl ${styles.card} p-6 shadow-2xl`
+        }
       >
         <button
           type="button"

@@ -1,7 +1,8 @@
 # 워크스페이스 v0 Phase 1 진척 + 다음 세션 가이드
 
-> 작성: 2026-05-10 18:30 KST
-> 진척: Phase 1A + 1B 완료. Phase 2~4 미진행. **미커밋.**
+> 작성: 2026-05-10 18:30 KST · 갱신: 2026-05-10 (Phase 2·3 일부)
+> 진척: Phase 1A + 1B + 우 패널 swap (lock 2) + SolveClient embedded (lock 4·5, lock 8 부분).
+>       Phase 4 (펜슬), lock 11 (AI SDK) 미진행.
 > 13 lock truth source: 메모리 `project_workspace_v0_lock_decisions.md`
 > 시안: `docs/workspace-mockup-2026-05-10.html`
 > 리서치: 본 문서 §"기술 스택 결론" 참조
@@ -87,21 +88,23 @@
 
 ## 3 · 13 lock 진척
 
-| # | 결정 | 1A | 1B | 남음 |
-|---|---|:-:|:-:|---|
-| 1 | 패널 비율 280/flex/380 | ✅ | | |
-| 2 | 그래프 토글 (탭 + 헤더 카피) | placeholder | | Phase 2 — View Transitions + nuqs swap |
-| 3 | AI 사용량 emerald 캡슐 | ✅ | | |
-| 4 | 채점 결과 hero 인라인 | (SolveClient 내장) | | Phase 2/3 — SolveClient 분해 |
-| 5 | 리캡 인라인 + mini graph | (SolveClient 내장) | | Phase 2/3 |
-| **6** | **원본 PDF 페이지 렌더** | | **✅** | |
-| 7 | 펜슬 PDF 위 오버레이 | | | Phase 4 — `perfect-freehand` or tldraw |
-| 8 | 정답 펜+칩 둘 다 | (SolveClient 내장) | | Phase 2/3 |
-| 9 | /v2/home → workspace redirect | ✅ | | |
-| 10 | /v2/workspace/[itemId] 라우트 | ✅ | | |
-| 11 | Vercel AI SDK v6 | | | Phase 2 — `ai` + `@ai-sdk/anthropic` |
-| 12 | Edge → Node | ✅ (no-op) | | |
-| **13** | **PDF.js 도입** | | **✅** | |
+| # | 결정 | 1A | 1B | 2·3 | 남음 |
+|---|---|:-:|:-:|:-:|---|
+| 1 | 패널 비율 280/flex/380 | ✅ | | | |
+| **2** | **그래프 토글 (탭 + 헤더 카피)** | placeholder | | **✅** | nuqs `?right=coach\|graph` + 약점 캡슐·탭 동일 setter. View Transitions 는 stable React 미포함 → CSS transition |
+| 3 | AI 사용량 emerald 캡슐 | ✅ | | | |
+| **4** | **채점 결과 hero 인라인** | | | **✅** | `<ResultPanel inline>` — `fixed inset-0` → `relative w-full` |
+| **5** | **리캡 인라인 + mini graph** | | | **✅(부분)** | `<RecapOverlay inline>` — 인라인 정상. mini graph 자동 등장은 미구현 (별도 컴포넌트) |
+| **6** | **원본 PDF 페이지 렌더** | | **✅** | | |
+| 7 | 펜슬 PDF 위 오버레이 | | | | Phase 4 — `perfect-freehand` or tldraw |
+| **8** | **정답 펜+칩 둘 다** | | | **부분** | 칩 측 `solve-store.selectedAnswer` 공유 상태 그대로 (이미 됨). 펜 → answer 인식은 Phase 4 펜슬 오버레이 동시 구현 |
+| 9 | /v2/home → workspace redirect | ✅ | | | |
+| 10 | /v2/workspace/[itemId] 라우트 | ✅ | | | |
+| 11 | Vercel AI SDK v6 | | | skip | 자체 SSE 프로토콜(token/card/highlight/similar) 깊게 묶여 있어 마이그레이션 비용 > 이득. `@ai-sdk/anthropic` 모델 교체로 점진 가능 |
+| 12 | Edge → Node | ✅ (no-op) | | | |
+| **13** | **PDF.js 도입** | | **✅** | | |
+
+**진척**: 8/13 → **11/13 완전 + 1/13 부분 + 1/13 보류** (8 부분, 11 보류).
 
 ---
 

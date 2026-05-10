@@ -75,6 +75,13 @@ interface Props {
   retryCtx?: RetryCtx | null
   /** 진입 출처. 'daily' 면 batch 종료 시 home?dailyDone=1 로 이동. */
   from?: "daily" | null
+  /**
+   * 워크스페이스(/v2/workspace) 안에서 호스팅될 때 true.
+   * 자체 헤더·sticky footer·aside GraphPanel·floating CoachPanel 을 숨겨
+   * 워크스페이스 외곽(헤더+우 패널)과 중복을 제거한다.
+   * 결과/리캡/재도전 오버레이는 inline (fixed→relative) 로 hero 영역에 펼쳐진다 (lock 4·5).
+   */
+  embedded?: boolean
 }
 
 export function SolveClient({
@@ -87,6 +94,7 @@ export function SolveClient({
   challengeCtx = null,
   retryCtx = null,
   from = null,
+  embedded = false,
 }: Props) {
   const router = useRouter()
   const isExam = mode === "exam"
@@ -372,53 +380,59 @@ export function SolveClient({
 
   const canSubmit = !!selectedAnswer && !submitting
 
+  const containerClass = embedded
+    ? "flex w-full flex-col gap-6 px-4 py-6"
+    : "mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8 sm:px-8"
+
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8 sm:px-8">
-      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-black/5 pb-4">
-        <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-black/55">
-          <span>풀이</span>
-          <span className="text-black/30">·</span>
-          <span>
-            {isDaily
-              ? "오늘의 도전"
-              : mode === "exam"
-                ? "실전 모드"
-                : mode === "recovery"
-                  ? "오답복구"
-                  : mode === "challenge"
-                    ? "챌린지"
-                    : mode === "retry"
-                      ? "재도전"
-                      : "연습 모드"}
-          </span>
-          {isBatch && batch && (
-            <>
-              <span className="text-black/30">·</span>
-              <span data-testid="batch-progress">
-                {batchIdx + 1}/{batch.length}
-              </span>
-            </>
-          )}
-        </div>
-        <div className="flex items-center gap-3">
-          {!aiHintLocked && <HintButton />}
-          {isExam ? (
-            <ExamTimerInline
-              startedAt={Date.now()}
-              examTimeMs={
-                examTimeMs ?? 60_000 + (item.itemDifficulty ?? 0.5) * 120_000
-              }
-              onTimeUp={() => {
-                if (!submitting && selectedAnswer) {
-                  void handleSubmit()
+    <main className={containerClass}>
+      {!embedded && (
+        <header className="flex flex-wrap items-center justify-between gap-2 border-b border-black/5 pb-4">
+          <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-black/55">
+            <span>풀이</span>
+            <span className="text-black/30">·</span>
+            <span>
+              {isDaily
+                ? "오늘의 도전"
+                : mode === "exam"
+                  ? "실전 모드"
+                  : mode === "recovery"
+                    ? "오답복구"
+                    : mode === "challenge"
+                      ? "챌린지"
+                      : mode === "retry"
+                        ? "재도전"
+                        : "연습 모드"}
+            </span>
+            {isBatch && batch && (
+              <>
+                <span className="text-black/30">·</span>
+                <span data-testid="batch-progress">
+                  {batchIdx + 1}/{batch.length}
+                </span>
+              </>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            {!aiHintLocked && <HintButton />}
+            {isExam ? (
+              <ExamTimerInline
+                startedAt={Date.now()}
+                examTimeMs={
+                  examTimeMs ?? 60_000 + (item.itemDifficulty ?? 0.5) * 120_000
                 }
-              }}
-            />
-          ) : (
-            <Timer />
-          )}
-        </div>
-      </header>
+                onTimeUp={() => {
+                  if (!submitting && selectedAnswer) {
+                    void handleSubmit()
+                  }
+                }}
+              />
+            ) : (
+              <Timer />
+            )}
+          </div>
+        </header>
+      )}
 
       {isChallenge && (
         <ChallengeProgress
@@ -445,7 +459,11 @@ export function SolveClient({
         </div>
       )}
 
-      <div className="grid gap-6 sm:grid-cols-[1fr_220px]">
+      <div
+        className={
+          embedded ? "flex flex-col gap-6" : "grid gap-6 sm:grid-cols-[1fr_220px]"
+        }
+      >
         <div className="flex flex-col gap-6">
           <ItemBody item={item} />
           <PencilPanel
@@ -516,9 +534,11 @@ export function SolveClient({
             />
           )}
         </div>
-        <div className="hidden sm:block">
-          <GraphPanel itemId={item.id} highlightNodeIds={highlightNodeIds} />
-        </div>
+        {!embedded && (
+          <div className="hidden sm:block">
+            <GraphPanel itemId={item.id} highlightNodeIds={highlightNodeIds} />
+          </div>
+        )}
       </div>
 
       <section className="flex flex-col gap-4 rounded-lg border border-black/5 bg-white/60 p-4">
@@ -536,7 +556,14 @@ export function SolveClient({
         </div>
       )}
 
-      <footer className="sticky bottom-0 -mx-4 flex items-center justify-end gap-2 border-t border-black/5 bg-white/95 px-4 py-3 backdrop-blur sm:-mx-8 sm:px-8">
+      {/* embedded: 워크스페이스 hero 안에서는 sticky 대신 inline 정렬 */}
+      <footer
+        className={
+          embedded
+            ? "flex items-center justify-end gap-2 border-t border-black/5 bg-white/70 px-2 py-3"
+            : "sticky bottom-0 -mx-4 flex items-center justify-end gap-2 border-t border-black/5 bg-white/95 px-4 py-3 backdrop-blur sm:-mx-8 sm:px-8"
+        }
+      >
         <button
           type="button"
           onClick={handleSubmit}
@@ -564,6 +591,7 @@ export function SolveClient({
               ? { idx: batchIdx, total: batch.length, isLast: isLastInBatch }
               : null
           }
+          inline={embedded}
         />
       )}
 
@@ -578,6 +606,7 @@ export function SolveClient({
             if (recapAllPassed) return
             handleRecapClose()
           }}
+          inline={embedded}
         />
       )}
 
@@ -590,7 +619,8 @@ export function SolveClient({
         />
       )}
 
-      {!aiHintLocked && <CoachPanel itemId={item.id} />}
+      {/* 워크스페이스 우 패널이 자체 CoachPanel 호스팅 — 임베드 시 floating 패널 숨김 */}
+      {!embedded && !aiHintLocked && <CoachPanel itemId={item.id} />}
     </main>
   )
 }

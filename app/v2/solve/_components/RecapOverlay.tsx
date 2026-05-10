@@ -29,6 +29,8 @@ export interface RecapOverlayProps {
   /** Q1 호환: 단일 카드 통과 콜백. */
   onPassed?: () => void
   onClose: () => void
+  /** 워크스페이스 hero 인라인 (lock 5: 결과 아래 시퀀스). default false (모달). */
+  inline?: boolean
 }
 
 export function RecapOverlay({
@@ -38,6 +40,7 @@ export function RecapOverlay({
   onAllPassed,
   onPassed,
   onClose,
+  inline = false,
 }: RecapOverlayProps) {
   // Q1 호환 — candidate 단일 입력을 candidates 배열로 정규화
   const queue: RecapDiagnoseCandidate[] =
@@ -113,13 +116,17 @@ export function RecapOverlay({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-sm p-4"
-      role="dialog"
-      aria-modal="true"
+      className={
+        inline
+          ? "flex w-full"
+          : "fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-sm p-4"
+      }
+      role={inline ? "region" : "dialog"}
+      aria-modal={inline ? undefined : "true"}
       aria-label="리캡카드"
       data-testid="recap-overlay"
     >
-      <div className="relative w-full max-w-xl">
+      <div className={inline ? "relative w-full" : "relative w-full max-w-xl"}>
         <button
           type="button"
           onClick={onClose}
