@@ -22,10 +22,13 @@ export const dynamic = "force-dynamic"
 
 interface Props {
   params: Promise<{ unitId: string }>
+  searchParams: Promise<{ leveledUp?: string }>
 }
 
-export default async function StudyUnitPage({ params }: Props) {
+export default async function StudyUnitPage({ params, searchParams }: Props) {
   const { unitId } = await params
+  const sp = await searchParams
+  const leveledUp = sp.leveledUp === "1"
   const { user } = await requireUser()
 
   // 모든 published Pattern (Concept + Pattern 둘 다 포함, displayLayer 로 분기)
@@ -110,6 +113,35 @@ export default async function StudyUnitPage({ params }: Props) {
             )}
           </div>
         </header>
+
+        {leveledUp && (
+          <section
+            className="flex items-center gap-3 rounded-xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-50 to-emerald-100/40 px-5 py-4"
+            data-testid="level-up-banner"
+            role="status"
+          >
+            <span className="text-2xl" aria-hidden>
+              🎉
+            </span>
+            <div className="flex-1">
+              <div className="text-sm font-bold text-emerald-900">
+                챌린지 LEVEL UP!
+              </div>
+              <div className="text-xs text-emerald-800/80">
+                5연속 정답으로 난이도가 올라갔어요. 같은 유형 더 어려운 문제로
+                이어가 보세요.
+              </div>
+            </div>
+            {firstItem && (
+              <Link
+                href={`/v2/solve/${firstItem.id}`}
+                className="rounded-full bg-emerald-700 px-4 py-2 text-xs font-medium text-white hover:bg-emerald-800"
+              >
+                이어서 도전 →
+              </Link>
+            )}
+          </section>
+        )}
 
         <section className="grid gap-6 md:grid-cols-[1fr_320px]">
           <div className="flex flex-col gap-6">

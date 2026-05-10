@@ -12,7 +12,12 @@ import { verifyParentToken } from "@/lib/email/token"
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
+function appUrl(): string {
+  return process.env.NEXT_PUBLIC_APP_URL ?? "https://deepen.lab"
+}
+
 function htmlResponse(body: string, status = 200): Response {
+  const home = appUrl()
   return new Response(
     `<!doctype html><html lang="ko"><head><meta charset="utf-8">
     <title>Deepen 보호자 동의</title>
@@ -20,6 +25,11 @@ function htmlResponse(body: string, status = 200): Response {
     </head><body style="margin:0;padding:0;background:#fafafa;font-family:system-ui,-apple-system,Segoe UI,Roboto,Apple SD Gothic Neo,Noto Sans KR,sans-serif">
     <main style="max-width:520px;margin:64px auto;padding:32px;background:#fff;border:1px solid #e5e7eb;border-radius:12px">
     ${body}
+    <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0 16px 0">
+    <p style="margin:0;font-size:12px;color:#6b7280">
+      Deepen — 입시 학습 코치 ·
+      <a href="${home}" style="color:#15803d;text-decoration:none">학생 화면 보러가기 →</a>
+    </p>
     </main></body></html>`,
     {
       status,

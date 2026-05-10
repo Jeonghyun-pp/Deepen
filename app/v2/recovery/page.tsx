@@ -68,10 +68,37 @@ export default async function RecoveryPage() {
 
         {rows.length === 0 ? (
           <section
-            className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900"
+            className="flex flex-col items-start gap-4 rounded-xl border border-amber-200 bg-amber-50 px-5 py-5"
             data-testid="wrong-note-empty"
           >
-            아직 오답이 쌓이지 않았어요. 풀이를 시작해 보세요.
+            <div className="flex items-start gap-3">
+              <span className="text-xl" aria-hidden>
+                ✨
+              </span>
+              <div>
+                <div className="text-sm font-semibold text-amber-900">
+                  아직 오답이 쌓이지 않았어요
+                </div>
+                <p className="mt-1 text-xs text-amber-800/80">
+                  연습/실전 모드로 풀이를 시작하면 틀린 문제와 헷갈린 문제가
+                  자동으로 모입니다. 같은 유형 3번 연속 맞히면 졸업해요.
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/v2/study/default"
+                className="rounded-md bg-amber-900 px-4 py-2 text-xs font-medium text-amber-50 hover:bg-amber-950"
+              >
+                단원 열기 →
+              </Link>
+              <Link
+                href="/v2/home"
+                className="rounded-md border border-amber-300 bg-white px-4 py-2 text-xs font-medium text-amber-900 hover:bg-amber-50"
+              >
+                홈으로
+              </Link>
+            </div>
           </section>
         ) : (
           <section
