@@ -12,7 +12,7 @@
  *   exportToBlob({ editor, ids, format: 'png', opts: { background: false } })
  */
 
-import type { Editor } from "tldraw"
+import type { Editor, TLShapeId } from "tldraw"
 import { EXPORT_MAX_BYTES, EXPORT_MAX_DIMENSION } from "./tools-config"
 
 export class ExportTooLargeError extends Error {
@@ -51,12 +51,19 @@ export function base64ByteSize(dataUrl: string): number {
   return Math.floor((base64.length * 3) / 4) - padding
 }
 
-export async function exportDrawingToPng(editor: Editor): Promise<string> {
-  const idsSet = editor.getCurrentPageShapeIds()
-  if (idsSet.size === 0) throw new ExportEmptyError()
+/**
+ * @param shapeIds 명시 지정 시 해당 shape 만 export. 미지정 시 페이지 전체 (기존 동작).
+ *                 PdfPenCanvas 처럼 PDF image shape 가 페이지에 있는 경우 잉크 id 만 골라 넘기는 용도.
+ */
+export async function exportDrawingToPng(
+  editor: Editor,
+  shapeIds?: TLShapeId[],
+): Promise<string> {
+  const ids = shapeIds ?? [...editor.getCurrentPageShapeIds()]
+  if (ids.length === 0) throw new ExportEmptyError()
 
   // tldraw v5: editor.toImage(shapes, opts) → { blob, width, height }
-  const { blob } = await editor.toImage([...idsSet], {
+  const { blob } = await editor.toImage(ids, {
     format: "png",
     background: false,
     padding: 16,

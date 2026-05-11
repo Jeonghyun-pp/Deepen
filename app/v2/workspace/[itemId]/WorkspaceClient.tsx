@@ -15,37 +15,45 @@
  *   - URL state mode swap 미구현 (nuqs 도입은 했으나 Phase 2 에서 활용)
  */
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import dynamic from "next/dynamic"
 import Link from "next/link"
-import { Sparkles, Map } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Sparkles, Map, Target, ChevronDown } from "lucide-react"
 import { Group, Panel, Separator } from "react-resizable-panels"
 import { useQueryState, parseAsStringEnum } from "nuqs"
 import type { ItemResponse } from "@/lib/api/schemas/items"
 import type { OcrResponse } from "@/lib/api/schemas/ocr"
 import type { TierKey } from "@/lib/billing/tier"
-import { ChunksPane } from "@/app/v2/study/[unitId]/dual/_components/ChunksPane"
+import { ChunksPane } from "@/app/v2/_components/ChunksPane"
 import { CoachPanel } from "@/app/v2/solve/_components/CoachPanel"
 import { GraphPanel } from "@/app/v2/solve/_components/GraphPanel"
-import { PencilPanel } from "@/app/v2/solve/[itemId]/_components/PencilPanel"
 import { SolveClient } from "@/app/v2/solve/[itemId]/SolveClient"
 import { useCoachStore } from "@/app/v2/_components/store/coach-store"
+import { useSolveStore } from "@/app/v2/_components/store/solve-store"
 
 /**
- * PdfPageViewer 는 ssr:false 동적 import — pdfjs-dist 의 canvas.js 가 모듈 평가 시
- * 브라우저 전용 `DOMMatrix` 를 참조해 Next.js SSR 시 RuntimeError 발생.
- * `"use client"` 만으론 부족 (Next 16 RSC 가 모듈을 서버에서 평가).
+ * PdfPenCanvas — PDF 비트맵과 펜 잉크가 **단일 tldraw 캔버스** 안에 stack 되는 통합 컴포넌트.
+ * ssr:false 동적 import 이유:
+ *   1) pdfjs-dist 가 모듈 평가 시 브라우저 전용 `DOMMatrix` 를 참조 (SSR RuntimeError)
+ *   2) tldraw 도 브라우저 전용
+ *
+ * 교체 배경 (이전 = PdfPageViewer + PencilPanel(overlay) 분리):
+ *   - react-pdf 캔버스 위에 tldraw 캔버스를 absolute 오버레이 → 두 GPU 레이어 / 두 페인트 클럭
+ *   - DPR sub-px drift + 1~2 프레임 컴포지터 지연 = 잉크가 PDF 위에 안 놓이고 떠 있는 느낌
+ *   - Goodnotes Web (web.dev case-study) · tldraw PDF editor 모두 단일 캔버스 + image asset 패턴
+ *     으로 동일 문제를 해결. 본 컴포넌트가 그 패턴.
  */
-const PdfPageViewer = dynamic(
+const PdfPenCanvas = dynamic(
   () =>
-    import("./_components/PdfPageViewer").then((m) => ({
-      default: m.PdfPageViewer,
+    import("./_components/PdfPenCanvas").then((m) => ({
+      default: m.PdfPenCanvas,
     })),
   {
     ssr: false,
     loading: () => (
       <div className="flex h-full items-center justify-center bg-white text-xs text-black/45">
-        PDF 뷰어 로딩 중…
+        PDF 캔버스 로딩 중…
       </div>
     ),
   },
@@ -57,12 +65,21 @@ const modeParser = parseAsStringEnum([
   "challenge",
   "retry",
   "daily",
+  "exam",
+  "recovery",
 ]).withDefault("practice")
-type WorkspaceMode = "practice" | "challenge" | "retry" | "daily"
-// SolveClient 가 받는 mode 는 'daily' 를 from prop 으로 처리하므로 매핑
+type WorkspaceMode =
+  | "practice"
+  | "challenge"
+  | "retry"
+  | "daily"
+  | "exam"
+  | "recovery"
+// SolveClient 가 받는 mode 는 'daily' 를 from prop 으로 처리하므로 매핑.
+// exam/recovery 는 그대로 통과.
 const toSolveMode = (
   m: WorkspaceMode,
-): "practice" | "challenge" | "retry" =>
+): "practice" | "challenge" | "retry" | "exam" | "recovery" =>
   m === "daily" ? "practice" : m
 
 interface Chunk {
@@ -71,6 +88,21 @@ interface Chunk {
   sectionTitle: string | null
   pageStart: number | null
   content: string
+}
+
+interface ChallengeCtx {
+  targetPatternId: string
+  patternLabel: string
+  startingDifficulty: number
+  consecutiveCorrect: number
+  consecutiveWrong: number
+  levelsCleared: number
+}
+
+interface RetryCtx {
+  storedItemId: string
+  recapPatternIds: string[]
+  storedItemLabel: string
 }
 
 interface Props {
@@ -85,6 +117,16 @@ interface Props {
   pdfSignedUrl: string | null
   /** pattern_state.theta < 0.4 인 Pattern 수. 0 이면 캡슐 hide. */
   weakCount: number
+  /** mode='challenge' 일 때 URL 직렬화된 ctx. 없으면 null. */
+  challengeCtx: ChallengeCtx | null
+  /** mode='retry' 일 때 URL 직렬화된 ctx. */
+  retryCtx: RetryCtx | null
+  /** item.patternIds[0] 의 라벨 — 챌린지 진입 UI 에서 사용. 없으면 빈 문자열. */
+  firstPatternLabel: string
+  /** Stage 1: daily batch chaining 지원. SolveClient 가 from='daily'+batch[] 로 인식. */
+  batch: string[] | null
+  batchIdx: number
+  fromDaily: boolean
 }
 
 export function WorkspaceClient({
@@ -98,16 +140,65 @@ export function WorkspaceClient({
   docTitle,
   pdfSignedUrl,
   weakCount,
+  challengeCtx,
+  retryCtx,
+  firstPatternLabel,
+  batch,
+  batchIdx,
+  fromDaily,
 }: Props) {
+  const router = useRouter()
   const setCoachOpen = useCoachStore((s) => s.setOpen)
   const setInputPrefill = useCoachStore((s) => s.setInputPrefill)
   const highlightNodeIds = useCoachStore((s) => s.highlightNodeIds)
   const [right, setRight] = useQueryState("right", rightParser)
   const [mode] = useQueryState("mode", modeParser)
+  const [modeMenuOpen, setModeMenuOpen] = useState(false)
+  const modeMenuRef = useRef<HTMLDivElement | null>(null)
 
-  // 펜슬 오버레이 (lock #7, Phase 4 Path A) — pencil PNG + OCR 결과를 workspace 가 보유.
-  // PdfPageViewer 위 absolute 로 PencilPanel(variant='overlay') 렌더 + onExport → /api/ocr →
-  // 결과를 SolveClient(embedded) 에 prop 으로 주입해 OcrResultPanel/handleSubmit 가 활용.
+  // dropdown outside-click 닫기.
+  useEffect(() => {
+    if (!modeMenuOpen) return
+    const handler = (e: MouseEvent) => {
+      if (
+        modeMenuRef.current &&
+        !modeMenuRef.current.contains(e.target as Node)
+      ) {
+        setModeMenuOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handler)
+    return () => document.removeEventListener("mousedown", handler)
+  }, [modeMenuOpen])
+
+  const enterPracticeMode = useCallback(() => {
+    setModeMenuOpen(false)
+    // mode 만 reset — challenge/retry ctx URL params 제거.
+    router.replace(`/v2/workspace/${item.id}?mode=practice`, { scroll: false })
+  }, [router, item.id])
+
+  const enterChallengeMode = useCallback(() => {
+    setModeMenuOpen(false)
+    const targetPatternId = item.patternIds[0]
+    if (!targetPatternId) return
+    const anchor = item.itemDifficulty ?? 0.5
+    const params = new URLSearchParams({
+      mode: "challenge",
+      pattern: targetPatternId,
+      label: firstPatternLabel || "유형 챌린지",
+      anchor: String(anchor),
+      streak: "0",
+      wrong: "0",
+      cleared: "0",
+    })
+    router.replace(`/v2/workspace/${item.id}?${params.toString()}`, {
+      scroll: false,
+    })
+  }, [router, item.id, item.patternIds, item.itemDifficulty, firstPatternLabel])
+
+  // 펜슬 (Phase 4 Path D, 단일 캔버스): PDF + 펜이 같은 tldraw 카메라 안에서 함께 렌더.
+  // 더이상 absolute overlay 아님 — PdfPenCanvas 가 export 한 PNG 를 workspace 가 받아
+  // /api/ocr → SolveClient(embedded) 에 prop 주입.
   const [pencilPng, setPencilPng] = useState<string | null>(null)
   const [ocrResult, setOcrResult] = useState<OcrResponse | null>(null)
   const [ocrPending, setOcrPending] = useState(false)
@@ -136,14 +227,33 @@ export function WorkspaceClient({
           setOcrError(err.error ?? `http_${res.status}`)
           return
         }
-        setOcrResult((await res.json()) as OcrResponse)
+        const data = (await res.json()) as OcrResponse
+        setOcrResult(data)
+        // Phase 4 Path C (lock #8): 펜으로 답까지 표시했으면 자동으로
+        // solve-store.selectedAnswer 채움. 5지선다 + Vision 감지 + 신뢰도 0.5+ 만.
+        // 사용자가 chip 으로 명시 선택했으면 (selectedAnswer 이미 set) 덮어쓰지 않음.
+        if (
+          data.detectedAnswerChoice &&
+          data.answerConfidence >= 0.5 &&
+          item.itemChoices &&
+          item.itemChoices.length >= data.detectedAnswerChoice
+        ) {
+          const choiceText =
+            item.itemChoices[data.detectedAnswerChoice - 1]?.trim()
+          if (choiceText) {
+            const current = useSolveStore.getState().selectedAnswer
+            if (!current) {
+              useSolveStore.getState().setSelectedAnswer(choiceText)
+            }
+          }
+        }
       } catch (e) {
         setOcrError((e as Error).message ?? "network_error")
       } finally {
         setOcrPending(false)
       }
     },
-    [item.id],
+    [item.id, item.itemChoices],
   )
 
   const handlePencilClear = useCallback(() => {
@@ -194,7 +304,7 @@ export function WorkspaceClient({
   return (
     <main className="flex h-screen flex-col overflow-hidden bg-zinc-50">
       <header
-        className="flex items-center justify-between gap-4 border-b border-black/8 bg-white/90 backdrop-blur px-6 py-3 shrink-0"
+        className="relative z-40 flex items-center justify-between gap-4 border-b border-black/8 bg-white/90 backdrop-blur px-6 py-3 shrink-0"
         data-testid="workspace-header"
       >
         <div className="flex items-center gap-3">
@@ -215,6 +325,112 @@ export function WorkspaceClient({
         </div>
 
         <div className="flex items-center gap-2">
+          {/* 모드 chip + dropdown (Phase 4 후속 — challenge/retry 진입점). */}
+          <div className="relative" ref={modeMenuRef}>
+            <button
+              type="button"
+              onClick={() => setModeMenuOpen((v) => !v)}
+              aria-expanded={modeMenuOpen}
+              aria-haspopup="menu"
+              data-testid="mode-chip"
+              className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                mode === "challenge"
+                  ? "border-violet-300 bg-violet-50 text-violet-800"
+                  : mode === "retry"
+                    ? "border-amber-300 bg-amber-50 text-amber-800"
+                    : mode === "daily"
+                      ? "border-sky-300 bg-sky-50 text-sky-800"
+                      : mode === "exam"
+                        ? "border-rose-300 bg-rose-50 text-rose-800"
+                        : mode === "recovery"
+                          ? "border-orange-300 bg-orange-50 text-orange-800"
+                          : "border-black/10 bg-white text-black/70 hover:bg-black/[0.03]"
+              }`}
+            >
+              {mode === "challenge" && <Target size={12} />}
+              <span>
+                {mode === "challenge"
+                  ? challengeCtx?.patternLabel
+                    ? `챌린지 · ${challengeCtx.patternLabel}`
+                    : "챌린지"
+                  : mode === "retry"
+                    ? "재도전"
+                    : mode === "daily"
+                      ? "오늘의 도전"
+                      : mode === "exam"
+                        ? "실전 모드"
+                        : mode === "recovery"
+                          ? "오답복구"
+                          : "연습"}
+              </span>
+              <ChevronDown
+                size={11}
+                className={`transition-transform ${modeMenuOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+            {modeMenuOpen && (
+              <div
+                role="menu"
+                data-testid="mode-menu"
+                className="absolute right-0 top-full z-50 mt-1 w-64 overflow-hidden rounded-lg border border-black/10 bg-white shadow-xl"
+              >
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={enterPracticeMode}
+                  className={`flex w-full items-start gap-2 px-3 py-2 text-left text-xs hover:bg-black/[0.04] ${
+                    mode === "practice" ? "bg-black/[0.03]" : ""
+                  }`}
+                  data-testid="mode-option-practice"
+                >
+                  <span className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                  <span className="flex-1">
+                    <span className="block font-medium text-black/85">
+                      연습 모드
+                    </span>
+                    <span className="block text-[10px] text-black/50">
+                      힌트·AI 코치 사용 가능
+                    </span>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={enterChallengeMode}
+                  disabled={item.patternIds.length === 0}
+                  className={`flex w-full items-start gap-2 px-3 py-2 text-left text-xs hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-40 ${
+                    mode === "challenge" ? "bg-violet-50/60" : ""
+                  }`}
+                  data-testid="mode-option-challenge"
+                  title={
+                    item.patternIds.length === 0
+                      ? "이 문제에 연결된 유형 정보가 없어요"
+                      : "현재 유형 5연속 정답에 도전"
+                  }
+                >
+                  <Target size={11} className="mt-0.5 shrink-0 text-violet-500" />
+                  <span className="flex-1">
+                    <span className="block font-medium text-black/85">
+                      챌린지 · {firstPatternLabel || "현재 유형"}
+                    </span>
+                    <span className="block text-[10px] text-black/50">
+                      힌트·AI 잠금 · 5연속 정답 시 난이도 ↑
+                    </span>
+                  </span>
+                </button>
+                {mode === "retry" && retryCtx && (
+                  <div
+                    className="border-t border-black/5 bg-amber-50 px-3 py-2 text-[10px] text-amber-900"
+                    data-testid="mode-retry-banner"
+                  >
+                    재도전 진행 중 · 리캡 {retryCtx.recapPatternIds.length}장
+                    통과 후 같은 문제 재시도
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* 약점 framing — 그래프 강등 표면 1. 클릭 → 우 패널 학습지도 swap (lock 2)
               weakCount=0 이면 캡슐 자체 hide. */}
           {weakCount > 0 && (
@@ -256,8 +472,8 @@ export function WorkspaceClient({
       </header>
 
       <Group orientation="horizontal" className="flex-1">
-        {/* LEFT — PDF chunks */}
-        <Panel defaultSize={22} minSize={15} maxSize={35} id="left">
+        {/* LEFT — PDF chunks (E2E 수정: 좁아서 가독성 낮음 → 비율 ↑) */}
+        <Panel defaultSize="28%" minSize="20%" maxSize="42%" id="left">
           <aside className="flex h-full flex-col border-r border-black/8 bg-white/60">
             <div className="flex items-center justify-between border-b border-black/5 px-4 py-3 shrink-0">
               <div className="text-[10px] uppercase tracking-widest text-black/45 truncate">
@@ -289,8 +505,8 @@ export function WorkspaceClient({
 
         <Separator className="w-px bg-black/8 hover:w-1 hover:bg-emerald-400/40 transition-all" />
 
-        {/* CENTER — Phase 1B: PDF (위 60%) + SolveClient (아래 40%) */}
-        <Panel defaultSize={50} minSize={35} id="center">
+        {/* CENTER — Phase 1B: PDF (위 60%) + SolveClient (아래 40%). 좌 패널 ↑ 한 만큼 center ↓. */}
+        <Panel defaultSize="44%" minSize="30%" id="center">
           <section
             className="flex h-full flex-col overflow-hidden bg-white/30"
             data-testid="workspace-hero"
@@ -298,18 +514,13 @@ export function WorkspaceClient({
             {pdfSignedUrl ? (
               <>
                 <div className="h-[60%] min-h-0 border-b border-black/8">
-                  <PdfPageViewer
+                  <PdfPenCanvas
+                    itemId={item.id}
+                    userId={userId}
                     signedUrl={pdfSignedUrl}
                     title={docTitle ?? "강의안"}
-                    overlay={
-                      <PencilPanel
-                        itemId={item.id}
-                        userId={userId}
-                        variant="overlay"
-                        onExport={handlePencilExport}
-                        onClearAttachment={handlePencilClear}
-                      />
-                    }
+                    onExport={handlePencilExport}
+                    onClearAttachment={handlePencilClear}
                   />
                 </div>
                 <div
@@ -320,7 +531,11 @@ export function WorkspaceClient({
                     item={item}
                     userId={userId}
                     mode={toSolveMode(mode)}
-                    from={mode === "daily" ? "daily" : null}
+                    from={fromDaily || mode === "daily" ? "daily" : null}
+                    batch={batch}
+                    batchIdx={batchIdx}
+                    challengeCtx={challengeCtx}
+                    retryCtx={retryCtx}
                     embedded
                     injectedPencilPng={pencilPng}
                     injectedOcrResult={ocrResult}
@@ -338,6 +553,8 @@ export function WorkspaceClient({
                   userId={userId}
                   mode={toSolveMode(mode)}
                   from={mode === "daily" ? "daily" : null}
+                  challengeCtx={challengeCtx}
+                  retryCtx={retryCtx}
                   embedded
                 />
               </div>
@@ -348,7 +565,7 @@ export function WorkspaceClient({
         <Separator className="w-px bg-black/8 hover:w-1 hover:bg-emerald-400/40 transition-all" />
 
         {/* RIGHT — Coach ↔ 학습 지도 swap (lock 2). nuqs ?right=coach|graph */}
-        <Panel defaultSize={28} minSize={20} maxSize={40} id="right">
+        <Panel defaultSize="28%" minSize="20%" maxSize="40%" id="right">
           <aside className="flex h-full flex-col border-l border-black/8 bg-white/85">
             <div className="flex border-b border-black/5 shrink-0" role="tablist">
               <button
@@ -397,7 +614,7 @@ export function WorkspaceClient({
               data-testid={`right-panel-${right}`}
             >
               {right === "coach" ? (
-                <CoachPanel itemId={item.id} />
+                <CoachPanel itemId={item.id} variant="inline" />
               ) : (
                 <div className="h-full overflow-y-auto p-3">
                   <GraphPanel

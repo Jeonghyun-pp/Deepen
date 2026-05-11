@@ -43,5 +43,13 @@ export const OcrResponse = z.object({
   /** 0~1 — Vision 의 self-reported overall confidence. */
   overallConfidence: z.number().min(0).max(1),
   processingTimeMs: z.number().int().nonnegative(),
+  /**
+   * Phase 4 Path C (lock #8): 5지선다 문제일 때 학생이 풀이 마지막에 동그라미·
+   * 체크·"답: N" 등으로 표시한 답 번호 (1~5). 감지 못 했거나 객관식이 아니면 null.
+   * 클라는 이 값을 itemChoices[n-1] 로 매핑해 solve-store.setSelectedAnswer 호출.
+   */
+  detectedAnswerChoice: z.number().int().min(1).max(5).nullable(),
+  /** Vision 의 답 감지 신뢰도 (0~1). detectedAnswerChoice 가 null 이면 0. */
+  answerConfidence: z.number().min(0).max(1),
 })
 export type OcrResponse = z.infer<typeof OcrResponse>

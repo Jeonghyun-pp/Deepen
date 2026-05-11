@@ -36,7 +36,23 @@ export const dynamic = "force-dynamic"
 
 interface Props {
   params: Promise<{ itemId: string }>
-  searchParams: Promise<{ mode?: string; doc?: string }>
+  searchParams: Promise<{
+    mode?: string
+    doc?: string
+    /** challenge ctx (mode=challenge 일 때만 의미). standalone /v2/solve 와 동일 schema. */
+    pattern?: string
+    label?: string
+    anchor?: string
+    streak?: string
+    wrong?: string
+    cleared?: string
+    /** retry ctx (mode=retry). recap=PID,PID,... */
+    recap?: string
+    /** daily batch chaining (Stage 1) — standalone /v2/solve 와 동일 schema. */
+    from?: string
+    batch?: string
+    idx?: string
+  }>
 }
 
 export default async function WorkspacePage({ params, searchParams }: Props) {
@@ -162,6 +178,50 @@ export default async function WorkspacePage({ params, searchParams }: Props) {
     patternIds: patternRows.map((r) => r.patternId),
   }
 
+  // 모드 swap (Phase 4 후속) — challenge/retry ctx URL 직렬화. standalone /v2/solve 와 동일 schema.
+  const challengeCtx =
+    sp.mode === "challenge" && sp.pattern
+      ? {
+          targetPatternId: sp.pattern,
+          patternLabel: sp.label ?? "",
+          startingDifficulty: sp.anchor ? Number(sp.anchor) : 0.5,
+          consecutiveCorrect: sp.streak ? Number(sp.streak) : 0,
+          consecutiveWrong: sp.wrong ? Number(sp.wrong) : 0,
+          levelsCleared: sp.cleared ? Number(sp.cleared) : 0,
+        }
+      : null
+
+  const retryCtx =
+    sp.mode === "retry" && sp.recap
+      ? {
+          storedItemId: itemId,
+          recapPatternIds: sp.recap.split(",").filter(Boolean),
+          storedItemLabel: sp.label ?? "",
+        }
+      : null
+
+  // 패턴 라벨 lookup — 모드 chip 의 chip 라벨 / challenge 진입 UI 에 활용.
+  const firstPatternId = patternRows[0]?.patternId ?? null
+  let firstPatternLabel = ""
+  if (firstPatternId) {
+    const [patternNode] = await db
+      .select({ label: nodes.label })
+      .from(nodes)
+      .where(eq(nodes.id, firstPatternId))
+      .limit(1)
+    firstPatternLabel = patternNode?.label ?? ""
+  }
+
+  // Stage 1·6: daily/exam batch chaining 모두 워크스페이스 hero 가 호스팅.
+  // SolveClient 가 from='daily' + batch[] 또는 mode='exam' + batch[] 로 분기.
+  const fromDaily = sp.from === "daily"
+  const isExamBatch = sp.mode === "exam"
+  const batchList =
+    (fromDaily || isExamBatch) && sp.batch
+      ? sp.batch.split(",").filter(Boolean)
+      : null
+  const batchIdx = sp.idx ? Number(sp.idx) : 0
+
   return (
     <WorkspaceClient
       item={itemPayload}
@@ -174,6 +234,12 @@ export default async function WorkspacePage({ params, searchParams }: Props) {
       docTitle={docTitle}
       pdfSignedUrl={pdfSignedUrl}
       weakCount={weakCount}
+      challengeCtx={challengeCtx}
+      retryCtx={retryCtx}
+      firstPatternLabel={firstPatternLabel}
+      batch={batchList}
+      batchIdx={Number.isFinite(batchIdx) ? batchIdx : 0}
+      fromDaily={fromDaily}
     />
   )
 }

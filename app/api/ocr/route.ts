@@ -134,6 +134,8 @@ export const POST = withAuth("POST /api/ocr", async (request, { user }) => {
     steps: aligned,
     overallConfidence: extracted.overallConfidence,
     processingTimeMs: Date.now() - startedAt,
+    detectedAnswerChoice: extracted.detectedAnswerChoice,
+    answerConfidence: extracted.answerConfidence,
   }
   return Response.json(response, { status: 200 })
 })

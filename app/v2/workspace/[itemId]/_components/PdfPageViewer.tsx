@@ -124,16 +124,17 @@ export function PdfPageViewer({
           <Page
             pageNumber={pageNumber}
             width={width}
-            renderTextLayer={true}
+            renderTextLayer={false}
             renderAnnotationLayer={false}
             className="shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
           />
         </Document>
-        {/* 펜슬 등 absolute 레이어 — 본문 컨테이너 기준. */}
+        {/* 펜슬 등 absolute 레이어 — 본문 컨테이너 기준.
+            E2E 수정: pointer-events-auto 로 변경. 이전 pointer-events-none + 자식 auto 조합이
+            tldraw 캔버스 wheel/pointer 이벤트를 못 받게 만들어 펜 그리기 차단됐음.
+            textLayer 도 비활성 (펜 캔버스와 이벤트 충돌). */}
         {overlay && (
-          <div className="pointer-events-none absolute inset-0">
-            {overlay}
-          </div>
+          <div className="pointer-events-auto absolute inset-0">{overlay}</div>
         )}
       </div>
     </div>
