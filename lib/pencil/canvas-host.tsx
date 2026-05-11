@@ -8,6 +8,9 @@
  * tldraw v5 API: <Tldraw onMount={(editor) => ...} />
  *               loadSnapshot(editor.store, snapshot) 로 복원.
  *               editor.store.listen(...) 으로 변경 구독.
+ *
+ * Phase 4 Path B (2026-05-11): hideUi=true + 마운트 시 'draw' 도구 강제.
+ *   tldraw 자체 toolbar/패널 숨기고 우리 PencilToolbar 만 노출 — 워크스페이스 시각 일관성.
  */
 
 import type { Editor, TLEditorSnapshot } from "tldraw"
@@ -30,8 +33,12 @@ export function PencilCanvasHost({
 }: PencilCanvasHostProps) {
   return (
     <Tldraw
-      hideUi={false}
+      hideUi
       onMount={(editor) => {
+        // Phase 4 Path B: 'draw' 도구 강제 (선택/이동/줌 도구 노출 X).
+        // 사용자는 우리 PencilToolbar 의 색·굵기·undo·redo·clear 만 사용.
+        editor.setCurrentTool("draw")
+
         if (initialSnapshot) {
           try {
             loadSnapshot(editor.store, initialSnapshot)

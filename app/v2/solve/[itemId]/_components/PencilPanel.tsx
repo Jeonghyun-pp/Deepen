@@ -16,7 +16,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { Editor, TLEditorSnapshot } from "tldraw"
-import { getSnapshot } from "tldraw"
+import { DefaultColorStyle, DefaultSizeStyle, getSnapshot } from "tldraw"
 import { PencilCanvasHost } from "@/lib/pencil/canvas-host"
 import {
   exportDrawingToPng,
@@ -37,6 +37,18 @@ import {
 import { PencilToolbar } from "./PencilToolbar"
 
 const AUTOSAVE_DEBOUNCE_MS = 2000
+
+// Phase 4 Path B (lock #7 폴리싱): 우리 PEN_COLORS/PEN_SIZES → tldraw 도메인 값 매핑.
+const COLOR_MAP: Record<PenColorKey, "black" | "blue" | "red"> = {
+  black: "black",
+  blue: "blue",
+  red: "red",
+}
+const SIZE_MAP: Record<PenSizeKey, "s" | "m" | "l"> = {
+  thin: "s",
+  mid: "m",
+  thick: "l",
+}
 
 export interface PencilPanelProps {
   itemId: string
@@ -116,10 +128,34 @@ export function PencilPanel({
     }
   }, [])
 
-  const handleMount = useCallback((editor: Editor) => {
-    editorRef.current = editor
-    // 색·굵기 실 적용은 Q2 polish (setStyleForNextShapes API 변동).
-  }, [])
+  const applyStyle = useCallback(
+    (editor: Editor, c: PenColorKey, s: PenSizeKey) => {
+      editor.setStyleForNextShapes(DefaultColorStyle, COLOR_MAP[c])
+      editor.setStyleForNextShapes(DefaultSizeStyle, SIZE_MAP[s])
+    },
+    [],
+  )
+
+  const handleMount = useCallback(
+    (editor: Editor) => {
+      editorRef.current = editor
+      applyStyle(editor, color, size)
+    },
+    [applyStyle, color, size],
+  )
+
+  // 툴바에서 color/size 바뀌면 editor 에 즉시 반영
+  useEffect(() => {
+    const editor = editorRef.current
+    if (editor) applyStyle(editor, color, size)
+  }, [applyStyle, color, size])
+
+  const handleUndo = () => {
+    editorRef.current?.undo()
+  }
+  const handleRedo = () => {
+    editorRef.current?.redo()
+  }
 
   const handleClear = () => {
     const editor = editorRef.current
@@ -172,6 +208,8 @@ export function PencilPanel({
             onSizeChange={setSize}
             onClear={handleClear}
             onExport={handleExport}
+            onUndo={handleUndo}
+            onRedo={handleRedo}
           />
         </div>
         <div className="relative flex-1 min-h-0">
@@ -236,6 +274,8 @@ export function PencilPanel({
         onSizeChange={setSize}
         onClear={handleClear}
         onExport={handleExport}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
       />
       <div className="relative h-[420px] w-full">
         {loadStatus === "loaded" && (

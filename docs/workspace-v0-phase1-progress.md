@@ -243,9 +243,11 @@
 - lock 8 부분: 칩 측 store 공유 + 펜으로 답 인식까지는 Path C 잔여 (Phase 4 후속)
 - standalone 회귀 0 (props 미주입 분기 보존)
 
-### Path B — tldraw chrome 다이어트 (미진행)
-- `hideUi={true}` + 외부 PencilToolbar 만 노출, 도구 제한
-- 시각 일관성 ↑ 단 standalone 회귀 위험. 별도 라운드
+### Path B — tldraw chrome 다이어트 (✅)
+- `PencilCanvasHost`: `<Tldraw hideUi />` + 마운트 시 `editor.setCurrentTool('draw')` 강제
+- `PencilPanel`: PEN_COLORS → `DefaultColorStyle` ('black'|'blue'|'red'), PEN_SIZES → `DefaultSizeStyle` ('s'|'m'|'l') 매핑. `setStyleForNextShapes` 로 실 펜 stroke 에 반영
+- `PencilToolbar`: 옵셔널 `onUndo`/`onRedo` prop 추가 (↶ ↷ 버튼). overlay + panel 모드 둘 다 노출
+- 도구 선택/이동/줌 등 tldraw 내장 UI 제거 — 커스텀 툴바만 남음 → 워크스페이스/standalone 시각 일관성 확보
 
 ### Path C — 펜→answer 인식 (lock 8 잔여, 미진행)
 - 펜으로 ◯ 그린 영역 좌표 → 5지선다 답 자동 인식

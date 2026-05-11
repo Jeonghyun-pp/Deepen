@@ -23,6 +23,9 @@ export interface PencilToolbarProps {
   onSizeChange: (s: PenSizeKey) => void
   onClear: () => void
   onExport: () => void
+  /** Phase 4 Path B — tldraw hideUi=true 이후 undo/redo 는 외부 버튼으로 노출. */
+  onUndo?: () => void
+  onRedo?: () => void
 }
 
 export function PencilToolbar({
@@ -33,6 +36,8 @@ export function PencilToolbar({
   onSizeChange,
   onClear,
   onExport,
+  onUndo,
+  onRedo,
 }: PencilToolbarProps) {
   return (
     <div
@@ -80,6 +85,35 @@ export function PencilToolbar({
           </button>
         ))}
       </div>
+
+      {(onUndo || onRedo) && (
+        <div className="ml-2 flex items-center gap-1">
+          {onUndo && (
+            <button
+              type="button"
+              onClick={onUndo}
+              disabled={busy}
+              data-testid="pencil-undo"
+              aria-label="실행 취소"
+              className="rounded-md border border-black/10 bg-white px-2 py-1 text-xs text-black/70 hover:bg-black/[0.03] disabled:opacity-40"
+            >
+              ↶
+            </button>
+          )}
+          {onRedo && (
+            <button
+              type="button"
+              onClick={onRedo}
+              disabled={busy}
+              data-testid="pencil-redo"
+              aria-label="다시 실행"
+              className="rounded-md border border-black/10 bg-white px-2 py-1 text-xs text-black/70 hover:bg-black/[0.03] disabled:opacity-40"
+            >
+              ↷
+            </button>
+          )}
+        </div>
+      )}
 
       <span className="flex-1" />
 
