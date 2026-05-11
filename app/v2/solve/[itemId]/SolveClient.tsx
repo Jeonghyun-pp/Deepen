@@ -434,6 +434,46 @@ export function SolveClient({
         </header>
       )}
 
+      {/* embedded 모드 — 워크스페이스 헤더가 chrome 을 대체하지만 타이머는 사라지므로
+          상단에 슬림 chip 한 줄로 모드 + 시간만 surface. */}
+      {embedded && (
+        <div className="flex items-center justify-between text-[11px] text-black/55">
+          <span className="uppercase tracking-widest">
+            {isDaily
+              ? "오늘의 도전"
+              : mode === "exam"
+                ? "실전"
+                : mode === "recovery"
+                  ? "오답복구"
+                  : mode === "challenge"
+                    ? "챌린지"
+                    : mode === "retry"
+                      ? "재도전"
+                      : "연습"}
+            {isBatch && batch && (
+              <span className="ml-2 text-black/35">
+                {batchIdx + 1}/{batch.length}
+              </span>
+            )}
+          </span>
+          {isExam ? (
+            <ExamTimerInline
+              startedAt={Date.now()}
+              examTimeMs={
+                examTimeMs ?? 60_000 + (item.itemDifficulty ?? 0.5) * 120_000
+              }
+              onTimeUp={() => {
+                if (!submitting && selectedAnswer) {
+                  void handleSubmit()
+                }
+              }}
+            />
+          ) : (
+            <Timer />
+          )}
+        </div>
+      )}
+
       {isChallenge && (
         <ChallengeProgress
           streak={challengeState.ctx.consecutiveCorrect}

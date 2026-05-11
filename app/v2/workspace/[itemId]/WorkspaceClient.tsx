@@ -61,6 +61,8 @@ interface Props {
   hasDocument: boolean
   docTitle: string | null
   pdfSignedUrl: string | null
+  /** pattern_state.theta < 0.4 인 Pattern 수. 0 이면 캡슐 hide. */
+  weakCount: number
 }
 
 export function WorkspaceClient({
@@ -73,6 +75,7 @@ export function WorkspaceClient({
   hasDocument,
   docTitle,
   pdfSignedUrl,
+  weakCount,
 }: Props) {
   const setCoachOpen = useCoachStore((s) => s.setOpen)
   const setInputPrefill = useCoachStore((s) => s.setInputPrefill)
@@ -139,22 +142,25 @@ export function WorkspaceClient({
         </div>
 
         <div className="flex items-center gap-2">
-          {/* 약점 framing — 그래프 강등 표면 1. 클릭 → 우 패널 학습지도 swap (lock 2) */}
-          <button
-            type="button"
-            onClick={() => swapRight(right === "graph" ? "coach" : "graph")}
-            aria-pressed={right === "graph"}
-            className={`hidden md:flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
-              right === "graph"
-                ? "border-rose-300 bg-rose-100 text-rose-800 ring-2 ring-rose-200"
-                : "border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
-            }`}
-            data-testid="weakness-chip"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
-            약점 −2개
-            <span className="text-rose-400">›</span>
-          </button>
+          {/* 약점 framing — 그래프 강등 표면 1. 클릭 → 우 패널 학습지도 swap (lock 2)
+              weakCount=0 이면 캡슐 자체 hide. */}
+          {weakCount > 0 && (
+            <button
+              type="button"
+              onClick={() => swapRight(right === "graph" ? "coach" : "graph")}
+              aria-pressed={right === "graph"}
+              className={`hidden md:flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                right === "graph"
+                  ? "border-rose-300 bg-rose-100 text-rose-800 ring-2 ring-rose-200"
+                  : "border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100"
+              }`}
+              data-testid="weakness-chip"
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
+              약점 −{weakCount}개
+              <span className="text-rose-400">›</span>
+            </button>
+          )}
 
           {/* AI 사용량 캡슐 (오르조 차용) */}
           <div

@@ -11,7 +11,9 @@
  *   - 반응형 width (컨테이너 폭 기반)
  *   - 펜 오버레이 X (Phase 4)
  *
- * Worker source: pdfjs CDN. Phase 3에서 public/ 셀프호스트 검토.
+ * Worker source (Phase 3 self-host): public/pdf.worker.min.mjs — pdfjs-dist 의 worker 빌드를
+ * `cp node_modules/pdfjs-dist/build/pdf.worker.min.mjs public/` 로 복사. 버전은 pdfjs 와 자동 정합.
+ * CDN 다운/지역 차단 시에도 동작.
  */
 
 import { useEffect, useRef, useState } from "react"
@@ -19,7 +21,7 @@ import { Document, Page, pdfjs } from "react-pdf"
 import "react-pdf/dist/Page/AnnotationLayer.css"
 import "react-pdf/dist/Page/TextLayer.css"
 
-pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`
+pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs"
 
 export interface PdfPageViewerProps {
   signedUrl: string

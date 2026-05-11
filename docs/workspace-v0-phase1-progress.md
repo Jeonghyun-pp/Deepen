@@ -1,8 +1,9 @@
 # 워크스페이스 v0 진척 + 다음 세션 가이드
 
-> 작성: 2026-05-10 18:30 KST · 갱신: 2026-05-11 (Phase 2 완료)
-> 진척: Phase 1A + 1B + 우 패널 swap (lock 2) + SolveClient embedded (lock 4·5, lock 8 부분) + Phase 2 전부 (AI SDK v5 풀 마이그레이션 + nuqs mode + View Transitions).
+> 작성: 2026-05-10 18:30 KST · 갱신: 2026-05-11 (Phase 3 폴리싱 권장 번들 완료)
+> 진척: Phase 1 (셸 + PDF) + Phase 2 (AI SDK v5 + nuqs mode + View Transitions) + Phase 3 권장 번들 4개 (PDF self-host, 약점 집계, Pretendard self-host, 타이머 chip)
 >       남은 lock: 7 (펜슬 PDF 오버레이, Phase 4), 8 부분 (펜→answer 인식, Phase 4 동시).
+>       Phase 3 미진행: KaTeX (미설치 — skip), Cache Components (위험), TanStack Query (surface 넓음), 모드 swap UI (ctx 부족)
 > 13 lock truth source: 메모리 `project_workspace_v0_lock_decisions.md`
 > 시안: `docs/workspace-mockup-2026-05-10.html`
 > 리서치: 본 문서 §"기술 스택 결론" 참조
@@ -178,16 +179,46 @@
 
 ---
 
-## 6 · Phase 3 — 폴리싱 (~1~2일)
+## 6 · Phase 3 — 폴리싱 (✅ 2026-05-11, 권장 번들 4개)
 
-- **KaTeX SSR** — 수능 적분/시그마 첫 paint 막힘 방지. RSC `renderToString`.
-- **Cache Components** — `next.config.ts`에 `cacheComponents: true`. 라우트별 `'use cache'` + `cacheLife('max')` + `cacheTag`.
-- **Pretendard 동적 서브셋** — `next/font/local` + 한글 글리프만.
-- **TanStack Query** — 서버 캐시(`'use cache'`) + 클라 mutation 분리.
-- **"약점 −N개" 실제 집계** — patternState theta < 0.4 카운트.
-- **약점 카피 클릭 동작 wire up** — Phase 2의 nuqs swap과 연결.
-- **SolveClient 분해** — 워크스페이스 헤더와 시각 중복 제거. 자체 헤더/footer 분리해서 워크스페이스 외부에서 호스팅 가능하게.
-- **PDF self-host worker** — `public/pdf.worker.min.mjs` 복사 + workerSrc 변경. CDN 의존성 제거.
+### 6.1 PDF.js worker self-host — ✅
+- `cp node_modules/pdfjs-dist/build/pdf.worker.min.mjs public/`
+- `PdfPageViewer.tsx`: workerSrc `cdnjs.cloudflare.com` → `/pdf.worker.min.mjs`
+- 1MB self-host. 버전은 pdfjs-dist 와 자동 정합.
+
+### 6.2 약점 −N개 실제 집계 — ✅
+- `/v2/workspace/[itemId]/page.tsx`: `SELECT COUNT(*) FROM pattern_state WHERE user_id=$1 AND theta < 0.4` 추가
+- `WorkspaceClient` 에 `weakCount: number` prop 전달
+- `weakCount > 0` 일 때만 캡슐 렌더 (0 이면 hide)
+- 임계값: 0.4 — `/v2/graph` mock 의 isWeak 컨벤션과 정합
+
+### 6.3 Pretendard 동적 서브셋 (self-host) — ✅
+- 이전: `<link rel="stylesheet" href="cdn.jsdelivr.net/.../pretendardvariable.min.css">`
+- 변경: `public/fonts/PretendardVariable.woff2` (2.06MB 단일 가변 폰트) + `next/font/local`
+- `display: "swap"` (시스템 폰트로 먼저 paint → Pretendard 로 swap, FOUT 허용)
+- `--font-pretendard` CSS var 주입 + `app/v2/layout.tsx` fontFamily stack 에 var 추가
+- CDN 의존성 제거 (render-blocking external request 제거)
+- Nunito 도 `--font-nunito` variable 로 정리
+
+### 6.4 SolveClient 시각 중복 해결 — ✅ (분해는 미진행)
+- 조사 결과: `embedded` prop 이 이미 헤더/sticky footer/floating panel 적절히 hide → **시각 중복 자체는 없음**
+- 진짜 문제: embedded 모드에서 **타이머가 안 보임** (헤더 통째 hide)
+- 수정: embedded 일 때 본문 상단에 슬림 chip 한 줄 (모드 + Timer/ExamTimer) 추가
+- 구조 분해 (SolveHeader/SolveFooter 분리) 는 호출처 없어 over-engineering — 다음 라운드 미룸
+
+### 6.5 KaTeX SSR — ⏭ skip
+- 조사 결과: `ItemBody.tsx` 의 "KaTeX 도입은 M1.4 에 미룸 — 콘텐츠 시드 형식 확정 후" 코멘트 확인. KaTeX 미설치/미사용. 작업 불요.
+
+### 미진행 (별도 phase 권장)
+- Cache Components (Next 16 canary 단계, 캐시 invalidation 위험)
+- TanStack Query (마이그레이션 surface 넓음, 1일+)
+- 모드 swap UI (challenge/retry ctx 없이 UI 만 깔면 더미)
+
+### 검증
+- `tsc --noEmit`: ✅
+- `npm test`: ✅ 143/143
+- `npm run build`: ✅
+- `npm run lint`: ✅ (내 코드 0 errors)
 
 ---
 

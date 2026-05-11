@@ -13,14 +13,24 @@
  */
 
 import { notFound, redirect } from "next/navigation"
-import { and, asc, desc, eq } from "drizzle-orm"
+import { and, asc, count, desc, eq, lt } from "drizzle-orm"
 import { requireUser } from "@/lib/auth/require-user"
 import { db } from "@/lib/db"
-import { chunks, documents, edges, nodes, users } from "@/lib/db/schema"
+import {
+  chunks,
+  documents,
+  edges,
+  nodes,
+  patternState,
+  users,
+} from "@/lib/db/schema"
 import { getActiveTier, getUsageStat } from "@/lib/billing/quota"
 import { createSupabaseAdminClient } from "@/lib/supabase/admin"
 import type { ItemResponse } from "@/lib/api/schemas/items"
 import { WorkspaceClient } from "./WorkspaceClient"
+
+/** 약점 임계값 — pattern_state.theta < 0.4 = 약점. /v2/graph 의 mock 컨벤션과 정합. */
+const WEAKNESS_THETA_THRESHOLD = 0.4
 
 export const dynamic = "force-dynamic"
 
@@ -126,6 +136,18 @@ export default async function WorkspacePage({ params, searchParams }: Props) {
   const tier = await getActiveTier(user.id)
   const usage = await getUsageStat(user.id)
 
+  // 약점 카운트 — pattern_state.theta < 0.4 인 Pattern 수
+  const [weakCountRow] = await db
+    .select({ n: count() })
+    .from(patternState)
+    .where(
+      and(
+        eq(patternState.userId, user.id),
+        lt(patternState.theta, WEAKNESS_THETA_THRESHOLD),
+      ),
+    )
+  const weakCount = Number(weakCountRow?.n ?? 0)
+
   const itemPayload: ItemResponse = {
     id: item.id,
     type: "item",
@@ -151,6 +173,7 @@ export default async function WorkspacePage({ params, searchParams }: Props) {
       hasDocument={!!documentId}
       docTitle={docTitle}
       pdfSignedUrl={pdfSignedUrl}
+      weakCount={weakCount}
     />
   )
 }
