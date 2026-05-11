@@ -52,6 +52,8 @@ import {
 import {
   DEFAULT_COLOR,
   DEFAULT_SIZE,
+  PEN_COLORS,
+  PEN_SIZES,
   type PenColorKey,
   type PenSizeKey,
 } from "@/lib/pencil/tools-config"
@@ -94,6 +96,23 @@ export function PdfPenCanvas({
   const pdfShapeIdRef = useRef<TLShapeId | null>(null)
   const pdfAssetIdRef = useRef<TLAssetId | null>(null)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // tldraw 캔버스 wrapper — navigator.ink presentationArea + pointer listener anchor
+  const canvasContainerRef = useRef<HTMLDivElement | null>(null)
+  // navigator.ink presenter — Goodnotes Web 가 Windows PWA 에서 쓰는 OS 컴포지터 직결 잉크 트레일
+  const inkPresenterRef = useRef<{
+    updateInkTrailStartPoint: (
+      e: PointerEvent,
+      style: { color: string; diameter: number },
+    ) => void
+  } | null>(null)
+  const inkDrawingRef = useRef(false)
+  const inkColorHexRef = useRef<string>(
+    PEN_COLORS.find((c) => c.key === DEFAULT_COLOR)?.hex ?? "#0F1411",
+  )
+  const inkDiameterPxRef = useRef<number>(
+    PEN_SIZES.find((s) => s.key === DEFAULT_SIZE)?.px ?? 4,
+  )
 
   // Tldraw onMount 도착 신호 — render effect 가 editorRef 의 null 체크만으로는
   // mount 이후 한 번 더 실행되지 않으므로 boolean state 로 dep 에 노출.
@@ -289,11 +308,88 @@ export function PdfPenCanvas({
     [initialSnapshot, userId, itemId],
   )
 
-  // color/size 변경 → editor 에 즉시 반영
+  // color/size 변경 → editor 에 즉시 반영 + ink presenter 용 hex/diameter 동기화
   useEffect(() => {
     const editor = editorRef.current
     if (editor) applyStyle(editor, color, size)
+    const hex = PEN_COLORS.find((c) => c.key === color)?.hex
+    if (hex) inkColorHexRef.current = hex
+    const px = PEN_SIZES.find((s) => s.key === size)?.px
+    if (px) inkDiameterPxRef.current = px
   }, [applyStyle, color, size])
+
+  // navigator.ink — OS 컴포지터에 잉크 트레일 위임 (지각 latency 0ms 에 가깝게)
+  //
+  // Chromium 95+ on Windows 만 지원 (Edge 동일). Safari/Firefox/iPad 는 no-op.
+  // tldraw 가 SVG 기반이라 canvas `desynchronized:true` 는 적용 불가 — 대신 OS 컴포지터가
+  // 다음 paint 이전에 wet-ink 트레일을 우선 그려준다. tldraw 의 실제 stroke 가 다음 프레임에
+  // 그려지면 트레일은 자연스럽게 흡수됨. 충돌 없음.
+  //
+  // 출처: WICG/ink-enhancement, Goodnotes Web Windows PWA 사례 (PWA Builder blog).
+  useEffect(() => {
+    const container = canvasContainerRef.current
+    if (!container || typeof navigator === "undefined") return
+    const nav = navigator as {
+      ink?: {
+        requestPresenter: (opts: {
+          presentationArea: HTMLElement | null
+        }) => Promise<{
+          updateInkTrailStartPoint: (
+            e: PointerEvent,
+            style: { color: string; diameter: number },
+          ) => void
+        }>
+      }
+    }
+    if (!nav.ink?.requestPresenter) return
+
+    let cancelled = false
+    nav.ink
+      .requestPresenter({ presentationArea: container })
+      .then((presenter) => {
+        if (cancelled) return
+        inkPresenterRef.current = presenter
+      })
+      .catch(() => {
+        /* 환경에서 거부 — fallback 없이 일반 페인트 */
+      })
+
+    const onDown = (e: PointerEvent) => {
+      if (e.button !== 0) return // primary 만
+      inkDrawingRef.current = true
+    }
+    const onMove = (e: PointerEvent) => {
+      if (!inkDrawingRef.current) return
+      const presenter = inkPresenterRef.current
+      if (!presenter) return
+      // pressure 미지원 (mouse) 은 1 로. pen pressure 가 있으면 굵기 가변.
+      const pressure = e.pressure > 0 ? e.pressure : 1
+      try {
+        presenter.updateInkTrailStartPoint(e, {
+          color: inkColorHexRef.current,
+          diameter: inkDiameterPxRef.current * pressure,
+        })
+      } catch {
+        /* presenter 해제 직후 fire 등 — silent */
+      }
+    }
+    const onUp = () => {
+      inkDrawingRef.current = false
+    }
+
+    container.addEventListener("pointerdown", onDown, { passive: true })
+    container.addEventListener("pointermove", onMove, { passive: true })
+    container.addEventListener("pointerup", onUp, { passive: true })
+    container.addEventListener("pointercancel", onUp, { passive: true })
+    return () => {
+      cancelled = true
+      inkPresenterRef.current = null
+      container.removeEventListener("pointerdown", onDown)
+      container.removeEventListener("pointermove", onMove)
+      container.removeEventListener("pointerup", onUp)
+      container.removeEventListener("pointercancel", onUp)
+    }
+  }, [])
 
   // unmount cleanup
   useEffect(() => {
@@ -405,8 +501,9 @@ export function PdfPenCanvas({
         onRedo={handleRedo}
       />
 
-      {/* 캔버스 — PDF + 펜 잉크가 같은 tldraw 카메라 안에 stack */}
-      <div className="relative flex-1 min-h-0 bg-zinc-100/60">
+      {/* 캔버스 — PDF + 펜 잉크가 같은 tldraw 카메라 안에 stack.
+          navigator.ink presentationArea + pointer listener anchor 도 이 div. */}
+      <div ref={canvasContainerRef} className="relative flex-1 min-h-0 bg-zinc-100/60">
         {snapshotReady && (
           <Tldraw
             hideUi
