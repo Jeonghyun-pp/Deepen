@@ -15,7 +15,7 @@
  *   - URL state mode swap 미구현 (nuqs 도입은 했으나 Phase 2 에서 활용)
  */
 
-import { useEffect } from "react"
+import { useCallback, useEffect } from "react"
 import Link from "next/link"
 import { Sparkles, Map } from "lucide-react"
 import { Group, Panel, Separator } from "react-resizable-panels"
@@ -30,6 +30,18 @@ import { useCoachStore } from "@/app/v2/_components/store/coach-store"
 import { PdfPageViewer } from "./_components/PdfPageViewer"
 
 const rightParser = parseAsStringEnum(["coach", "graph"]).withDefault("coach")
+const modeParser = parseAsStringEnum([
+  "practice",
+  "challenge",
+  "retry",
+  "daily",
+]).withDefault("practice")
+type WorkspaceMode = "practice" | "challenge" | "retry" | "daily"
+// SolveClient 가 받는 mode 는 'daily' 를 from prop 으로 처리하므로 매핑
+const toSolveMode = (
+  m: WorkspaceMode,
+): "practice" | "challenge" | "retry" =>
+  m === "daily" ? "practice" : m
 
 interface Chunk {
   id: string
@@ -66,10 +78,33 @@ export function WorkspaceClient({
   const setInputPrefill = useCoachStore((s) => s.setInputPrefill)
   const highlightNodeIds = useCoachStore((s) => s.highlightNodeIds)
   const [right, setRight] = useQueryState("right", rightParser)
+  const [mode] = useQueryState("mode", modeParser)
 
   useEffect(() => {
     setCoachOpen(true)
   }, [setCoachOpen])
+
+  /**
+   * View Transitions — 우 패널 swap 시 browser-native crossfade.
+   * React 19.2 stable 은 ViewTransition 컴포넌트 미노출 → document.startViewTransition 직접 호출.
+   * 미지원 브라우저(Safari/Firefox 17.x-)는 즉시 swap fallback.
+   */
+  const swapRight = useCallback(
+    (next: "coach" | "graph") => {
+      type DocWithVT = Document & {
+        startViewTransition?: (cb: () => void) => unknown
+      }
+      const doc = document as DocWithVT
+      if (typeof doc.startViewTransition === "function") {
+        doc.startViewTransition(() => {
+          void setRight(next)
+        })
+      } else {
+        void setRight(next)
+      }
+    },
+    [setRight],
+  )
 
   const handleTextSelect = (text: string, source: { ordinal: number }) => {
     setInputPrefill(
@@ -107,7 +142,7 @@ export function WorkspaceClient({
           {/* 약점 framing — 그래프 강등 표면 1. 클릭 → 우 패널 학습지도 swap (lock 2) */}
           <button
             type="button"
-            onClick={() => void setRight(right === "graph" ? "coach" : "graph")}
+            onClick={() => swapRight(right === "graph" ? "coach" : "graph")}
             aria-pressed={right === "graph"}
             className={`hidden md:flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
               right === "graph"
@@ -193,12 +228,24 @@ export function WorkspaceClient({
                   className="h-[40%] min-h-0 overflow-y-auto"
                   data-testid="hero-solve-region"
                 >
-                  <SolveClient item={item} userId={userId} mode="practice" embedded />
+                  <SolveClient
+                    item={item}
+                    userId={userId}
+                    mode={toSolveMode(mode)}
+                    from={mode === "daily" ? "daily" : null}
+                    embedded
+                  />
                 </div>
               </>
             ) : (
               <div className="flex-1 overflow-y-auto">
-                <SolveClient item={item} userId={userId} mode="practice" embedded />
+                <SolveClient
+                    item={item}
+                    userId={userId}
+                    mode={toSolveMode(mode)}
+                    from={mode === "daily" ? "daily" : null}
+                    embedded
+                  />
               </div>
             )}
           </section>
@@ -214,7 +261,7 @@ export function WorkspaceClient({
                 type="button"
                 role="tab"
                 aria-selected={right === "coach"}
-                onClick={() => void setRight("coach")}
+                onClick={() => swapRight("coach")}
                 className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-3 text-xs font-medium transition ${
                   right === "coach"
                     ? "border-b-2 border-emerald-600 text-black"
@@ -232,7 +279,7 @@ export function WorkspaceClient({
                 type="button"
                 role="tab"
                 aria-selected={right === "graph"}
-                onClick={() => void setRight("graph")}
+                onClick={() => swapRight("graph")}
                 className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-3 text-xs font-medium transition relative ${
                   right === "graph"
                     ? "border-b-2 border-rose-500 text-black"
@@ -252,6 +299,7 @@ export function WorkspaceClient({
             </div>
             <div
               className="flex-1 overflow-hidden"
+              style={{ viewTransitionName: "workspace-right-panel" }}
               data-testid={`right-panel-${right}`}
             >
               {right === "coach" ? (

@@ -1,8 +1,8 @@
-# 워크스페이스 v0 Phase 1 진척 + 다음 세션 가이드
+# 워크스페이스 v0 진척 + 다음 세션 가이드
 
-> 작성: 2026-05-10 18:30 KST · 갱신: 2026-05-10 (Phase 2·3 일부)
-> 진척: Phase 1A + 1B + 우 패널 swap (lock 2) + SolveClient embedded (lock 4·5, lock 8 부분).
->       Phase 4 (펜슬), lock 11 (AI SDK) 미진행.
+> 작성: 2026-05-10 18:30 KST · 갱신: 2026-05-11 (Phase 2 완료)
+> 진척: Phase 1A + 1B + 우 패널 swap (lock 2) + SolveClient embedded (lock 4·5, lock 8 부분) + Phase 2 전부 (AI SDK v5 풀 마이그레이션 + nuqs mode + View Transitions).
+>       남은 lock: 7 (펜슬 PDF 오버레이, Phase 4), 8 부분 (펜→answer 인식, Phase 4 동시).
 > 13 lock truth source: 메모리 `project_workspace_v0_lock_decisions.md`
 > 시안: `docs/workspace-mockup-2026-05-10.html`
 > 리서치: 본 문서 §"기술 스택 결론" 참조
@@ -122,38 +122,59 @@
 
 ---
 
-## 5 · Phase 2 — AI SDK + URL state (~2일)
+## 5 · Phase 2 — AI SDK + URL state + View Transitions (✅ 2026-05-11)
 
-### 5.1 Vercel AI SDK v6 마이그레이션
-- `npm install ai @ai-sdk/anthropic`
-- `lib/clients/claude.ts` → AI SDK wrapper 추가 또는 교체 (한 곳만 바꾸면 모든 라우트 전파)
-- `app/api/ai-coach/chat/route.ts`:
-  ```ts
-  import { streamText } from 'ai'
-  import { anthropic } from '@ai-sdk/anthropic'
-  return streamText({
-    model: anthropic('claude-sonnet-4-5'),
-    messages,
-  }).toDataStreamResponse()
-  ```
-- `CoachPanel.tsx` → `useChat` 훅으로 메시지 누적/스트리밍/에러 처리 위임 (~200줄 감소)
-- 기존 tool_use 분기 (card / highlight / similar) 보존 필요 — `useChat` onToolCall 후크 활용
+### 5.1 AI SDK 풀 마이그레이션 — ✅
+**버전 정렬**: `ai@5.0.186` + `@ai-sdk/anthropic@2.0.79` + `@ai-sdk/react@2.0.188`.
+원래 lock 11 카피는 "v6" 였으나 v6 stable 의 React 바인딩이 없음 (v6↔react canary 만, react v2↔ai v5 가 유일한 stable 페어).
+실 록은 "useChat 훅 도입" 이므로 v5 stable 로 정렬.
 
-### 5.2 URL state mode swap (nuqs)
-- `useQueryState('mode', parseAsStringEnum(['practice','challenge','retry','daily']).withDefault('practice'))` — shallow
-- `useQueryState('right', parseAsStringEnum(['coach','graph']).withDefault('coach'))` — 우 패널 swap
-- 약점 카피 클릭 → `setRight('graph')` 트리거
-- 우 패널 탭 클릭 → 동일 setter
+**서버 (`/api/ai-coach/chat`)**:
+- 자체 SSE (`event: token/card/highlight/similar/done`) → `createUIMessageStream` + `writer.merge(streamText(...).toUIMessageStream())`
+- 모델 호출: `streamText({ model: anthropic(env.CLAUDE_MODEL), tools, onFinish })`
+- tool 3종 인라인 `tool({ inputSchema: z.object(...), execute })`:
+  - `insert_recap_card` — DB buildRecapCard 호출 후 `writer.write({ type: 'data-card', data })`
+  - `highlight_graph_nodes` — `writer.write({ type: 'data-highlight', transient: true })`
+  - `find_similar_items` — `writer.write({ type: 'data-similar', transient: true })`
+- `stopWhen: stepCountIs(2)` — tool 실행 후 LLM 한 번 더 회전하지 않게
+- cache_control 은 v5 의 `allowSystemInMessages: true` + system message 의 `providerOptions.anthropic.cacheControl` 로 보존
+- quota 429 / onFinish recordAiCall / features.aiCoach 503 모두 보존
 
-### 5.3 View Transitions API (선택, React 19.2)
-- `import { ViewTransition, unstable_addTransitionType } from 'react'`
-- 우 패널 swap 감쌈:
-  ```tsx
-  <ViewTransition name="right-panel">
-    {right === 'coach' ? <CoachPanel /> : <GraphPanel />}
-  </ViewTransition>
-  ```
-- `useTransition` + `addTransitionType('panel-swap')`로 부드러운 전환
+**클라 (`CoachPanel.tsx`)**:
+- 자체 fetch + `readSse()` (~100줄) → `useChat({ id: itemId, transport: DefaultChatTransport })`
+- `prepareSendMessagesRequest` 로 body 에 itemId + chipKey + messages 합성
+- `customFetch` 로 429 가로채 store.quotaError 채움 (DefaultChatTransport.fetch 옵션)
+- `onData` 가 highlight/similar 만 store 에 반영 (transient)
+- card 는 message.parts (`data-card`) 에 자동 누적 → `CoachMessage` 가 직접 렌더
+- store 메시지 prefill bridge 는 `useCoachStore.subscribe` 콜백으로 (react-hooks/set-state-in-effect 회피)
+
+**store (`coach-store.ts`)**:
+- messages / streaming / push* / appendDelta / setError / attachCard 제거 (useChat 이 보유)
+- 남은 필드: open / itemId / highlightNodeIds / similarItems / quotaError / inputPrefill
+- 91 줄 → 70 줄
+
+**삭제**:
+- `streamClaude()` (lib/clients/claude.ts)
+- `lib/ai-coach/tools.ts` (COACH_TOOLS — 라우트가 인라인 정의)
+
+**타입**: `lib/ai-coach/coach-message.ts` 신규 — `CoachUIMessage = UIMessage<unknown, CoachDataParts>`
+
+### 5.2 nuqs `?mode` 쿼리 상태 — ✅
+- `useQueryState('mode', parseAsStringEnum(['practice','challenge','retry','daily']).withDefault('practice'))`
+- `daily` → SolveClient 의 `from='daily'` 로 매핑
+- 모드 swap UI 는 미구현 (Phase 3 폴리싱 또는 challenge/retry 라우트 도입 시)
+
+### 5.3 View Transitions API — ✅
+- React 19.2 stable 이 `ViewTransition` 컴포넌트 미노출 → browser-native `document.startViewTransition` 직접 호출
+- `swapRight(next)` 헬퍼: 지원 브라우저는 crossfade, 미지원은 즉시 swap fallback
+- 우 패널 컨테이너에 `style={{ viewTransitionName: 'workspace-right-panel' }}`
+- 약점 캡슐 + 우 탭 클릭 모두 동일 헬퍼 경유
+
+### 검증
+- `tsc --noEmit`: ✅
+- `npm test`: ✅ 143/143
+- `npm run build`: ✅
+- `npm run lint`: ✅ (내 코드 0)
 
 ---
 

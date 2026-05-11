@@ -4,16 +4,23 @@
  * AI 코치 사이드 패널 — 풀이 화면 우측 (모바일은 bottom sheet).
  * Spec: docs/build-spec/07-q1-build.md M1.5, 05-llm-prompts §1.
  *
+ * Phase 2 (AI SDK v6 마이그레이션):
+ *   - 자체 fetch + readSse() → @ai-sdk/react `useChat` 훅
+ *   - messages 는 훅이 보유 (store 에서 제거됨)
+ *   - card 는 message.parts (data-card) 로 자동 누적
+ *   - highlight / similar 는 transient data part → onData → store
+ *   - quota 429 는 DefaultChatTransport.fetch 래퍼로 가로채 store.quotaError 채움
+ *
  * 흐름:
- *   사용자 free input 또는 5칩 클릭 → /api/ai-coach/chat SSE
- *   토큰 delta → 마지막 assistant 메시지 누적
- *   tool_use → card / highlight / similar 이벤트 분기
- *   429 quota 응답 → 패널에 업그레이드 안내
+ *   사용자 free input 또는 5칩 클릭 → sendMessage({ text }, { body: { chipKey } })
+ *   onData → store.setHighlight / setSimilar
+ *   onError → quota or generic
  */
 
-import { useCallback, useEffect, useRef, useState } from "react"
-import type { CoachChatRequest } from "@/lib/api/schemas/ai-coach"
-import type { RecapCardPayload } from "@/lib/api/schemas/recap"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { DefaultChatTransport } from "ai"
+import { useChat } from "@ai-sdk/react"
+import type { CoachUIMessage } from "@/lib/ai-coach/coach-message"
 import { useCoachStore } from "@/app/v2/_components/store/coach-store"
 import { useSolveStore } from "@/app/v2/_components/store/solve-store"
 import { CoachMessage } from "./CoachMessage"
@@ -27,39 +34,90 @@ export function CoachPanel({ itemId }: CoachPanelProps) {
   const open = useCoachStore((s) => s.open)
   const setOpen = useCoachStore((s) => s.setOpen)
   const begin = useCoachStore((s) => s.begin)
-  const messages = useCoachStore((s) => s.messages)
-  const streaming = useCoachStore((s) => s.streaming)
-  const setStreaming = useCoachStore((s) => s.setStreaming)
-  const pushUser = useCoachStore((s) => s.pushUser)
-  const pushAssistant = useCoachStore((s) => s.pushAssistant)
-  const appendDelta = useCoachStore((s) => s.appendDelta)
-  const attachCard = useCoachStore((s) => s.attachCard)
-  const setError = useCoachStore((s) => s.setError)
+  const quotaError = useCoachStore((s) => s.quotaError)
+  const setQuotaError = useCoachStore((s) => s.setQuotaError)
   const setHighlight = useCoachStore((s) => s.setHighlight)
   const setSimilar = useCoachStore((s) => s.setSimilar)
-  const quotaError = useCoachStore((s) => s.quotaError)
-  const inputPrefill = useCoachStore((s) => s.inputPrefill)
-  const setInputPrefill = useCoachStore((s) => s.setInputPrefill)
-  const setQuotaError = useCoachStore((s) => s.setQuotaError)
 
   const bumpAiQuestions = useSolveStore((s) => s.bumpAiQuestions)
 
   const [input, setInput] = useState("")
   const scrollRef = useRef<HTMLDivElement | null>(null)
 
+  // itemId 변경 시 store 초기화 (코치 메시지는 useChat 의 id 분리로 자연 reset)
   useEffect(() => {
     begin(itemId)
   }, [itemId, begin])
 
-  // M2.6 듀얼 모드: PDF 드래그 → coach-store.inputPrefill → input 자동 채움.
-  // 학생이 검토 후 Enter 로 send.
+  // 429 가로채는 fetch — DefaultChatTransport 에 주입
+  const customFetch = useCallback<typeof fetch>(
+    async (input, init) => {
+      const res = await fetch(input, init)
+      if (res.status === 429) {
+        const data = (await res
+          .clone()
+          .json()
+          .catch(() => ({}))) as {
+          limit?: number | "unlimited"
+          used?: number
+        }
+        setQuotaError({
+          limit: data.limit ?? 5,
+          used: data.used ?? 5,
+        })
+        // AI SDK 가 비-200 을 에러로 던지도록 그대로 반환
+      }
+      return res
+    },
+    [setQuotaError],
+  )
+
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport<CoachUIMessage>({
+        api: "/api/ai-coach/chat",
+        fetch: customFetch,
+        prepareSendMessagesRequest: ({ messages, body }) => ({
+          body: {
+            itemId,
+            ...(body ?? {}),
+            messages,
+          },
+        }),
+      }),
+    [customFetch, itemId],
+  )
+
+  const { messages, sendMessage, status, error, clearError } =
+    useChat<CoachUIMessage>({
+      id: itemId,
+      transport,
+      onData: (part) => {
+        if (part.type === "data-highlight") {
+          setHighlight(part.data.nodeIds)
+        } else if (part.type === "data-similar") {
+          setSimilar({
+            patternId: part.data.patternId,
+            itemIds: part.data.items.map((it) => it.id),
+          })
+        }
+      },
+    })
+
+  const streaming = status === "submitted" || status === "streaming"
+
+  // PDF 드래그 prefill → 로컬 input 브리지.
+  // store subscribe 콜백에서 setState 호출하면 react-hooks/set-state-in-effect 회피.
   useEffect(() => {
-    if (inputPrefill) {
-      setInput(inputPrefill)
-      setOpen(true)
-      setInputPrefill(null)
-    }
-  }, [inputPrefill, setInputPrefill, setOpen])
+    const unsub = useCoachStore.subscribe((state, prev) => {
+      if (state.inputPrefill && state.inputPrefill !== prev.inputPrefill) {
+        setInput(state.inputPrefill)
+        setOpen(true)
+        useCoachStore.getState().setInputPrefill(null)
+      }
+    })
+    return unsub
+  }, [setOpen])
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -68,81 +126,36 @@ export function CoachPanel({ itemId }: CoachPanelProps) {
   }, [messages])
 
   const send = useCallback(
-    async (message: string, chipKey?: ChipKey) => {
-      if (streaming || !message.trim()) return
+    (text: string, chipKey?: ChipKey) => {
+      if (streaming || !text.trim()) return
       bumpAiQuestions()
-
-      pushUser(message)
-      const assistantId = `a-${Date.now()}`
-      pushAssistant(assistantId)
-      setStreaming(true)
       setQuotaError(null)
       setHighlight([])
-
-      try {
-        const body: CoachChatRequest = {
-          itemId,
-          message,
-          ...(chipKey ? { chipKey } : {}),
-        }
-        const res = await fetch("/api/ai-coach/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(body),
-        })
-
-        if (res.status === 429) {
-          const data = (await res.json()) as { limit?: number; used?: number }
-          setQuotaError({ limit: data.limit ?? 5, used: data.used ?? 5 })
-          setError(assistantId, "quota_exceeded")
-          setStreaming(false)
-          return
-        }
-        if (!res.ok || !res.body) {
-          setError(assistantId, `http_${res.status}`)
-          setStreaming(false)
-          return
-        }
-
-        await readSse(res.body, {
-          onToken: (delta) => appendDelta(assistantId, delta),
-          onCard: (card) => attachCard(assistantId, card),
-          onHighlight: (nodeIds) => setHighlight(nodeIds),
-          onSimilar: (p) => setSimilar(p),
-          onError: (msg) => setError(assistantId, msg),
-        })
-      } catch (e) {
-        setError(assistantId, (e as Error).message ?? "network_error")
-      } finally {
-        setStreaming(false)
-      }
+      clearError()
+      void sendMessage(
+        { text },
+        chipKey ? { body: { chipKey } } : undefined,
+      )
     },
     [
-      itemId,
       streaming,
       bumpAiQuestions,
-      pushUser,
-      pushAssistant,
-      appendDelta,
-      attachCard,
-      setError,
-      setHighlight,
-      setSimilar,
-      setStreaming,
       setQuotaError,
+      setHighlight,
+      clearError,
+      sendMessage,
     ],
   )
 
   const handleChip = (key: ChipKey) => {
-    void send(`(${key}) 알려주세요.`, key)
+    send(`(${key}) 알려주세요.`, key)
   }
 
   const handleSend = () => {
     const v = input.trim()
     if (!v) return
     setInput("")
-    void send(v)
+    send(v)
   }
 
   if (!open) {
@@ -191,9 +204,25 @@ export function CoachPanel({ itemId }: CoachPanelProps) {
             막힌 부분을 골라 보세요. 코치가 단계별로 안내합니다.
           </p>
         )}
-        {messages.map((m) => (
-          <CoachMessage key={m.id} message={m} />
-        ))}
+        {messages.map((m, idx) => {
+          const isLast = idx === messages.length - 1
+          return (
+            <CoachMessage
+              key={m.id}
+              message={m}
+              streaming={streaming && isLast && m.role === "assistant"}
+            />
+          )
+        })}
+        {error && !quotaError && (
+          <p
+            className="text-center text-xs text-rose-700"
+            data-testid="coach-message-error"
+            role="alert"
+          >
+            응답 실패 — 다시 보내 보세요.
+          </p>
+        )}
       </div>
 
       {quotaError && (
@@ -239,72 +268,4 @@ export function CoachPanel({ itemId }: CoachPanelProps) {
       </footer>
     </aside>
   )
-}
-
-interface SseHandlers {
-  onToken: (delta: string) => void
-  onCard: (card: RecapCardPayload) => void
-  onHighlight: (nodeIds: string[]) => void
-  onSimilar: (p: { patternId: string; itemIds: string[] }) => void
-  onError: (msg: string) => void
-}
-
-async function readSse(
-  body: ReadableStream<Uint8Array>,
-  handlers: SseHandlers,
-): Promise<void> {
-  const reader = body.getReader()
-  const decoder = new TextDecoder()
-  let buffer = ""
-
-  while (true) {
-    const { value, done } = await reader.read()
-    if (done) break
-    buffer += decoder.decode(value, { stream: true })
-
-    let sepIndex: number
-    while ((sepIndex = buffer.indexOf("\n\n")) !== -1) {
-      const raw = buffer.slice(0, sepIndex)
-      buffer = buffer.slice(sepIndex + 2)
-      const lines = raw.split("\n")
-      let event = "message"
-      const dataLines: string[] = []
-      for (const line of lines) {
-        if (line.startsWith("event: ")) event = line.slice(7).trim()
-        else if (line.startsWith("data: ")) dataLines.push(line.slice(6))
-      }
-      const dataStr = dataLines.join("\n")
-      if (!dataStr) continue
-      let data: unknown
-      try {
-        data = JSON.parse(dataStr)
-      } catch {
-        continue
-      }
-      if (event === "token") {
-        const d = data as { delta: string }
-        handlers.onToken(d.delta)
-      } else if (event === "card") {
-        const d = data as { card: RecapCardPayload }
-        handlers.onCard(d.card)
-      } else if (event === "highlight") {
-        const d = data as { nodeIds: string[] }
-        handlers.onHighlight(d.nodeIds)
-      } else if (event === "similar") {
-        const d = data as {
-          patternId: string
-          items: { id: string }[]
-        }
-        handlers.onSimilar({
-          patternId: d.patternId,
-          itemIds: d.items?.map((it) => it.id) ?? [],
-        })
-      } else if (event === "error") {
-        const d = data as { message: string }
-        handlers.onError(d.message)
-      } else if (event === "done") {
-        return
-      }
-    }
-  }
 }

@@ -16,11 +16,14 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.79",
+    "@ai-sdk/react": "^2.0.188",
     "@anthropic-ai/sdk": "^0.82.0",
     "@dagrejs/dagre": "^3.0.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.103.3",
     "@xyflow/react": "^12.10.2",
+    "ai": "^5.0.186",
     "drizzle-orm": "^0.45.2",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.7.0",
