@@ -65,7 +65,9 @@ export default async function ExamPage({ params }: Props) {
   }
 
   const batchCsv = items.map((r) => r.id).join(",")
+  // Stage 6: exam batch 도 워크스페이스 hero 로 흡수. SolveClient embedded 가
+  // ExamTimerInline + hint/AI 잠금 chrome 을 자동 활성.
   redirect(
-    `/v2/solve/${items[0].id}?mode=exam&batch=${encodeURIComponent(batchCsv)}&idx=0`,
+    `/v2/workspace/${items[0].id}?mode=exam&batch=${encodeURIComponent(batchCsv)}&idx=0`,
   )
 }

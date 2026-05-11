@@ -157,6 +157,8 @@ export function SolveClient({
 
   const setCoachOpen = useCoachStore((s) => s.setOpen)
   const resetCoach = useCoachStore((s) => s.reset)
+  const setCoachHighlight = useCoachStore((s) => s.setHighlight)
+  const setCoachPrefill = useCoachStore((s) => s.setInputPrefill)
   const highlightNodeIds = useCoachStore((s) => s.highlightNodeIds)
 
   const [submitting, setSubmitting] = useState(false)
@@ -231,6 +233,16 @@ export function SolveClient({
       const response = await submitAttempt(payload)
       setResult(response)
 
+      // UX §15 자동 surface — 결손 의심 prereq 패턴 ID 들을 코치 store 에 highlight 로 push.
+      // 우 패널 "학습 지도" 탭이 펄스 ring 으로 자동 강조 (GraphPanel.highlightNodeIds 구독).
+      // recapNeeded=false 면 highlight clear (이전 attempt 잔상 제거).
+      const prereqCands = response.diagnosis.candidatePrereq ?? []
+      if (response.diagnosis.recapNeeded && prereqCands.length > 0) {
+        setCoachHighlight(prereqCands.map((c) => c.patternId))
+      } else {
+        setCoachHighlight([])
+      }
+
       // M3.2 challenge: reducer 로 ctx 갱신 → next item 라우팅 시 사용
       if (isChallenge) {
         const correct = response.attemptResult.label === "correct"
@@ -295,29 +307,31 @@ export function SolveClient({
       }
       const nextId = batch[batchIdx + 1]
       const csv = encodeURIComponent(batch.join(","))
+      // Stage 6: exam batch 도 워크스페이스 hero 로 흡수 — modeParser 에 exam 추가됨.
+      // hint/AI 잠금은 SolveClient(embedded) 내부 isExam 분기가 자동 처리.
       const params = isDaily
         ? `from=daily&batch=${csv}&idx=${batchIdx + 1}`
         : `mode=exam&batch=${csv}&idx=${batchIdx + 1}`
-      router.push(`/v2/solve/${nextId}?${params}`)
+      router.push(`/v2/workspace/${nextId}?${params}`)
       return
     }
 
-    // M3.2 retry: 단일 attempt → 단원 진입으로
+    // M3.2 retry: 단일 attempt → home (Stage 12: study lobby 흡수)
     if (isRetry) {
-      router.push("/v2/study/default")
+      router.push("/v2/home")
       return
     }
 
     // M3.2 challenge: 머신 상태로 다음 단계 결정
     if (isChallenge) {
       if (challengeState.name === "session_end") {
-        router.push("/v2/study/default")
+        router.push("/v2/home")
         return
       }
       // level_up 은 ResultPanel 의 별도 CTA 에서 처리하지만, "다음" 클릭이면
-      // 동일 흐름. session_end 와 동일하게 단원으로 (다음 Pattern 추천은 후속).
+      // 동일 흐름. session_end 와 동일하게 home 으로 (Stage 12).
       if (challengeState.name === "level_up") {
-        router.push("/v2/study/default?leveledUp=1")
+        router.push("/v2/home?leveledUp=1")
         return
       }
       // solving — 같은 Pattern, difficulty=ctx.currentDifficulty 로 다음 Item
@@ -344,14 +358,15 @@ export function SolveClient({
               wrong: String(challengeState.ctx.consecutiveWrong),
               cleared: String(challengeState.ctx.levelsCleared),
             })
-            router.push(`/v2/solve/${data.itemId}?${params.toString()}`)
+            // Stage 1: challenge 다음 item 도 워크스페이스 hero 로.
+            router.push(`/v2/workspace/${data.itemId}?${params.toString()}`)
             return
           }
         }
       } catch {
         /* fall through */
       }
-      router.push("/v2/study/default")
+      router.push("/v2/home")
       return
     }
 
@@ -364,7 +379,8 @@ export function SolveClient({
       if (res.ok) {
         const data = (await res.json()) as { itemId: string | null }
         if (data.itemId && data.itemId !== item.id) {
-          router.push(`/v2/solve/${data.itemId}`)
+          // Stage 1: 일반 다음 문제도 워크스페이스 hero 로 (hero 누수 해결).
+          router.push(`/v2/workspace/${data.itemId}`)
           return
         }
       }
@@ -411,7 +427,8 @@ export function SolveClient({
     })
     setRecapCandidates(null)
     setRecapAllPassed(false)
-    router.push(`/v2/solve/${item.id}?${params.toString()}`)
+    // Stage 1: retry mode 진입도 워크스페이스 hero 로.
+    router.push(`/v2/workspace/${item.id}?${params.toString()}`)
   }
 
   const skipRetry = () => {
@@ -528,7 +545,7 @@ export function SolveClient({
           patternLabel={challengeState.ctx.patternLabel || "유형 챌린지"}
           consecutiveWrong={challengeState.ctx.consecutiveWrong}
           difficulty={challengeState.ctx.currentDifficulty}
-          onAbort={() => router.push("/v2/study/default")}
+          onAbort={() => router.push("/v2/home")}
         />
       )}
 
@@ -602,6 +619,28 @@ export function SolveClient({
                     }
                     const data = (await res.json()) as OcrResponse
                     setOcrResult(data)
+                    // Phase 4 Path C (lock #8) — standalone 분기에서도 펜→답 자동 채움.
+                    // Vision 이 답 표시 감지 + 신뢰도 0.5+ + 현재 미선택 시에만 덮어쓰지 않음.
+                    if (
+                      data.detectedAnswerChoice &&
+                      data.answerConfidence >= 0.5 &&
+                      item.itemChoices &&
+                      item.itemChoices.length >= data.detectedAnswerChoice
+                    ) {
+                      const choiceText =
+                        item.itemChoices[
+                          data.detectedAnswerChoice - 1
+                        ]?.trim()
+                      if (choiceText) {
+                        const current =
+                          useSolveStore.getState().selectedAnswer
+                        if (!current) {
+                          useSolveStore
+                            .getState()
+                            .setSelectedAnswer(choiceText)
+                        }
+                      }
+                    }
                   } catch (e) {
                     setOcrError((e as Error).message ?? "network_error")
                   } finally {
@@ -691,11 +730,13 @@ export function SolveClient({
         </div>
       )}
 
-      {/* embedded: 워크스페이스 hero 안에서는 sticky 대신 inline 정렬 */}
+      {/* E2E 수정: embedded 도 sticky bottom-0 — 워크스페이스 hero 의 좁은 40% 영역에서
+          스크롤 끝에 가야만 보이던 문제 해결. 부모 hero-solve-region (overflow-y-auto)
+          가 sticky 컨테이너 역할. */}
       <footer
         className={
           embedded
-            ? "flex items-center justify-end gap-2 border-t border-black/5 bg-white/70 px-2 py-3"
+            ? "sticky bottom-0 -mx-4 z-10 flex items-center justify-end gap-2 border-t border-black/8 bg-white/95 px-4 py-3 backdrop-blur shadow-[0_-4px_8px_rgba(0,0,0,0.04)]"
             : "sticky bottom-0 -mx-4 flex items-center justify-end gap-2 border-t border-black/5 bg-white/95 px-4 py-3 backdrop-blur sm:-mx-8 sm:px-8"
         }
       >
@@ -721,6 +762,14 @@ export function SolveClient({
               ? handleOpenRecap
               : undefined
           }
+          onAskCoachAboutPrereq={({ patternLabel }) => {
+            // UX §15: 결손 의심 prereq 칩 클릭 → 코치 input prefill.
+            // 사용자가 직접 send 결정 (자동 send 는 invasive — 비활성).
+            setCoachOpen(true)
+            setCoachPrefill(
+              `${patternLabel} 개념이 결손인 것 같아요. 이 개념을 짧게 리캡해주세요.`,
+            )
+          }}
           batchProgress={
             isBatch && batch
               ? { idx: batchIdx, total: batch.length, isLast: isLastInBatch }

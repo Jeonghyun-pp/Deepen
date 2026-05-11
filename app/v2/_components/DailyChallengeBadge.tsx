@@ -67,7 +67,7 @@ export function DailyChallengeBadge() {
   })
   return (
     <Link
-      href={`/v2/solve/${firstId}?${params.toString()}`}
+      href={`/v2/workspace/${firstId}?${params.toString()}`}
       data-testid="daily-challenge-badge"
       className="group inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-medium text-emerald-800 hover:bg-emerald-100"
       title={data.copy ?? `약점 ${data.items.length}문제 도전`}

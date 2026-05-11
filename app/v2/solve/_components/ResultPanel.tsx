@@ -58,6 +58,12 @@ export interface ResultPanelProps {
   batchProgress?: { idx: number; total: number; isLast: boolean } | null
   /** 워크스페이스 hero 영역 인라인 (lock 4: 모달 X). default false (모달). */
   inline?: boolean
+  /**
+   * UX §15 자동 surface — 결손 의심 prereq 패턴 칩 클릭 시 호출.
+   * 부모(SolveClient/WorkspaceClient)가 코치 inputPrefill 을 채워 사용자가 send 결정.
+   * 미설정 시 칩은 noop (정보 표시만).
+   */
+  onAskCoachAboutPrereq?: (args: { patternId: string; patternLabel: string }) => void
 }
 
 export function ResultPanel({
@@ -67,11 +73,15 @@ export function ResultPanel({
   onClose,
   batchProgress = null,
   inline = false,
+  onAskCoachAboutPrereq,
 }: ResultPanelProps) {
   const tone: Tone = result.attemptResult.label
   const styles = TONE_STYLES[tone]
   const reasonTags = result.attemptResult.reasonTags
   const explanation = result.attemptResult.explanation
+  const prereqCandidates = result.diagnosis.candidatePrereq ?? []
+  const showPrereqBanner =
+    result.diagnosis.recapNeeded && prereqCandidates.length > 0
 
   return (
     <div
@@ -149,6 +159,56 @@ export function ResultPanel({
               })}
             </div>
           </div>
+        )}
+
+        {showPrereqBanner && (
+          <section
+            className="mt-5 rounded-lg border border-amber-300 bg-amber-50/80 p-3"
+            data-testid="prereq-deficit-banner"
+            aria-label="결손 의심 선행 개념"
+          >
+            <div className="flex items-baseline justify-between gap-2">
+              <p className="text-xs font-medium text-amber-900">
+                <span aria-hidden>💡</span> 이전 학년 개념 결손이 의심돼요
+              </p>
+              <span className="text-[10px] text-amber-800/70">
+                {prereqCandidates.length}개 후보
+              </span>
+            </div>
+            <ul className="mt-2 flex flex-wrap gap-1.5" data-testid="prereq-candidate-chips">
+              {prereqCandidates.slice(0, 4).map((c) => {
+                const interactive = !!onAskCoachAboutPrereq
+                const label = c.grade ? `${c.grade} · ${c.patternLabel}` : c.patternLabel
+                const className = `inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium ${
+                  interactive
+                    ? "bg-white text-amber-900 ring-1 ring-amber-200 hover:bg-amber-100"
+                    : "bg-amber-100 text-amber-900"
+                }`
+                return interactive ? (
+                  <button
+                    type="button"
+                    key={c.patternId}
+                    onClick={() =>
+                      onAskCoachAboutPrereq?.({
+                        patternId: c.patternId,
+                        patternLabel: c.patternLabel,
+                      })
+                    }
+                    className={className}
+                    data-testid={`prereq-chip-${c.patternId}`}
+                    title={`결손 의심도 ${(c.deficitProb * 100).toFixed(0)}% — 코치에게 물어보기`}
+                  >
+                    {label}
+                    <span className="text-amber-500">›</span>
+                  </button>
+                ) : (
+                  <span key={c.patternId} className={className} title={`결손 의심도 ${(c.deficitProb * 100).toFixed(0)}%`}>
+                    {label}
+                  </span>
+                )
+              })}
+            </ul>
+          </section>
         )}
 
         {explanation && (

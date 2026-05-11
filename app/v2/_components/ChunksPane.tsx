@@ -1,11 +1,14 @@
 "use client"
 
 /**
- * Chunks Pane — PDF 직접 렌더 대신 chunks ordinal list (Q2 단순화).
+ * Chunks Pane — PDF chunks ordinal list + 드래그 → 코치 prefill.
  * Spec: docs/build-spec/08-q2-build.md M2.6 (B) PDF pane simplification.
  *
  * 핵심: 텍스트 드래그 → onTextSelect callback → 코치 패널 prefill.
  * window.getSelection() 으로 단순 받음. chunk 매핑은 가장 가까운 ordinal.
+ *
+ * 원래 dual/_components 에 있었으나 Stage 5 에서 v2/_components 로 이동
+ * (dual 라우트 deprecate 와 분리해 재사용 가능 컴포넌트로 격상).
  *
  * Q3 계획: react-pdf + bbox 좌표 매핑.
  */
@@ -99,7 +102,7 @@ export function ChunksPane({
       <div className="flex h-full items-center justify-center px-6 text-center text-xs text-black/45">
         업로드된 PDF 의 chunks 가 여기 표시됩니다.
         <br />
-        텍스트 드래그 → "코치에게 묻기" 인터랙션이 핵심.
+        텍스트 드래그 → &quot;코치에게 묻기&quot; 인터랙션이 핵심.
       </div>
     )
   }

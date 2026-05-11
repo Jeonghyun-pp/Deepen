@@ -22,7 +22,9 @@ export default function OnboardRoute() {
     if (busy) return;
     setBusy(target);
     await markOnboarded();
-    router.push(target === "home" ? "/v2/home" : "/v2/recap/discriminant");
+    // Stage 0: /v2/recap/[id] 라우트 deprecate — home 으로 일원화.
+    // home 이 firstItem 있으면 자동 /v2/workspace/[itemId] 로 redirect.
+    router.push("/v2/home");
   };
 
   return (

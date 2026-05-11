@@ -8,9 +8,9 @@
  *   - SolveTimeBreakdown
  *   - WeeklyComparisonChart (custom SVG)
  */
-import Link from "next/link"
 import { requireUser } from "@/lib/auth/require-user"
 import { buildOverview } from "@/lib/stats/aggregate"
+import { LobbyHeader } from "@/app/v2/_components/LobbyHeader"
 import { WeakNodesReducedCard } from "./_components/WeakNodesReducedCard"
 import { MasteryDeltaCard } from "./_components/MasteryDeltaCard"
 import { SolveTimeBreakdown } from "./_components/SolveTimeBreakdown"
@@ -27,23 +27,14 @@ export default async function StatsPage() {
     overview.weeklyComparison.some((w) => w.attempts > 0)
 
   return (
-    <main className="min-h-screen bg-zinc-50 px-6 py-10">
-      <div className="mx-auto flex max-w-5xl flex-col gap-6">
-        <header className="flex items-center justify-between border-b border-black/5 pb-4">
-          <div>
-            <Link
-              href="/v2/home"
-              className="text-[11px] uppercase tracking-widest text-black/45 hover:text-black/70"
-            >
-              ← 홈
-            </Link>
-            <h1 className="mt-1 text-2xl font-semibold text-black/85">
-              내 학습 통계
-            </h1>
-            <p className="mt-1 text-xs text-black/55">
-              매주 토요일 23:00 KST 스냅샷 기준. 보호자 리포트와 같은 숫자입니다.
-            </p>
-          </div>
+    <main className="min-h-screen bg-zinc-50">
+      <LobbyHeader active="stats" />
+      <div className="mx-auto flex max-w-5xl flex-col gap-6 px-6 py-10">
+        <header className="border-b border-black/5 pb-4">
+          <h1 className="text-2xl font-semibold text-black/85">내 학습 통계</h1>
+          <p className="mt-1 text-xs text-black/55">
+            매주 토요일 23:00 KST 스냅샷 기준. 보호자 리포트와 같은 숫자입니다.
+          </p>
         </header>
 
         {!hasAnyData && (

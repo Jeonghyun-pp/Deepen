@@ -9,16 +9,20 @@
 
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import { and, asc, count, eq } from "drizzle-orm"
+import { and, count, eq } from "drizzle-orm"
 import { requireUser } from "@/lib/auth/require-user"
 import { isAdminEmail } from "@/lib/auth/require-admin"
 import { db } from "@/lib/db"
 import { nodes, users } from "@/lib/db/schema"
 import { COPY } from "@/lib/ui/copy"
+import { documents } from "@/lib/db/schema"
+import { desc } from "drizzle-orm"
 import { getActiveTier, getUsageStat } from "@/lib/billing/quota"
 import { QuotaCard } from "@/app/v2/billing/_components/QuotaCard"
 import { DailyChallengeBadge } from "@/app/v2/_components/DailyChallengeBadge"
+import { LobbyHeader } from "@/app/v2/_components/LobbyHeader"
 import { LogoutButton } from "./LogoutButton"
+import { LectureStartButton } from "./LectureStartButton"
 
 export const dynamic = "force-dynamic"
 
@@ -52,11 +56,13 @@ export default async function HomePage({ searchParams }: Props) {
     .from(nodes)
     .where(and(eq(nodes.type, "item"), eq(nodes.status, "published")))
 
+  // E2E 수정: asc → desc. 가장 오래된 item 으로 가면 옛 시드 (PDF 미연결) 로 진입.
+  // 가장 최근 published item 이 활성 시드일 가능성이 높음.
   const [firstItem] = await db
     .select({ id: nodes.id })
     .from(nodes)
     .where(and(eq(nodes.type, "item"), eq(nodes.status, "published")))
-    .orderBy(asc(nodes.createdAt))
+    .orderBy(desc(nodes.createdAt))
     .limit(1)
 
   // 워크스페이스 v0 lock #9 — 통합 워크스페이스로 redirect (오르조 '열자마자 풀이').
@@ -72,17 +78,21 @@ export default async function HomePage({ searchParams }: Props) {
   const tier = await getActiveTier(user.id)
   const usage = await getUsageStat(user.id)
 
+  // 북극성 Stage 2 — 사용자 가장 최근 ready document (강의안 학습 시작 진입점)
+  const [readyDoc] = await db
+    .select({ id: documents.id })
+    .from(documents)
+    .where(and(eq(documents.userId, user.id), eq(documents.status, "ready")))
+    .orderBy(desc(documents.createdAt))
+    .limit(1)
+  const readyDocumentId = readyDoc?.id ?? null
+
   return (
-    <main className="min-h-screen bg-zinc-50 px-4 py-8 sm:px-6 sm:py-10">
-      <div className="mx-auto flex max-w-3xl flex-col gap-10">
-        <header className="flex flex-wrap items-center justify-between gap-y-3 gap-x-3">
-          <Link
-            href="/"
-            className="text-xs font-extrabold tracking-[0.18em] text-black/85"
-          >
-            DEEPEN
-          </Link>
-          <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-2 text-xs text-black/55">
+    <main className="min-h-screen bg-zinc-50">
+      <LobbyHeader
+        active="home"
+        rightSlot={
+          <>
             <DailyChallengeBadge />
             <QuotaCard
               tier={tier}
@@ -93,8 +103,10 @@ export default async function HomePage({ searchParams }: Props) {
             />
             <span className="hidden max-w-[160px] truncate sm:inline">{user.email}</span>
             <LogoutButton />
-          </div>
-        </header>
+          </>
+        }
+      />
+      <div className="mx-auto flex max-w-3xl flex-col gap-10 px-4 py-8 sm:px-6 sm:py-10">
 
         {dailyDone && (
           <section
@@ -154,27 +166,16 @@ export default async function HomePage({ searchParams }: Props) {
           </section>
         )}
 
+        {/* Stage 2: nav 통일 — 상단 LobbyHeader 가 단원/오답/약점/내정보 4-nav 제공.
+            footer 는 settings 진입만 남김. (요금·보호자·PDF·어드민) */}
         <nav
           aria-label="보조 내비게이션"
           className="flex flex-wrap gap-x-4 gap-y-2 border-t border-black/5 pt-6 text-xs text-black/55 sm:gap-x-3"
         >
-          <Link href="/v2/graph" className="hover:text-black/80 hover:underline">
-            전체 학습 지도
-          </Link>
-          {isAdmin && (
-            <Link
-              href="/admin/seed-review"
-              className="hover:text-black/80 hover:underline"
-            >
-              어드민
-            </Link>
-          )}
           <Link href="/upload" className="hover:text-black/80 hover:underline">
             PDF 업로드
           </Link>
-          <Link href="/v2/stats" className="hover:text-black/80 hover:underline">
-            내 통계
-          </Link>
+          <LectureStartButton readyDocumentId={readyDocumentId} />
           <Link href="/v2/billing" className="hover:text-black/80 hover:underline">
             요금
           </Link>
@@ -184,6 +185,14 @@ export default async function HomePage({ searchParams }: Props) {
           >
             보호자 리포트
           </Link>
+          {isAdmin && (
+            <Link
+              href="/admin/seed-review"
+              className="hover:text-black/80 hover:underline"
+            >
+              어드민
+            </Link>
+          )}
         </nav>
       </div>
     </main>
@@ -203,11 +212,11 @@ function UnitCard({
 }) {
   const hasContent = itemCount > 0 && firstItemId
 
-  if (hasContent) {
-    // 단원 진입 화면 (/v2/study/[unitId]) 경유 — Pattern 미리보기 후 풀이 시작.
+  if (hasContent && firstItemId) {
+    // Stage 12: study/[unitId] 흡수 — 단원 lobby 거치지 않고 워크스페이스 hero 로 직행.
     return (
       <Link
-        href="/v2/study/default"
+        href={`/v2/workspace/${firstItemId}`}
         className="group block rounded-2xl border border-black/10 bg-white p-6 shadow-sm transition hover:border-black/30 hover:shadow-md"
         data-testid="unit-card-active"
       >

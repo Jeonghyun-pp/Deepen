@@ -65,7 +65,7 @@ export function OcrResultPanel({
       className="rounded-lg border border-black/10 bg-white p-4"
       data-testid="ocr-result-panel"
     >
-      <header className="mb-3 flex items-center justify-between">
+      <header className="mb-3 flex items-center justify-between gap-3">
         <div>
           <p className="text-[11px] uppercase tracking-widest text-black/45">
             풀이 분석
@@ -75,6 +75,16 @@ export function OcrResultPanel({
             {(ocr.processingTimeMs / 1000).toFixed(1)}s
           </p>
         </div>
+        {ocr.detectedAnswerChoice && ocr.answerConfidence >= 0.5 && (
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-medium text-emerald-800"
+            data-testid="ocr-detected-answer"
+            title={`답 감지 신뢰도 ${(ocr.answerConfidence * 100).toFixed(0)}%`}
+          >
+            <span className="text-emerald-600">✏️</span>
+            <span>답 {ocr.detectedAnswerChoice}번 인식</span>
+          </span>
+        )}
         <button
           type="button"
           onClick={onDismiss}

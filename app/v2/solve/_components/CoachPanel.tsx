@@ -28,9 +28,14 @@ import { ChipBar, type ChipKey } from "./ChipBar"
 
 export interface CoachPanelProps {
   itemId: string
+  /**
+   * E2E 수정: 'inline' = 워크스페이스 우 panel 안에 채워지는 모드 (fixed X).
+   * 'floating' (default) = 기존 standalone /v2/solve 의 fixed 우측 420px.
+   */
+  variant?: "floating" | "inline"
 }
 
-export function CoachPanel({ itemId }: CoachPanelProps) {
+export function CoachPanel({ itemId, variant = "floating" }: CoachPanelProps) {
   const open = useCoachStore((s) => s.open)
   const setOpen = useCoachStore((s) => s.setOpen)
   const begin = useCoachStore((s) => s.begin)
@@ -159,6 +164,8 @@ export function CoachPanel({ itemId }: CoachPanelProps) {
   }
 
   if (!open) {
+    // inline 모드: 닫혀 있어도 floating 버튼 띄우지 않음 (panel 자리가 비게 됨).
+    if (variant === "inline") return null
     return (
       <button
         type="button"
@@ -172,27 +179,35 @@ export function CoachPanel({ itemId }: CoachPanelProps) {
     )
   }
 
+  const asideClass =
+    variant === "inline"
+      ? "flex h-full w-full flex-col bg-white"
+      : "fixed inset-0 z-40 flex flex-col bg-white shadow-2xl sm:inset-y-0 sm:left-auto sm:right-0 sm:w-[420px] sm:border-l sm:border-black/10"
+
   return (
     <aside
-      className="fixed inset-0 z-40 flex flex-col bg-white shadow-2xl sm:inset-y-0 sm:left-auto sm:right-0 sm:w-[420px] sm:border-l sm:border-black/10"
+      className={asideClass}
       data-testid="coach-panel"
       aria-label="AI 코치 패널"
     >
-      <header className="flex items-center justify-between border-b border-black/5 px-4 py-3">
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] uppercase tracking-widest text-black/55">
-            AI 코치
-          </span>
-        </div>
-        <button
-          type="button"
-          onClick={() => setOpen(false)}
-          className="text-black/55 hover:text-black/85"
-          aria-label="닫기"
-        >
-          ✕
-        </button>
-      </header>
+      {/* inline 모드: 워크스페이스 우 panel 의 자체 탭 헤더가 이미 있어서 내부 header 중복 → 숨김 */}
+      {variant !== "inline" && (
+        <header className="flex items-center justify-between border-b border-black/5 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] uppercase tracking-widest text-black/55">
+              AI 코치
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="text-black/55 hover:text-black/85"
+            aria-label="닫기"
+          >
+            ✕
+          </button>
+        </header>
+      )}
 
       <div
         ref={scrollRef}
