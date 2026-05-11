@@ -168,6 +168,8 @@ export function SolveClient({
   const [ocrResult, setOcrResult] = useState<OcrResponse | null>(null)
   const [ocrPending, setOcrPending] = useState(false)
   const [ocrError, setOcrError] = useState<string | null>(null)
+  /** P1-5 폴리싱: exam 시간 종료 시 미답이면 안내 배너. */
+  const [examExpired, setExamExpired] = useState(false)
 
   // overlay 호스팅 시 effective 값은 injected 우선
   const effPencilPng = overlayPencilHosted
@@ -465,6 +467,9 @@ export function SolveClient({
                 onTimeUp={() => {
                   if (!submitting && selectedAnswer) {
                     void handleSubmit()
+                  } else if (!selectedAnswer) {
+                    // P1-5 폴리싱: 미답 상태 시간 종료 → 안내 배너
+                    setExamExpired(true)
                   }
                 }}
               />
@@ -506,6 +511,8 @@ export function SolveClient({
               onTimeUp={() => {
                 if (!submitting && selectedAnswer) {
                   void handleSubmit()
+                } else if (!selectedAnswer) {
+                  setExamExpired(true)
                 }
               }}
             />
@@ -523,6 +530,20 @@ export function SolveClient({
           difficulty={challengeState.ctx.currentDifficulty}
           onAbort={() => router.push("/v2/study/default")}
         />
+      )}
+
+      {/* P1-5 폴리싱: exam 시간 종료 + 미답 → 안내 배너. 사용자가 답 선택 후 자동 dismiss. */}
+      {examExpired && !selectedAnswer && (
+        <div
+          className="flex items-center justify-between gap-3 rounded-lg border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-900"
+          role="alert"
+          data-testid="exam-expired-banner"
+        >
+          <span>
+            <span className="font-semibold">시간 초과</span> · 답을 선택해
+            제출하세요.
+          </span>
+        </div>
       )}
 
       {isRetry && retryCtx && (
@@ -602,11 +623,28 @@ export function SolveClient({
           )}
           {effOcrError && (
             <div
-              className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800"
+              className="flex items-center justify-between gap-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800"
               role="alert"
               data-testid="ocr-error"
             >
-              {errorCopyForCode(effOcrError)}
+              <span>{errorCopyForCode(effOcrError)}</span>
+              <button
+                type="button"
+                onClick={() => {
+                  // P1-5 폴리싱: 다시 그리기 — 펜+OCR 상태 reset
+                  if (overlayPencilHosted) {
+                    onPencilClearFromResult?.()
+                  } else {
+                    setOcrError(null)
+                    setOcrResult(null)
+                    setPencilPng(null)
+                  }
+                }}
+                data-testid="ocr-retry"
+                className="shrink-0 rounded-md border border-rose-300 bg-white px-2.5 py-1 text-xs font-medium text-rose-800 hover:bg-rose-100"
+              >
+                다시 그리기
+              </button>
             </div>
           )}
           {effOcrResult && !effOcrPending && (

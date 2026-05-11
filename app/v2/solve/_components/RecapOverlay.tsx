@@ -129,7 +129,22 @@ export function RecapOverlay({
       <div className={inline ? "relative w-full" : "relative w-full max-w-xl"}>
         <button
           type="button"
-          onClick={onClose}
+          onClick={() => {
+            // P1-5 폴리싱: 시퀀스 중간 (1장 이상 통과했지만 아직 끝 아님) 에 X 누르면 confirm
+            const inMidSequence =
+              queue.length > 1 &&
+              passedSet.size > 0 &&
+              passedSet.size < queue.length
+            if (inMidSequence) {
+              if (
+                !window.confirm(
+                  `리캡 ${passedSet.size}/${queue.length} 통과 중. 닫으면 진행이 초기화됩니다. 닫으시겠어요?`,
+                )
+              )
+                return
+            }
+            onClose()
+          }}
           className="absolute right-2 top-2 z-10 rounded-full bg-white/90 px-2.5 py-1 text-xs text-black/55 hover:text-black/90"
           aria-label="닫기"
         >
