@@ -713,5 +713,217 @@ export type NewDailyChallenge = typeof dailyChallenges.$inferInsert
 export type PatternStateSnapshot = typeof patternStateSnapshots.$inferSelect
 export type NewPatternStateSnapshot = typeof patternStateSnapshots.$inferInsert
 
+// ============================================================
+// North Star (Coverage·DAG·Mastery·Badge) — Stage 1 (2026-05-11)
+// Spec: docs/north-star-spec-2026-05-11.md §2
+//
+// 입시 도메인 (pattern_state·user_item_history) 와 분리. 강의안 도메인 전용.
+// 라우트는 향후 /v2/lecture/[id] 로 평행 진입 예정.
+// ============================================================
+
+export const chunkMapStateEnum = pgEnum("chunk_map_state", [
+  "proposed",
+  "confirmed",
+  "rejected",
+])
+
+export const masteryStateEnum = pgEnum("mastery_state", [
+  "unseen",
+  "viewed",
+  "tested",
+  "mastered",
+])
+
+export const checkItemTypeEnum = pgEnum("check_item_type", [
+  "cloze",
+  "order",
+  "mcq",
+  "argument",
+])
+
+export const checkItemStatusEnum = pgEnum("check_item_status", [
+  "active",
+  "flagged",
+  "retired",
+])
+
+export const lectureStatusEnum = pgEnum("lecture_status", [
+  "in_progress",
+  "completed",
+])
+
+export const chunkMapProposedByEnum = pgEnum("chunk_map_proposed_by", [
+  "llm",
+  "user",
+])
+
+// lectures — 강의안 컨테이너 (한 documentId 가 한 lecture, 한 user 단위)
+export const lectures = pgTable(
+  "lectures",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    documentId: uuid("document_id")
+      .notNull()
+      .references(() => documents.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    totalChunks: integer("total_chunks").notNull(),
+    totalNodes: integer("total_nodes").notNull().default(0),
+    status: lectureStatusEnum("status").notNull().default("in_progress"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+  },
+  (t) => ({
+    uniqueUserDoc: index("lectures_user_doc_uniq").on(t.userId, t.documentId),
+  }),
+)
+
+// chunk_node_map — chunk ↔ node 다대다 매핑 + 상태 머신.
+// (기존 chunkNodeMappings 와 별개 — 그쪽은 검색 embedding 용 user-scoped 단순 링크)
+export const chunkNodeMap = pgTable(
+  "chunk_node_map",
+  {
+    chunkId: uuid("chunk_id")
+      .notNull()
+      .references(() => chunks.id, { onDelete: "cascade" }),
+    nodeId: uuid("node_id")
+      .notNull()
+      .references(() => nodes.id, { onDelete: "cascade" }),
+    state: chunkMapStateEnum("state").notNull().default("proposed"),
+    confidence: real("confidence").notNull(),
+    proposedBy: chunkMapProposedByEnum("proposed_by").notNull(),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    reviewedBy: uuid("reviewed_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.chunkId, t.nodeId] }),
+    nodeIdx: index("chunk_node_map_node_idx").on(t.nodeId),
+    stateIdx: index("chunk_node_map_state_idx").on(t.state),
+  }),
+)
+
+// node_mastery — 강의안 도메인 mastery 상태 머신.
+// 입시 pattern_state.theta (Elo) 와 의도적 분리: 강의안은 행동 증명 머신.
+export const nodeMastery = pgTable(
+  "node_mastery",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    nodeId: uuid("node_id")
+      .notNull()
+      .references(() => nodes.id, { onDelete: "cascade" }),
+    state: masteryStateEnum("state").notNull().default("unseen"),
+    testedAt: timestamp("tested_at", { withTimezone: true }),
+    masteredAt: timestamp("mastered_at", { withTimezone: true }),
+    lastFailedAt: timestamp("last_failed_at", { withTimezone: true }),
+    failCount: integer("fail_count").notNull().default(0),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.userId, t.nodeId] }),
+    userStateIdx: index("node_mastery_user_state_idx").on(t.userId, t.state),
+  }),
+)
+
+// check_items — 노드별 자동 생성 확인 문항 (사용자 신고 가능)
+export const checkItems = pgTable(
+  "check_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    nodeId: uuid("node_id")
+      .notNull()
+      .references(() => nodes.id, { onDelete: "cascade" }),
+    type: checkItemTypeEnum("type").notNull(),
+    prompt: text("prompt").notNull(),
+    payload: jsonb("payload").notNull(),
+    status: checkItemStatusEnum("status").notNull().default("active"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => ({
+    nodeIdx: index("check_items_node_idx").on(t.nodeId, t.status),
+  }),
+)
+
+// check_attempts — mastery 전이 trigger
+export const checkAttempts = pgTable(
+  "check_attempts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    checkItemId: uuid("check_item_id")
+      .notNull()
+      .references(() => checkItems.id, { onDelete: "cascade" }),
+    correct: boolean("correct").notNull(),
+    response: jsonb("response").notNull(),
+    attemptedAt: timestamp("attempted_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => ({
+    userItemIdx: index("check_attempts_user_item_idx").on(
+      t.userId,
+      t.checkItemId,
+    ),
+  }),
+)
+
+// lecture_badges — 완주 뱃지 (snapshot 동결)
+export const lectureBadges = pgTable(
+  "lecture_badges",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    lectureId: uuid("lecture_id")
+      .notNull()
+      .references(() => lectures.id, { onDelete: "cascade" }),
+    issuedAt: timestamp("issued_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    coverageSnapshot: jsonb("coverage_snapshot").notNull(),
+    masteredNodeIds: jsonb("mastered_node_ids").notNull(),
+  },
+  (t) => ({
+    uniqueIssue: index("lecture_badges_user_lecture_uniq").on(
+      t.userId,
+      t.lectureId,
+    ),
+  }),
+)
+
+export type Lecture = typeof lectures.$inferSelect
+export type NewLecture = typeof lectures.$inferInsert
+export type ChunkNodeMap = typeof chunkNodeMap.$inferSelect
+export type NewChunkNodeMap = typeof chunkNodeMap.$inferInsert
+export type NodeMastery = typeof nodeMastery.$inferSelect
+export type NewNodeMastery = typeof nodeMastery.$inferInsert
+export type CheckItem = typeof checkItems.$inferSelect
+export type NewCheckItem = typeof checkItems.$inferInsert
+export type CheckAttempt = typeof checkAttempts.$inferSelect
+export type NewCheckAttempt = typeof checkAttempts.$inferInsert
+export type LectureBadge = typeof lectureBadges.$inferSelect
+export type NewLectureBadge = typeof lectureBadges.$inferInsert
+
+export type ChunkMapState = (typeof chunkMapStateEnum.enumValues)[number]
+export type MasteryStateValue = (typeof masteryStateEnum.enumValues)[number]
+export type CheckItemTypeValue = (typeof checkItemTypeEnum.enumValues)[number]
+
 // sql helper re-export (마이그레이션 후처리에서 사용)
 export { sql }
