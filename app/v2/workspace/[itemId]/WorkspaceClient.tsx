@@ -15,16 +15,18 @@
  *   - URL state mode swap 미구현 (nuqs 도입은 했으나 Phase 2 에서 활용)
  */
 
-import { useCallback, useEffect } from "react"
+import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
 import { Sparkles, Map } from "lucide-react"
 import { Group, Panel, Separator } from "react-resizable-panels"
 import { useQueryState, parseAsStringEnum } from "nuqs"
 import type { ItemResponse } from "@/lib/api/schemas/items"
+import type { OcrResponse } from "@/lib/api/schemas/ocr"
 import type { TierKey } from "@/lib/billing/tier"
 import { ChunksPane } from "@/app/v2/study/[unitId]/dual/_components/ChunksPane"
 import { CoachPanel } from "@/app/v2/solve/_components/CoachPanel"
 import { GraphPanel } from "@/app/v2/solve/_components/GraphPanel"
+import { PencilPanel } from "@/app/v2/solve/[itemId]/_components/PencilPanel"
 import { SolveClient } from "@/app/v2/solve/[itemId]/SolveClient"
 import { useCoachStore } from "@/app/v2/_components/store/coach-store"
 import { PdfPageViewer } from "./_components/PdfPageViewer"
@@ -82,6 +84,57 @@ export function WorkspaceClient({
   const highlightNodeIds = useCoachStore((s) => s.highlightNodeIds)
   const [right, setRight] = useQueryState("right", rightParser)
   const [mode] = useQueryState("mode", modeParser)
+
+  // 펜슬 오버레이 (lock #7, Phase 4 Path A) — pencil PNG + OCR 결과를 workspace 가 보유.
+  // PdfPageViewer 위 absolute 로 PencilPanel(variant='overlay') 렌더 + onExport → /api/ocr →
+  // 결과를 SolveClient(embedded) 에 prop 으로 주입해 OcrResultPanel/handleSubmit 가 활용.
+  const [pencilPng, setPencilPng] = useState<string | null>(null)
+  const [ocrResult, setOcrResult] = useState<OcrResponse | null>(null)
+  const [ocrPending, setOcrPending] = useState(false)
+  const [ocrError, setOcrError] = useState<string | null>(null)
+
+  const handlePencilExport = useCallback(
+    async (png: string | null) => {
+      setPencilPng(png)
+      setOcrError(null)
+      if (!png) {
+        setOcrResult(null)
+        return
+      }
+      setOcrPending(true)
+      try {
+        const res = await fetch("/api/ocr", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ itemId: item.id, imageBase64: png }),
+        })
+        if (!res.ok) {
+          const err = (await res.json().catch(() => ({}))) as {
+            error?: string
+          }
+          setOcrError(err.error ?? `http_${res.status}`)
+          return
+        }
+        setOcrResult((await res.json()) as OcrResponse)
+      } catch (e) {
+        setOcrError((e as Error).message ?? "network_error")
+      } finally {
+        setOcrPending(false)
+      }
+    },
+    [item.id],
+  )
+
+  const handlePencilClear = useCallback(() => {
+    setPencilPng(null)
+    setOcrResult(null)
+    setOcrError(null)
+  }, [])
+
+  const handleOcrDismiss = useCallback(() => {
+    setOcrResult(null)
+  }, [])
 
   useEffect(() => {
     setCoachOpen(true)
@@ -228,6 +281,15 @@ export function WorkspaceClient({
                   <PdfPageViewer
                     signedUrl={pdfSignedUrl}
                     title={docTitle ?? "강의안"}
+                    overlay={
+                      <PencilPanel
+                        itemId={item.id}
+                        userId={userId}
+                        variant="overlay"
+                        onExport={handlePencilExport}
+                        onClearAttachment={handlePencilClear}
+                      />
+                    }
                   />
                 </div>
                 <div
@@ -240,18 +302,24 @@ export function WorkspaceClient({
                     mode={toSolveMode(mode)}
                     from={mode === "daily" ? "daily" : null}
                     embedded
+                    injectedPencilPng={pencilPng}
+                    injectedOcrResult={ocrResult}
+                    injectedOcrPending={ocrPending}
+                    injectedOcrError={ocrError}
+                    onOcrDismiss={handleOcrDismiss}
+                    onPencilClearFromResult={handlePencilClear}
                   />
                 </div>
               </>
             ) : (
               <div className="flex-1 overflow-y-auto">
                 <SolveClient
-                    item={item}
-                    userId={userId}
-                    mode={toSolveMode(mode)}
-                    from={mode === "daily" ? "daily" : null}
-                    embedded
-                  />
+                  item={item}
+                  userId={userId}
+                  mode={toSolveMode(mode)}
+                  from={mode === "daily" ? "daily" : null}
+                  embedded
+                />
               </div>
             )}
           </section>

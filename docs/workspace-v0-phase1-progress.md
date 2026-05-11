@@ -1,9 +1,10 @@
 # 워크스페이스 v0 진척 + 다음 세션 가이드
 
-> 작성: 2026-05-10 18:30 KST · 갱신: 2026-05-11 (Phase 3 폴리싱 권장 번들 완료)
-> 진척: Phase 1 (셸 + PDF) + Phase 2 (AI SDK v5 + nuqs mode + View Transitions) + Phase 3 권장 번들 4개 (PDF self-host, 약점 집계, Pretendard self-host, 타이머 chip)
->       남은 lock: 7 (펜슬 PDF 오버레이, Phase 4), 8 부분 (펜→answer 인식, Phase 4 동시).
+> 작성: 2026-05-10 18:30 KST · 갱신: 2026-05-11 (Phase 4 Path A 펜슬 오버레이 완료)
+> 진척: Phase 1 (셸 + PDF) + Phase 2 (AI SDK v5 + nuqs mode + View Transitions) + Phase 3 권장 번들 4개 (PDF self-host, 약점 집계, Pretendard self-host, 타이머 chip) + Phase 4 Path A (펜 = PDF 위 absolute 오버레이)
+>       lock 7 ✅ 완료. lock 8 ⏳ 부분 (펜→answer 인식은 Path C 잔여).
 >       Phase 3 미진행: KaTeX (미설치 — skip), Cache Components (위험), TanStack Query (surface 넓음), 모드 swap UI (ctx 부족)
+>       Phase 4 미진행: Path B (chrome 다이어트), Path C (펜→answer 인식)
 > 13 lock truth source: 메모리 `project_workspace_v0_lock_decisions.md`
 > 시안: `docs/workspace-mockup-2026-05-10.html`
 > 리서치: 본 문서 §"기술 스택 결론" 참조
@@ -222,24 +223,43 @@
 
 ---
 
-## 7 · Phase 4 — 펜슬 PDF 오버레이 (가장 위험, ~2~3일)
+## 7 · Phase 4 — 펜슬 PDF 오버레이 (✅ Path A 2026-05-11)
 
-**기술 결정 필요**:
-- (a) `tldraw 5.0.0` (이미 설치됨) — 풀스택 SDK, Safari Pencil 누락 버그 #5813 위험
-- (b) `perfect-freehand` 직접 (리서치 권장) — 가벼움, 직접 구현, ~16~25ms latency
+**기술 결정 재확인**: tldraw 5.0.0 이 이미 도입돼 PencilPanel + persistence + export-png 까지 동작 중. "tldraw vs perfect-freehand" 결정은 사실상 **이미 tldraw 로 결정·구현 완료** (lock 7 의 "기술 결정 필요" 는 stale).
+**원 추정 2~3일은 풀스코프 가정**. 실 작업은 훨씬 작음 — Path A 는 한 세션 (~1시간).
 
-**좌표계 매핑**:
-- PDF.js viewport scale ↔ 펜 캔버스 좌표 동기화
-- `<canvas>` `desynchronized: true` (compositor 우회)
-- `pointerrawupdate` + `getCoalescedEvents()` + `getPredictedEvents()` (Safari 폴리필)
+### Path A — 최소 오버레이 (✅)
+**구현**
+- `PdfPageViewer` 에 `overlay?: ReactNode` prop 추가 → body 컨테이너에 `relative` + 그 안에 `absolute inset-0` overlay slot
+- `PencilPanel` 에 `variant: 'panel' | 'overlay'` prop 추가
+  - `'overlay'` 시 outer = `absolute inset-0 flex flex-col`, toolbar/footer 는 `bg-white/85 backdrop-blur-sm` chip, canvas `flex-1 min-h-0`
+  - `'panel'` 기본 = 기존 카드 (h-[420px]) 유지
+- `WorkspaceClient` 가 pencil state (`pencilPng/ocrResult/ocrPending/ocrError`) + OCR fetch 보유, `<PdfPageViewer overlay={<PencilPanel variant="overlay" ... />}>` 로 렌더
+- `SolveClient` 에 inject props 추가 (`injectedPencilPng/injectedOcrResult/...`). `overlayPencilHosted` 면 자체 PencilPanel 블록 스킵하고 `OcrResultPanel` 만 inject 된 값으로 렌더 (Accept-and-grade UX 보존)
+- standalone `/v2/solve` 는 inject props 미주입 → 기존 PencilPanel 그대로
 
-**OCR 좌표 시스템 재설계**:
-- 펜 stroke + PDF 좌표 페어로 backend 전송
-- 기존 OCR 라우트(`/api/ocr`) 인터페이스 변경
+**결과**
+- lock 7 충족: 펜 = PDF 위 직접 오버레이 (박스 분리 fallback 해제)
+- lock 8 부분: 칩 측 store 공유 + 펜으로 답 인식까지는 Path C 잔여 (Phase 4 후속)
+- standalone 회귀 0 (props 미주입 분기 보존)
 
-**우회로 (펜슬 오버레이 못 풀면)**:
-- Phase 1A의 박스 분리 유지
-- 차별점 -1, 셀러블 가치 -
+### Path B — tldraw chrome 다이어트 (미진행)
+- `hideUi={true}` + 외부 PencilToolbar 만 노출, 도구 제한
+- 시각 일관성 ↑ 단 standalone 회귀 위험. 별도 라운드
+
+### Path C — 펜→answer 인식 (lock 8 잔여, 미진행)
+- 펜으로 ◯ 그린 영역 좌표 → 5지선다 답 자동 인식
+- OCR 라우트 request 에 boundingBoxes 추가 필요 (후방호환 유지 가능)
+
+### Path D — 풀 좌표 시스템 재설계 (skip)
+- ROI 낮음. 진짜 필요 시점 도래 후 결정.
+
+### 검증
+- `tsc --noEmit`: ✅
+- `npm test`: ✅ 143/143
+- `npm run build`: ✅
+- `npm run lint`: ✅ (내 코드 0 errors)
+- 시각 검증: 미실측 (DB 빈 상태 — published item 시드 후 가능)
 
 ---
 

@@ -82,6 +82,19 @@ interface Props {
    * 결과/리캡/재도전 오버레이는 inline (fixed→relative) 로 hero 영역에 펼쳐진다 (lock 4·5).
    */
   embedded?: boolean
+  /**
+   * Phase 4 Path A — 워크스페이스가 PencilPanel 을 PDF 위 overlay 로 렌더할 때,
+   * pencil PNG + OCR 결과를 본 컴포넌트에 inject. SolveClient 는 자체 PencilPanel 렌더를 스킵하고
+   * 제출 시 injectedPencilPng + injectedOcrResult 를 쓴다.
+   *
+   * 값이 모두 undefined 면 standalone 모드 (자체 PencilPanel + 자체 OCR fetch) 유지.
+   */
+  injectedPencilPng?: string | null
+  injectedOcrResult?: OcrResponse | null
+  injectedOcrPending?: boolean
+  injectedOcrError?: string | null
+  onOcrDismiss?: () => void
+  onPencilClearFromResult?: () => void
 }
 
 export function SolveClient({
@@ -95,7 +108,21 @@ export function SolveClient({
   retryCtx = null,
   from = null,
   embedded = false,
+  injectedPencilPng,
+  injectedOcrResult,
+  injectedOcrPending,
+  injectedOcrError,
+  onOcrDismiss,
+  onPencilClearFromResult,
 }: Props) {
+  // 워크스페이스가 PencilPanel 을 PDF overlay 로 호스팅하는 경우 (lock #7, Phase 4 Path A).
+  // 자체 PencilPanel 블록을 스킵하고 inject 된 png/ocr 값을 쓴다.
+  const overlayPencilHosted =
+    embedded &&
+    (injectedPencilPng !== undefined ||
+      injectedOcrResult !== undefined ||
+      injectedOcrPending !== undefined ||
+      injectedOcrError !== undefined)
   const router = useRouter()
   const isExam = mode === "exam"
   const isChallenge = mode === "challenge"
@@ -142,6 +169,20 @@ export function SolveClient({
   const [ocrPending, setOcrPending] = useState(false)
   const [ocrError, setOcrError] = useState<string | null>(null)
 
+  // overlay 호스팅 시 effective 값은 injected 우선
+  const effPencilPng = overlayPencilHosted
+    ? (injectedPencilPng ?? null)
+    : pencilPng
+  const effOcrResult = overlayPencilHosted
+    ? (injectedOcrResult ?? null)
+    : ocrResult
+  const effOcrPending = overlayPencilHosted
+    ? (injectedOcrPending ?? false)
+    : ocrPending
+  const effOcrError = overlayPencilHosted
+    ? (injectedOcrError ?? null)
+    : ocrError
+
   useEffect(() => {
     begin(item.id)
     return () => {
@@ -164,7 +205,7 @@ export function SolveClient({
         aiQuestions: aiHintLocked ? 0 : aiQuestions,
         selfConfidence,
         mode,
-        ...(pencilPng ? { ocrImageBase64: pencilPng } : {}),
+        ...(effPencilPng ? { ocrImageBase64: effPencilPng } : {}),
         ...(isChallenge && challengeState.name === "solving"
           ? {
               challenge: {
@@ -201,7 +242,7 @@ export function SolveClient({
         void classifyReasonsFollowup({
           itemId: item.id,
           attemptTimestamp: response.attemptResult.attemptTimestamp,
-          ocrSteps: ocrResult?.steps,
+          ocrSteps: effOcrResult?.steps,
         }).then((mergedTags) => {
           if (!mergedTags) return
           setResult((prev) =>
@@ -506,71 +547,87 @@ export function SolveClient({
       >
         <div className="flex flex-col gap-6">
           <ItemBody item={item} />
-          <PencilPanel
-            itemId={item.id}
-            userId={userId}
-            onExport={async (png) => {
-              setPencilPng(png)
-              setOcrError(null)
-              if (!png) {
-                setOcrResult(null)
-                return
-              }
-              setOcrPending(true)
-              try {
-                const res = await fetch("/api/ocr", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  credentials: "include",
-                  body: JSON.stringify({
-                    itemId: item.id,
-                    imageBase64: png,
-                  }),
-                })
-                if (!res.ok) {
-                  const err = (await res.json().catch(() => ({}))) as {
-                    error?: string
+          {/* overlayPencilHosted: 워크스페이스가 PDF 위에 PencilPanel(variant='overlay')
+              + OCR fetch 를 호스팅 → 본 블록 전체 스킵. OcrResultPanel 만 inject 된 값으로 렌더. */}
+          {!overlayPencilHosted && (
+            <>
+              <PencilPanel
+                itemId={item.id}
+                userId={userId}
+                onExport={async (png) => {
+                  setPencilPng(png)
+                  setOcrError(null)
+                  if (!png) {
+                    setOcrResult(null)
+                    return
                   }
-                  setOcrError(err.error ?? `http_${res.status}`)
-                  return
-                }
-                const data = (await res.json()) as OcrResponse
-                setOcrResult(data)
-              } catch (e) {
-                setOcrError((e as Error).message ?? "network_error")
-              } finally {
-                setOcrPending(false)
-              }
-            }}
-            onClearAttachment={() => {
-              setPencilPng(null)
-              setOcrResult(null)
-              setOcrError(null)
-            }}
-          />
-          {ocrPending && (
+                  setOcrPending(true)
+                  try {
+                    const res = await fetch("/api/ocr", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      credentials: "include",
+                      body: JSON.stringify({
+                        itemId: item.id,
+                        imageBase64: png,
+                      }),
+                    })
+                    if (!res.ok) {
+                      const err = (await res.json().catch(() => ({}))) as {
+                        error?: string
+                      }
+                      setOcrError(err.error ?? `http_${res.status}`)
+                      return
+                    }
+                    const data = (await res.json()) as OcrResponse
+                    setOcrResult(data)
+                  } catch (e) {
+                    setOcrError((e as Error).message ?? "network_error")
+                  } finally {
+                    setOcrPending(false)
+                  }
+                }}
+                onClearAttachment={() => {
+                  setPencilPng(null)
+                  setOcrResult(null)
+                  setOcrError(null)
+                }}
+              />
+            </>
+          )}
+          {effOcrPending && (
             <p className="text-xs text-black/55" data-testid="ocr-pending">
               풀이 분석 중…
             </p>
           )}
-          {ocrError && (
+          {effOcrError && (
             <div
               className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800"
               role="alert"
               data-testid="ocr-error"
             >
-              {errorCopyForCode(ocrError)}
+              {errorCopyForCode(effOcrError)}
             </div>
           )}
-          {ocrResult && !ocrPending && (
+          {effOcrResult && !effOcrPending && (
             <OcrResultPanel
-              ocr={ocrResult}
+              ocr={effOcrResult}
               onAcceptAndGrade={() => handleSubmit()}
               onRedraw={() => {
-                setOcrResult(null)
-                setPencilPng(null)
+                if (overlayPencilHosted) {
+                  onPencilClearFromResult?.()
+                } else {
+                  setOcrResult(null)
+                  setPencilPng(null)
+                }
               }}
-              onDismiss={() => setOcrResult(null)}
+              onDismiss={() => {
+                if (overlayPencilHosted) {
+                  onOcrDismiss?.()
+                } else {
+                  setOcrResult(null)
+                }
+              }}
             />
           )}
         </div>

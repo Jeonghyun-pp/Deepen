@@ -45,6 +45,12 @@ export interface PencilPanelProps {
   onExport: (pngBase64: string | null) => void
   /** 빈 캔버스로 첨부 해제. */
   onClearAttachment?: () => void
+  /**
+   * 레이아웃 변종 (lock #7, Phase 4):
+   *   - 'panel' (default): 자체 카드 (border + h-[420px]). standalone /v2/solve.
+   *   - 'overlay': absolute inset-0. 워크스페이스의 PDF body 위에 얹어 직접 그림.
+   */
+  variant?: "panel" | "overlay"
 }
 
 type LoadStatus = "idle" | "loading" | "loaded" | "error"
@@ -54,6 +60,7 @@ export function PencilPanel({
   userId,
   onExport,
   onClearAttachment,
+  variant = "panel",
 }: PencilPanelProps) {
   const editorRef = useRef<Editor | null>(null)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -147,6 +154,73 @@ export function PencilPanel({
     } finally {
       setExporting(false)
     }
+  }
+
+  if (variant === "overlay") {
+    // PDF 위 absolute 오버레이: 풀-블리드 + 툴바/footer 는 반투명 chip 으로 띄움
+    return (
+      <section
+        className="absolute inset-0 flex flex-col pointer-events-auto"
+        data-testid="pencil-panel"
+      >
+        <div className="bg-white/85 backdrop-blur-sm">
+          <PencilToolbar
+            color={color}
+            size={size}
+            busy={exporting}
+            onColorChange={setColor}
+            onSizeChange={setSize}
+            onClear={handleClear}
+            onExport={handleExport}
+          />
+        </div>
+        <div className="relative flex-1 min-h-0">
+          {loadStatus === "loaded" && (
+            <PencilCanvasHost
+              onMount={handleMount}
+              onChange={handleChange}
+              initialSnapshot={initialSnapshot}
+            />
+          )}
+          {loadStatus === "loading" && (
+            <div className="flex h-full items-center justify-center text-xs text-black/45">
+              이전 풀이 불러오는 중…
+            </div>
+          )}
+          {loadStatus === "error" && (
+            <div className="flex h-full items-center justify-center text-xs text-rose-700">
+              풀이 데이터 로드 실패. 새로 시작합니다.
+            </div>
+          )}
+        </div>
+        {(attached || errorMsg || savedAt) && (
+          <footer className="flex flex-wrap items-center justify-between gap-2 bg-white/85 backdrop-blur-sm px-3 py-1.5 text-[11px] text-black/55">
+            <span>
+              {savedAt
+                ? `자동 저장됨 ${new Date(savedAt).toLocaleTimeString("ko-KR", { hour12: false })}`
+                : "자동 저장 대기"}
+            </span>
+            {attached && (
+              <span
+                className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-800"
+                data-testid="pencil-attached"
+              >
+                풀이 첨부됨
+              </span>
+            )}
+            {errorMsg && (
+              <span
+                className="text-rose-700"
+                role="alert"
+                data-testid="pencil-error"
+              >
+                {errorMsg}
+              </span>
+            )}
+          </footer>
+        )}
+      </section>
+    )
   }
 
   return (

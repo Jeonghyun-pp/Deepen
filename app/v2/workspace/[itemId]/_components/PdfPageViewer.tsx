@@ -16,7 +16,7 @@
  * CDN 다운/지역 차단 시에도 동작.
  */
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 import { Document, Page, pdfjs } from "react-pdf"
 import "react-pdf/dist/Page/AnnotationLayer.css"
 import "react-pdf/dist/Page/TextLayer.css"
@@ -27,12 +27,18 @@ export interface PdfPageViewerProps {
   signedUrl: string
   title: string
   initialPage?: number
+  /**
+   * 펜슬 오버레이 등 PDF 페이지 본문 위에 absolute 로 얹을 layer (lock #7, Phase 4).
+   * body 컨테이너 안에 `absolute inset-0` 으로 배치된다. caller 는 자체 pointer-events 처리 필요.
+   */
+  overlay?: ReactNode
 }
 
 export function PdfPageViewer({
   signedUrl,
   title,
   initialPage = 1,
+  overlay,
 }: PdfPageViewerProps) {
   const [pageNumber, setPageNumber] = useState(initialPage)
   const [numPages, setNumPages] = useState<number | null>(null)
@@ -101,7 +107,7 @@ export function PdfPageViewer({
 
       <div
         ref={containerRef}
-        className="flex flex-1 items-start justify-center overflow-y-auto bg-zinc-100/60 py-4"
+        className="relative flex flex-1 items-start justify-center overflow-y-auto bg-zinc-100/60 py-4"
       >
         <Document
           file={signedUrl}
@@ -123,6 +129,12 @@ export function PdfPageViewer({
             className="shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
           />
         </Document>
+        {/* 펜슬 등 absolute 레이어 — 본문 컨테이너 기준. */}
+        {overlay && (
+          <div className="pointer-events-none absolute inset-0">
+            {overlay}
+          </div>
+        )}
       </div>
     </div>
   )
