@@ -29,6 +29,8 @@ import {
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
+// 구독자별 Toss chargeBillingKey 호출 — 네트워크 latency × 구독 수. 5분.
+export const maxDuration = 300
 
 const PERIOD_DAYS = 30
 

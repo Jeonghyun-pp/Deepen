@@ -18,6 +18,8 @@ import {
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
+// 코호트 1000명 × Pattern·Item lookup — spec 상 ≤ 5분.
+export const maxDuration = 300
 
 /** KST 자정 기준 'YYYY-MM-DD'. */
 function todayKstIso(): string {

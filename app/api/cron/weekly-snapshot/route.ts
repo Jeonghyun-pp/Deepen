@@ -15,6 +15,8 @@ import {
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
+// 활성 사용자 전체 patternState 스냅샷 적재 — 사용자 수에 비례. 안전치 5분.
+export const maxDuration = 300
 
 async function handle(request: Request) {
   const auth = checkCronAuth(request)

@@ -15,6 +15,8 @@ import { checkCronAuth } from "@/lib/api/cron-auth"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
+// 5 batch × 100 노드 × 임베딩 API ~1~2s = 최대 ~10초이지만 OpenAI tail latency 대비 60s.
+export const maxDuration = 60
 
 const MAX_BATCHES_PER_INVOCATION = 5
 const BATCH_SIZE = 100
