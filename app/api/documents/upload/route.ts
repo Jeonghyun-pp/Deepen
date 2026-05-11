@@ -1,11 +1,11 @@
 import { randomUUID } from "node:crypto"
 import { after } from "next/server"
-import { eq } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { documents } from "@/lib/db/schema"
 import { apiError, withAuth } from "@/lib/api/handler"
 import { createSupabaseAdminClient } from "@/lib/supabase/admin"
-import { processDocument } from "@/lib/pipeline/process-document"
+import { createDocumentJob } from "@/lib/pipeline/document-jobs"
+import { processNextDocumentJob } from "@/lib/pipeline/document-job-runner"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -52,23 +52,20 @@ export const POST = withAuth("POST /api/documents/upload", async (request, { use
     })
     .returning()
 
-  // 백그라운드 처리 — Next.js after()로 응답 이후 실행 (Vercel serverless 호환).
-  // after()는 콜백이 반환한 Promise를 waitUntil로 연장한다.
-  after(() => runPipeline(created.id, user.id, storagePath))
+  // Queue the durable job first. after() only nudges processing after the
+  // upload response, so a dropped serverless instance does not lose the job.
+  await createDocumentJob({
+    userId: user.id,
+    documentId: created.id,
+    storagePath,
+    meta: { source: "upload" },
+  })
+
+  after(() =>
+    processNextDocumentJob(`upload-after-${created.id}`).catch((e) => {
+      console.error("[upload job nudge]", e)
+    })
+  )
 
   return Response.json(created, { status: 202 })
 })
-
-function runPipeline(documentId: string, userId: string, storagePath: string) {
-  return processDocument(documentId, userId, storagePath).catch(async (e) => {
-    console.error("[runPipeline] fatal:", e)
-    await db
-      .update(documents)
-      .set({
-        status: "failed",
-        errorMessage: e instanceof Error ? e.message : String(e),
-      })
-      .where(eq(documents.id, documentId))
-      .catch(() => {})
-  })
-}

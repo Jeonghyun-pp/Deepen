@@ -5,6 +5,16 @@ import UploadDropzone from "./UploadDropzone"
 import type { Document } from "@/lib/db/schema"
 import { createSupabaseBrowserClient } from "@/lib/supabase/client"
 
+interface LatestJob {
+  id: string
+  status: "queued" | "running" | "succeeded" | "failed" | "canceled"
+  attemptCount: number
+  maxAttempts: number
+  errorMessage: string | null
+}
+
+type DocumentWithJob = Document & { latestJob?: LatestJob | null }
+
 // Realtime 구독이 주요 신호. polling은 Realtime 이벤트 누락 대비 fallback.
 const POLL_INTERVAL_MS = 8000
 const STATUS_LABEL: Record<string, string> = {
@@ -23,7 +33,7 @@ export default function UploadPanel({
   /** 문서 하나가 처음으로 ready 상태가 됐을 때 호출 — 그래프 refetch 훅 */
   onDocumentReady?: (doc: Document) => void
 }) {
-  const [docs, setDocs] = useState<Document[]>([])
+  const [docs, setDocs] = useState<DocumentWithJob[]>([])
   const [loading, setLoading] = useState(true)
 
   const refresh = useCallback(async () => {
@@ -60,13 +70,16 @@ export default function UploadPanel({
   useEffect(() => {
     const supabase = createSupabaseBrowserClient()
     let cancelled = false
+    let channel: ReturnType<typeof supabase.channel> | null = null
     ;(async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser()
       if (!user || cancelled) return
-      const channel = supabase
-        .channel(`documents:${user.id}`)
+      // Strict Mode 더블-마운트 시 같은 topic 으로 .on() after .subscribe() 충돌이 나지 않도록 topic 에 인스턴스 suffix.
+      const topic = `documents:${user.id}:${Math.random().toString(36).slice(2, 10)}`
+      channel = supabase
+        .channel(topic)
         .on(
           "postgres_changes",
           {
@@ -80,13 +93,10 @@ export default function UploadPanel({
           },
         )
         .subscribe()
-
-      return () => {
-        supabase.removeChannel(channel)
-      }
     })()
     return () => {
       cancelled = true
+      if (channel) supabase.removeChannel(channel)
     }
   }, [refresh])
 
@@ -129,6 +139,12 @@ export default function UploadPanel({
                   {d.errorMessage && d.status === "failed" && (
                     <p className="text-[10px] text-red-600 truncate">
                       {d.errorMessage}
+                    </p>
+                  )}
+                  {d.latestJob && d.latestJob.status !== "succeeded" && (
+                    <p className="text-[10px] text-neutral-500 truncate">
+                      job: {d.latestJob.status} ({d.latestJob.attemptCount}/
+                      {d.latestJob.maxAttempts})
                     </p>
                   )}
                 </div>
