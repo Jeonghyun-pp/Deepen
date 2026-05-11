@@ -16,6 +16,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react"
+import dynamic from "next/dynamic"
 import Link from "next/link"
 import { Sparkles, Map } from "lucide-react"
 import { Group, Panel, Separator } from "react-resizable-panels"
@@ -29,7 +30,26 @@ import { GraphPanel } from "@/app/v2/solve/_components/GraphPanel"
 import { PencilPanel } from "@/app/v2/solve/[itemId]/_components/PencilPanel"
 import { SolveClient } from "@/app/v2/solve/[itemId]/SolveClient"
 import { useCoachStore } from "@/app/v2/_components/store/coach-store"
-import { PdfPageViewer } from "./_components/PdfPageViewer"
+
+/**
+ * PdfPageViewer 는 ssr:false 동적 import — pdfjs-dist 의 canvas.js 가 모듈 평가 시
+ * 브라우저 전용 `DOMMatrix` 를 참조해 Next.js SSR 시 RuntimeError 발생.
+ * `"use client"` 만으론 부족 (Next 16 RSC 가 모듈을 서버에서 평가).
+ */
+const PdfPageViewer = dynamic(
+  () =>
+    import("./_components/PdfPageViewer").then((m) => ({
+      default: m.PdfPageViewer,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full items-center justify-center bg-white text-xs text-black/45">
+        PDF 뷰어 로딩 중…
+      </div>
+    ),
+  },
+)
 
 const rightParser = parseAsStringEnum(["coach", "graph"]).withDefault("coach")
 const modeParser = parseAsStringEnum([
