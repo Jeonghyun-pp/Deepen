@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>차별점 — Deepen D2SF Pitch</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100vh; background: #0a0a0a; overflow: hidden; position: relative; }
+        .slide { width: 1920px; height: 1080px; transform-origin: 0 0; position: absolute; top: 50%; left: 50%; overflow: hidden; border-radius: 4px; box-shadow: 0 20px 80px rgba(0,0,0,0.6); }
+    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        function scaleSlide() {
+            const slide = document.querySelector('.slide');
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const scale = Math.min(vw / 1920, vh / 1080) * 0.92;
+            const sw = 1920 * scale, sh = 1080 * scale;
+            slide.style.transform = `translate(${-sw / 2}px, ${-sh / 2}px) scale(${scale})`;
+        }
+        window.addEventListener('resize', scaleSlide);
+        window.addEventListener('load', scaleSlide);
+    </script>
+</head>
+<body>
+    <div class="slide">
+        <div class="slide-frame">
+            <div class="top-zone">
+                <div>
+                    <div class="overline">7가지 축의 차별점</div>
+                    <h1 class="action-title">
+                        Deepen은 <span class="accent">7가지 축</span>에서 기존 학습 서비스와 다르다.
+                    </h1>
+                    <div class="body-text">
+                        단원 단위 진단·이분법 채점·정적 지도가 디폴트인 시장에서, Deepen은 모든 축을 <span class="em">유형·동적·검증</span> 방향으로 재정의합니다.
+                    </div>
+                </div>
+                <div class="section-tag">Resolution</div>
+            </div>
+
+            <div class="middle-zone" style="margin-top:14px; margin-bottom:14px;">
+                <div style="width:100%;">
+                    <table class="compare-table">
+                        <thead>
+                            <tr>
+                                <th style="width:48%;">기존 학습 서비스</th>
+                                <th style="width:4%;"></th>
+                                <th style="width:48%;">Deepen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="legacy">단원 단위 약점 진단</td>
+                                <td style="text-align:center; color:var(--accent); font-weight:800; background:transparent;">→</td>
+                                <td class="deepen"><span class="em">유형(Pattern) 단위</span> 약점 추적</td>
+                            </tr>
+                            <tr>
+                                <td class="legacy">현재 학년 안에서만 원인 탐색</td>
+                                <td style="text-align:center; color:var(--accent); font-weight:800; background:transparent;">→</td>
+                                <td class="deepen"><span class="em">이전 학년 선행 개념 결손까지</span> 역추적</td>
+                            </tr>
+                            <tr>
+                                <td class="legacy">맞음·틀림 이분법 채점</td>
+                                <td style="text-align:center; color:var(--accent); font-weight:800; background:transparent;">→</td>
+                                <td class="deepen"><span class="em">정답이지만 헷갈림</span> 까지 별도 분류</td>
+                            </tr>
+                            <tr>
+                                <td class="legacy">정적인 개념 지도</td>
+                                <td style="text-align:center; color:var(--accent); font-weight:800; background:transparent;">→</td>
+                                <td class="deepen">풀이 결과가 반영되는 <span class="em">동적 학습 지도</span></td>
+                            </tr>
+                            <tr>
+                                <td class="legacy">일반 챗봇 형 AI</td>
+                                <td style="text-align:center; color:var(--accent); font-weight:800; background:transparent;">→</td>
+                                <td class="deepen">현재 문제·유형·선행 개념·풀이 이력을 모두 아는 <span class="em">코치 AI</span></td>
+                            </tr>
+                            <tr>
+                                <td class="legacy">단원 기반 유사 문제 추천</td>
+                                <td style="text-align:center; color:var(--accent); font-weight:800; background:transparent;">→</td>
+                                <td class="deepen"><span class="em">유형 집합·조합 방식·응용 깊이</span> 기반 추천</td>
+                            </tr>
+                            <tr>
+                                <td class="legacy">5분짜리 강사 설명을 살 수 있는 학생만 받던 진단</td>
+                                <td style="text-align:center; color:var(--accent); font-weight:800; background:transparent;">→</td>
+                                <td class="deepen">AI로 <span class="em">모든 학생에게 동일 비용</span>으로 제공</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bottom-zone">
+                <div class="callout-bar">
+                    <span class="label">경쟁 우위</span>
+                    7개 축 중 <strong>어떤 경쟁사도 동시에 4개 이상</strong>을 갖지 못합니다 — 콴다·메가스터디·NotebookLM·유니브 AI 모두 1~3개 축에 머무릅니다.
+                </div>
+            </div>
+
+            <div class="source">경쟁사 분석 — 콴다 / 메가스터디 / NotebookLM / 유니브 AI / 매쓰홀릭</div>
+
+            <div class="brand-sig">
+                <div class="brand-sig-dots">
+                    <div class="brand-sig-dot c"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot p"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot i"></div>
+                </div>
+                <div class="brand-sig-name">Deepen</div>
+            </div>
+        </div>
+    </div>
+    <!-- notes: 7행 차별점 비교표. 좌측 = 기존 (회색·취소선 톤), 우측 = Deepen (앰버 강조). 가운데 → 화살표. -->
+</body>
+</html>

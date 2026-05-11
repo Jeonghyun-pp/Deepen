@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>자퇴율 — Deepen D2SF Pitch</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100vh; background: #0a0a0a; overflow: hidden; position: relative; }
+        .slide { width: 1920px; height: 1080px; transform-origin: 0 0; position: absolute; top: 50%; left: 50%; overflow: hidden; border-radius: 4px; box-shadow: 0 20px 80px rgba(0,0,0,0.6); }
+    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        function scaleSlide() {
+            const slide = document.querySelector('.slide');
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const scale = Math.min(vw / 1920, vh / 1080) * 0.92;
+            const sw = 1920 * scale, sh = 1080 * scale;
+            slide.style.transform = `translate(${-sw / 2}px, ${-sh / 2}px) scale(${scale})`;
+        }
+        window.addEventListener('resize', scaleSlide);
+        window.addEventListener('load', scaleSlide);
+    </script>
+</head>
+<body>
+    <div class="slide">
+        <div class="slide-frame">
+            <div class="top-zone">
+                <div>
+                    <div class="overline">사교육 의존의 결과</div>
+                    <h1 class="action-title">
+                        공교육은 메우지 못하고, 사교육은 비용 장벽 —<br>
+                        자퇴를 선택한 고등학생이 5년간 <span class="accent">거의 두 배</span>가 되었다.
+                    </h1>
+                    <div class="body-text">
+                        한 번 결손이 쌓이면 따라잡을 길이 없고, 사교육은 비용 때문에 접근이 제한됩니다. 자퇴는 그 결과 중 하나입니다.
+                    </div>
+                </div>
+                <div class="section-tag">Complication</div>
+            </div>
+
+            <div class="middle-zone">
+                <div class="col-60">
+                    <div style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.16em; color:var(--text-subtle); text-transform:uppercase; margin-bottom:14px;">고교 학업중단율 추이 · 2020 → 2024</div>
+                    <div class="bar-chart">
+                        <div class="bar-row">
+                            <div class="bar-label">2020</div>
+                            <div class="bar-track"><div class="bar-fill" style="width:52%;"></div></div>
+                            <div class="bar-value">1.1%<span class="small">14,140명</span></div>
+                        </div>
+                        <div class="bar-row">
+                            <div class="bar-label">2021</div>
+                            <div class="bar-track"><div class="bar-fill" style="width:71%;"></div></div>
+                            <div class="bar-value">1.5%<span class="small">19,740명</span></div>
+                        </div>
+                        <div class="bar-row">
+                            <div class="bar-label">2022</div>
+                            <div class="bar-track"><div class="bar-fill" style="width:90%;"></div></div>
+                            <div class="bar-value">1.9%<span class="small">23,609명</span></div>
+                        </div>
+                        <div class="bar-row">
+                            <div class="bar-label">2023</div>
+                            <div class="bar-track"><div class="bar-fill" style="width:95%;"></div></div>
+                            <div class="bar-value">2.0%<span class="small">25,588명</span></div>
+                        </div>
+                        <div class="bar-row">
+                            <div class="bar-label">2024</div>
+                            <div class="bar-track"><div class="bar-fill accent" style="width:100%;"></div></div>
+                            <div class="bar-value" style="color:var(--accent);">2.1%<span class="small" style="color:var(--accent-strong);">26,753명</span></div>
+                        </div>
+                    </div>
+                    <div style="margin-top:20px; font-size:14px; color:var(--text-subtle);">
+                        ※ 2022년부터 정시 확대 정책 본격 반영 — 자퇴 선택 폭증
+                    </div>
+                </div>
+
+                <div class="col-40" style="gap:10px;">
+                    <div class="hero" style="padding:14px 20px;">
+                        <div class="hero-number" style="font-size:72px;">2.1<span class="unit">%</span></div>
+                        <div class="hero-label" style="font-size:18px; margin-top:2px;">2024 학업중단율</div>
+                        <div class="hero-compare" style="font-size:15px;">22년 만의 최고치 · 5년 연속 상승</div>
+                    </div>
+                    <div class="hero" style="padding:14px 20px;">
+                        <div class="hero-number text" style="font-size:62px;">26,753<span class="unit">명</span></div>
+                        <div class="hero-label" style="font-size:18px; margin-top:2px;">2024 자퇴자 수</div>
+                        <div class="hero-compare" style="font-size:15px;">전년 대비 +4.6%</div>
+                    </div>
+                    <div class="hero" style="background:rgba(217,119,6,0.06); border-color:var(--accent); padding:14px 20px;">
+                        <div class="hero-number" style="font-size:72px;">+89<span class="unit">%</span></div>
+                        <div class="hero-label" style="font-size:18px; margin-top:2px;">5년간 자퇴자 누적 증가율</div>
+                        <div class="hero-compare" style="font-size:15px;">2020년 14,140명 대비</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-zone">
+                <div class="callout-bar">
+                    <span class="label">Insight</span>
+                    공교육이 결손을 메우지 못하고 사교육이 비용 장벽이 되는 구조에서, 자퇴는 <strong>학습자 개인의 선택이 아니라 시스템의 결과</strong>입니다.
+                </div>
+            </div>
+
+            <div class="source">출처 — 교육부 학업중단율 통계 (2024학년 기준), 베리타스알파 분석</div>
+
+            <div class="brand-sig">
+                <div class="brand-sig-dots">
+                    <div class="brand-sig-dot c"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot p"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot i"></div>
+                </div>
+                <div class="brand-sig-name">Deepen</div>
+            </div>
+        </div>
+    </div>
+    <!-- notes: 자퇴율 차트. 5년 추이 바 + 3개 히어로 넘버. 2024 막대만 앰버로 강조. -->
+</body>
+</html>

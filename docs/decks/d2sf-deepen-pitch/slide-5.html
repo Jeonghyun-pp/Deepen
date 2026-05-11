@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>진단의 한계 — Deepen D2SF Pitch</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100vh; background: #0a0a0a; overflow: hidden; position: relative; }
+        .slide { width: 1920px; height: 1080px; transform-origin: 0 0; position: absolute; top: 50%; left: 50%; overflow: hidden; border-radius: 4px; box-shadow: 0 20px 80px rgba(0,0,0,0.6); }
+    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        function scaleSlide() {
+            const slide = document.querySelector('.slide');
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const scale = Math.min(vw / 1920, vh / 1080) * 0.92;
+            const sw = 1920 * scale, sh = 1080 * scale;
+            slide.style.transform = `translate(${-sw / 2}px, ${-sh / 2}px) scale(${scale})`;
+        }
+        window.addEventListener('resize', scaleSlide);
+        window.addEventListener('load', scaleSlide);
+    </script>
+</head>
+<body>
+    <div class="slide">
+        <div class="slide-frame">
+            <div class="top-zone">
+                <div>
+                    <div class="overline">진단의 한계</div>
+                    <h1 class="action-title">
+                        기존 학습 서비스는 약점을 <span style="text-decoration:line-through; opacity:0.55;">'단원 단위'</span> 로만 본다 —<br>
+                        진짜 약점은 <span class="accent">'유형'</span> 과 <span class="accent">'이전 학년 개념'</span> 에 숨어 있다.
+                    </h1>
+                    <div class="body-text">
+                        고2 미분 문제를 못 푸는 진짜 이유가 중3 판별식 결손인 경우는 흔합니다. 그러나 어떤 서비스도 이를 짚어주지 못합니다.
+                    </div>
+                </div>
+                <div class="section-tag">Complication</div>
+            </div>
+
+            <div class="middle-zone">
+                <div class="col-45" style="gap:18px;">
+                    <div class="card gray" style="padding:22px 26px;">
+                        <div style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.16em; color:var(--text-subtle); text-transform:uppercase;">강사·인강의 진단</div>
+                        <div class="card-title" style="font-size:24px; color:var(--text-muted); margin-top:6px;">"이 학생이 미분이 약함"</div>
+                        <div class="card-body" style="font-size:17px;">단원 단위로만 약점을 본다 → 학생도, 강사도, 시스템도 진짜 원인을 모른다</div>
+                    </div>
+
+                    <div class="card accent" style="padding:22px 26px;">
+                        <div style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.16em; color:var(--accent); text-transform:uppercase;">실제로 일어나는 일</div>
+                        <div class="card-title" style="font-size:23px; margin-top:6px; line-height:1.35;">"곡선 밖 접선 유형이 약함 + <span style="color:var(--accent);">중3 판별식 결손</span>"</div>
+                        <div class="card-body" style="font-size:17px; color:var(--text);">현재 학년 안에서 아무리 풀어도 메워지지 않는 결손이 이전 학년에 숨어 있다</div>
+                    </div>
+
+                    <div class="insight-box" style="font-size:18px; padding:18px 24px;">
+                        <span class="label">Why it matters</span>
+                        같은 문제를 반복해서 틀리는 학생의 90%는 "단원 학습 부족"이 아니라 "유형 인식 + 선행 결손" 문제입니다.
+                    </div>
+                </div>
+
+                <div class="col-55">
+                    <div style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.16em; color:var(--text-subtle); text-transform:uppercase; margin-bottom:14px;">선행 결손 역추적 · 한 사례</div>
+                    <div style="display:flex; flex-direction:column; align-items:stretch; gap:0;">
+                        <div class="node pattern" style="justify-content:space-between;">
+                            <span class="grade-tag">수학Ⅱ</span>
+                            <span style="flex:1; text-align:center;">곡선 밖의 점에서 접선의 방정식</span>
+                        </div>
+                        <div class="arrow-down">↑ 막힌 이유는?</div>
+                        <div class="node concept" style="justify-content:space-between;">
+                            <span class="grade-tag">수학Ⅱ</span>
+                            <span style="flex:1; text-align:center;">미분계수 · 접선의 의미</span>
+                        </div>
+                        <div class="arrow-down">↑</div>
+                        <div class="node concept" style="justify-content:space-between;">
+                            <span class="grade-tag">고1</span>
+                            <span style="flex:1; text-align:center;">함수와 그래프 · 함수값 대입</span>
+                        </div>
+                        <div class="arrow-down">↑</div>
+                        <div class="node weak" style="justify-content:space-between;">
+                            <span class="grade-tag" style="background:#DC2626;">중3</span>
+                            <span style="flex:1; text-align:center; color:var(--accent-strong); font-weight:800;">이차방정식 판별식 ← 진짜 결손</span>
+                        </div>
+                        <div class="arrow-down">↑</div>
+                        <div class="node concept" style="justify-content:space-between;">
+                            <span class="grade-tag">중2</span>
+                            <span style="flex:1; text-align:center;">일차함수의 기울기</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-zone">
+                <div class="callout-bar">
+                    <span class="label">핵심</span>
+                    학생도 강사도 모릅니다 — 약점은 <strong>단원이 아니라 유형 단위</strong>이고, 원인은 <strong>이전 학년</strong>에 숨어 있습니다.
+                </div>
+            </div>
+
+            <div class="source">사례 — 팀원 학원 강사 / 과외 현장 관찰</div>
+
+            <div class="brand-sig">
+                <div class="brand-sig-dots">
+                    <div class="brand-sig-dot c"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot p"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot i"></div>
+                </div>
+                <div class="brand-sig-name">Deepen</div>
+            </div>
+        </div>
+    </div>
+    <!-- notes: 진단의 한계. 좌측 잘못된/올바른 진단 비교, 우측 5단계 prerequisite 트리. 중3 판별식 노드를 dashed amber로 강조. -->
+</body>
+</html>

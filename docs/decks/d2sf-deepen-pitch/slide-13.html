@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시장 — Deepen D2SF Pitch</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100vh; background: #0a0a0a; overflow: hidden; position: relative; }
+        .slide { width: 1920px; height: 1080px; transform-origin: 0 0; position: absolute; top: 50%; left: 50%; overflow: hidden; border-radius: 4px; box-shadow: 0 20px 80px rgba(0,0,0,0.6); }
+    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        function scaleSlide() {
+            const slide = document.querySelector('.slide');
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const scale = Math.min(vw / 1920, vh / 1080) * 0.92;
+            const sw = 1920 * scale, sh = 1080 * scale;
+            slide.style.transform = `translate(${-sw / 2}px, ${-sh / 2}px) scale(${scale})`;
+        }
+        window.addEventListener('resize', scaleSlide);
+        window.addEventListener('load', scaleSlide);
+    </script>
+</head>
+<body>
+    <div class="slide">
+        <div class="slide-frame">
+            <div class="top-zone">
+                <div>
+                    <div class="overline">시장 · 한국 입시 사교육</div>
+                    <h1 class="action-title">
+                        TAM <span class="blue">29.2조</span> · SAM <span class="blue">3-5조</span> ·
+                        SOM <span class="accent">18-30억</span>(3년 내, 입시 수학)
+                    </h1>
+                    <div class="body-text">
+                        고등학생 사교육비 8.1조 안에서, <em>유형 진단 + 선행 결손 추적</em>의 코치 포지션은 아직 비어 있습니다.
+                    </div>
+                </div>
+                <div class="section-tag">Resolution</div>
+            </div>
+
+            <div class="middle-zone">
+                <div class="col-50">
+                    <div style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.16em; color:var(--text-subtle); text-transform:uppercase; margin-bottom:10px;">시장 깔때기 · TAM → SOM</div>
+
+                    <!-- 3단 깔때기 -->
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div style="background:var(--blue); color:white; padding:18px 26px; border-radius:14px;">
+                            <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                                <span style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.16em; text-transform:uppercase; opacity:0.85;">TAM</span>
+                                <span style="font-family:'Outfit',sans-serif; font-size:42px; font-weight:900;">29.2조원</span>
+                            </div>
+                            <div style="font-size:16px; opacity:0.9; margin-top:2px;">한국 초·중·고 사교육비 총액 (2024, +7.7% YoY)</div>
+                        </div>
+
+                        <div style="background:var(--blue-soft); border:2px solid var(--blue); padding:16px 24px; border-radius:14px; width:88%; align-self:center;">
+                            <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                                <span style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.16em; text-transform:uppercase; color:var(--blue);">SAM</span>
+                                <span style="font-family:'Outfit',sans-serif; font-size:36px; font-weight:900; color:var(--blue);">3~5조원</span>
+                            </div>
+                            <div style="font-size:16px; color:var(--text); margin-top:2px;">디지털·AI 학습 도구 (고등학생 8.1조 중 일부)</div>
+                        </div>
+
+                        <div style="background:var(--accent); color:white; padding:16px 24px; border-radius:14px; width:70%; align-self:center;">
+                            <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                                <span style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.16em; text-transform:uppercase; opacity:0.95;">SOM (3년)</span>
+                                <span style="font-family:'Outfit',sans-serif; font-size:32px; font-weight:900;">18~30억</span>
+                            </div>
+                            <div style="font-size:15px; opacity:0.95; margin-top:2px;">입시 수학 · 수능 응시자 1% × 3-5만원/월</div>
+                        </div>
+                    </div>
+
+                    <div class="insight-box" style="margin-top:10px; font-size:15px; padding:14px 20px;">
+                        <span class="label">SOM 침투 가정</span>
+                        2025학년 수능 수학 응시자 <strong>44.3만명</strong> · 미적분 51.3% · 확률통계 45.6% · 기하 3.1%
+                    </div>
+                </div>
+
+                <div class="col-50">
+                    <div style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.16em; color:var(--text-subtle); text-transform:uppercase; margin-bottom:14px;">경쟁 구도 · 5 카테고리</div>
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <div class="card gray" style="padding:11px 18px; flex-direction:row; align-items:center; gap:16px;">
+                            <div style="min-width:120px; font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; letter-spacing:0.06em; color:var(--text-subtle); text-transform:uppercase;">문제 검색</div>
+                            <div style="min-width:90px; font-size:17px; font-weight:700; color:var(--text);">콴다</div>
+                            <div style="flex:1; font-size:15px; color:var(--text-muted); line-height:1.4;">단일 문제 풀이, 학습자 상태 모델 없음</div>
+                        </div>
+                        <div class="card gray" style="padding:11px 18px; flex-direction:row; align-items:center; gap:16px;">
+                            <div style="min-width:120px; font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; letter-spacing:0.06em; color:var(--text-subtle); text-transform:uppercase;">디지털 인강</div>
+                            <div style="min-width:90px; font-size:17px; font-weight:700; color:var(--text);">메가스터디</div>
+                            <div style="flex:1; font-size:15px; color:var(--text-muted); line-height:1.4;">강의 소비 중심, 진단·추천 약함</div>
+                        </div>
+                        <div class="card gray" style="padding:11px 18px; flex-direction:row; align-items:center; gap:16px;">
+                            <div style="min-width:120px; font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; letter-spacing:0.06em; color:var(--text-subtle); text-transform:uppercase;">범용 AI</div>
+                            <div style="min-width:90px; font-size:17px; font-weight:700; color:var(--text);">NotebookLM</div>
+                            <div style="flex:1; font-size:15px; color:var(--text-muted); line-height:1.4;">입시 도메인·유형 분류·기출 데이터 없음</div>
+                        </div>
+                        <div class="card gray" style="padding:11px 18px; flex-direction:row; align-items:center; gap:16px;">
+                            <div style="min-width:120px; font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; letter-spacing:0.06em; color:var(--text-subtle); text-transform:uppercase;">학습 관리</div>
+                            <div style="min-width:90px; font-size:17px; font-weight:700; color:var(--text);">매쓰홀릭</div>
+                            <div style="flex:1; font-size:15px; color:var(--text-muted); line-height:1.4;">단원 단위 약점, 선행 결손 추적 없음</div>
+                        </div>
+                        <div class="card gray" style="padding:11px 18px; flex-direction:row; align-items:center; gap:16px;">
+                            <div style="min-width:120px; font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; letter-spacing:0.06em; color:var(--text-subtle); text-transform:uppercase;">얼리</div>
+                            <div style="min-width:90px; font-size:17px; font-weight:700; color:var(--text);">유니브 AI</div>
+                            <div style="flex:1; font-size:15px; color:var(--text-muted); line-height:1.4;">학부 시험 9,900원 포지션, 완결성 없음</div>
+                        </div>
+
+                        <div class="card accent" style="padding:11px 18px; flex-direction:row; align-items:center; gap:16px; margin-top:4px;">
+                            <div style="min-width:120px; font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; letter-spacing:0.06em; color:var(--accent); text-transform:uppercase;">★ Deepen</div>
+                            <div style="min-width:90px; font-size:17px; font-weight:800; color:var(--text);">유형 + 선행</div>
+                            <div style="flex:1; font-size:15px; color:var(--text); line-height:1.4; font-weight:500;">두 축을 동시에 가진 유일한 포지션</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-zone">
+                <div class="callout-bar">
+                    <span class="label">SOM 한 줄</span>
+                    사교육 참여율 <strong>80%</strong>, 고1인당 월 <strong>77.2만원</strong> — Pro 14,900원의 5%만 대체해도 시장이 열립니다.
+                </div>
+            </div>
+
+            <div class="source">통계청 「2024년 초중고 사교육비조사」 · 한국교육과정평가원 「2025학년도 수능 응시현황」</div>
+
+            <div class="brand-sig">
+                <div class="brand-sig-dots">
+                    <div class="brand-sig-dot c"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot p"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot i"></div>
+                </div>
+                <div class="brand-sig-name">Deepen</div>
+            </div>
+        </div>
+    </div>
+    <!-- notes: 시장. 좌측 TAM/SAM/SOM 깔때기, 우측 5경쟁사 + Deepen 강조 행. -->
+</body>
+</html>

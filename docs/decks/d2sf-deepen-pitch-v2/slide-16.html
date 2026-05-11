@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>닫는 말 — Deepen D2SF v2</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100vh; background: #0a0a0a; overflow: hidden; position: relative; }
+        .slide { width: 1920px; height: 1080px; transform-origin: 0 0; position: absolute; top: 50%; left: 50%; overflow: hidden; border-radius: 4px; box-shadow: 0 20px 80px rgba(0,0,0,0.6); }
+    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        function scaleSlide() {
+            const slide = document.querySelector('.slide');
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const scale = Math.min(vw / 1920, vh / 1080) * 0.92;
+            const sw = 1920 * scale, sh = 1080 * scale;
+            slide.style.transform = `translate(${-sw / 2}px, ${-sh / 2}px) scale(${scale})`;
+        }
+        window.addEventListener('resize', scaleSlide);
+        window.addEventListener('load', scaleSlide);
+    </script>
+</head>
+<body>
+    <div class="slide">
+        <div class="page-index">
+            <span class="deck-name">Naver D2SF · 2026</span>
+            <span>15 / 15</span>
+        </div>
+
+        <div class="split-65-35" style="height:100%; padding:140px 120px 100px;">
+            <!-- 좌측: 큰 인용 -->
+            <div style="display:flex; flex-direction:column; justify-content:center;">
+                <div class="quote-serif" style="font-size:56px; line-height:1.25; max-width:1080px; margin-bottom:48px;">
+                    <em>기술이</em> <strong>5분의 격차</strong>를<br>
+                    메울 수 있는 <em>시점에 와 있다.</em>
+                </div>
+
+                <div style="font-size:21px; line-height:1.65; color:var(--text-muted); max-width:920px;">
+                    Deepen은 <span class="t-italic">어떤 문제를 풀어야 하는지</span>가 아니라<br>
+                    <span class="t-em">왜 그 문제를 못 푸는지</span>를 아는 첫 한국형 입시 학습 코치다.
+                </div>
+            </div>
+
+            <!-- 우측: 컨택트 -->
+            <div style="display:flex; flex-direction:column; justify-content:flex-end; padding-bottom:20px;">
+                <div class="cover-mark" style="font-size:120px; margin-bottom:16px;">Deepen<span class="dot">.</span></div>
+
+                <div class="rule-thick" style="margin:24px 0;"></div>
+
+                <div style="font-family:'Pretendard',sans-serif; font-size:14px; font-weight:800; letter-spacing:0.18em; color:var(--text-faint); text-transform:uppercase; margin-bottom:14px;">CONTACT · FOUNDER</div>
+                <div style="font-family:'Pretendard',sans-serif; font-size:24px; font-weight:800; color:var(--text); margin-bottom:6px;">박정현</div>
+                <div style="font-family:'Outfit',sans-serif; font-size:22px; font-weight:600; color:var(--accent);">pjhice0331@gmail.com</div>
+                <div style="font-size:14px; color:var(--text-muted); margin-top:18px; ">기술 데모·미팅 요청 환영</div>
+            </div>
+        </div>
+    </div>
+    <!-- notes: Breath 클로징. 좌측 큰 Spectral 인용 (5분의 격차 다시 호출), 우측 워드마크 + 컨택트. 60% 공백. -->
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>3분기 채점 — Deepen D2SF</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100vh; background: #0a0a0a; overflow: hidden; position: relative; }
+        .slide { width: 1920px; height: 1080px; transform-origin: 0 0; position: absolute; top: 50%; left: 50%; overflow: hidden; border-radius: 4px; box-shadow: 0 20px 80px rgba(0,0,0,0.6); }
+    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        function scaleSlide() {
+            const slide = document.querySelector('.slide');
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const scale = Math.min(vw / 1920, vh / 1080) * 0.92;
+            const sw = 1920 * scale, sh = 1080 * scale;
+            slide.style.transform = `translate(${-sw / 2}px, ${-sh / 2}px) scale(${scale})`;
+        }
+        window.addEventListener('resize', scaleSlide);
+        window.addEventListener('load', scaleSlide);
+    </script>
+</head>
+<body>
+    <div class="slide">
+        <div class="page-index">
+            <span class="deck-name">Naver D2SF · 2026</span>
+            <span>10 / 15 · <span class="accent">II</span></span>
+        </div>
+
+        <div class="frame">
+            <h1 class="action-title" style="max-width:1700px;">
+                채점은 <span class="t-em">3분기</span>다 —<br>
+                <span class="accent">'정답이지만 헷갈림'</span>이 시험 변별력을 결정한다.
+            </h1>
+
+            <div class="rule" style="margin:24px 0 40px;"></div>
+
+            <div class="split-45-55" style="flex:1; align-items:start;">
+                <div>
+                    <div class="eyebrow" style="margin-bottom:24px;">제출 후 결과 분기</div>
+
+                    <div style="padding:22px 0; border-top:1px solid var(--rule-strong);">
+                        <div style="display:flex; align-items:baseline; gap:18px; margin-bottom:8px;">
+                            <span style="font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; letter-spacing:0.14em; color:var(--text-muted);">A</span>
+                            <span style="font-family:'Pretendard',sans-serif; font-size:26px; font-weight:800; color:var(--emerald);">정답</span>
+                        </div>
+                        <div style="font-size:18px; line-height:1.55; color:var(--text-muted);">다음 문제로. 단, 풀이 시간·힌트·자신감을 함께 반영해 숙련도 갱신.</div>
+                    </div>
+
+                    <div style="padding:22px 0; border-top:1px solid var(--rule);">
+                        <div style="display:flex; align-items:baseline; gap:18px; margin-bottom:8px;">
+                            <span style="font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; letter-spacing:0.14em; color:var(--text-muted);">B</span>
+                            <span style="font-family:'Pretendard',sans-serif; font-size:26px; font-weight:800; color:#DC2626;">오답</span>
+                        </div>
+                        <div style="font-size:18px; line-height:1.55; color:var(--text-muted);">8가지 분석 기준으로 원인 추적. 단순 해설이 아니라 <span class="t-em">어디서 막혔는지.</span></div>
+                    </div>
+
+                    <div style="padding:22px 0; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule-strong); padding-left:18px; border-left:4px solid var(--accent); background:rgba(217,119,6,0.03);">
+                        <div style="display:flex; align-items:baseline; gap:18px; margin-bottom:8px;">
+                            <span style="font-family:'Outfit',sans-serif; font-size:14px; font-weight:800; letter-spacing:0.14em; color:var(--accent);">C ★</span>
+                            <span style="font-family:'Pretendard',sans-serif; font-size:26px; font-weight:800; color:var(--accent);">정답이지만 헷갈림</span>
+                        </div>
+                        <div style="font-size:18px; line-height:1.55; color:var(--text);"><span class="t-em">약점 후보로 별도 저장.</span> 입시 변별력의 핵심 — 시험에서 다시 틀릴 위험이 가장 큰 영역.</div>
+                    </div>
+                </div>
+
+                <div style="padding-left:36px; border-left:1px solid var(--rule);">
+                    <div class="eyebrow" style="margin-bottom:24px;">8가지 오답 원인 분석 기준</div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+                        <div style="padding:18px 24px 18px 0; border-top:1px solid var(--rule); display:flex; gap:14px; align-items:baseline;">
+                            <span style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:700; color:var(--accent); letter-spacing:0.1em;">01</span>
+                            <span style="font-size:19px; font-weight:600; color:var(--text);">현재 개념 부족</span>
+                        </div>
+                        <div style="padding:18px 0 18px 24px; border-top:1px solid var(--rule); border-left:1px solid var(--rule); display:flex; gap:14px; align-items:baseline;">
+                            <span style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:700; color:var(--accent); letter-spacing:0.1em;">02</span>
+                            <span style="font-size:19px; font-weight:600; color:var(--text);">유형 인식 실패</span>
+                        </div>
+                        <div style="padding:18px 24px 18px 0; border-top:1px solid var(--rule); display:flex; gap:14px; align-items:baseline;">
+                            <span style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:700; color:var(--accent); letter-spacing:0.1em;">03</span>
+                            <span style="font-size:19px; font-weight:600; color:var(--text);">접근 방향 오류</span>
+                        </div>
+                        <div style="padding:18px 0 18px 24px; border-top:1px solid var(--rule); border-left:1px solid var(--rule); display:flex; gap:14px; align-items:baseline;">
+                            <span style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:700; color:var(--accent); letter-spacing:0.1em;">04</span>
+                            <span style="font-size:19px; font-weight:600; color:var(--text);">계산 실수</span>
+                        </div>
+                        <div style="padding:18px 24px 18px 0; border-top:1px solid var(--rule); display:flex; gap:14px; align-items:baseline;">
+                            <span style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:700; color:var(--accent); letter-spacing:0.1em;">05</span>
+                            <span style="font-size:19px; font-weight:600; color:var(--text);">조건 해석 오류</span>
+                        </div>
+                        <div style="padding:18px 0 18px 24px; border-top:1px solid var(--rule); border-left:1px solid var(--rule); display:flex; gap:14px; align-items:baseline;">
+                            <span style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:700; color:var(--accent); letter-spacing:0.1em;">06</span>
+                            <span style="font-size:19px; font-weight:600; color:var(--text);">그래프 해석 오류</span>
+                        </div>
+                        <div style="padding:18px 24px 18px 0; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule); display:flex; gap:14px; align-items:baseline;">
+                            <span style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:700; color:var(--accent); letter-spacing:0.1em;">07</span>
+                            <span style="font-size:19px; font-weight:600; color:var(--text);">풀이 논리 비약</span>
+                        </div>
+                        <div style="padding:18px 0 18px 24px; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule); border-left:1px solid var(--rule); display:flex; gap:14px; align-items:baseline;">
+                            <span style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:700; color:var(--accent); letter-spacing:0.1em;">08</span>
+                            <span style="font-size:19px; font-weight:600; color:var(--text);">이전 학년 결손</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:32px; font-family:'Pretendard',sans-serif; font-size:21px; font-weight:700; color:var(--text); line-height:1.4;">
+                        "맞았지만 불안정한 문제는 시험에서 <span class="t-accent">가장 먼저 무너진다.</span>"
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- notes: v2 hairline 톤 — 3분기 채점 + 8가지 분석 기준. 1-9 v1 카드 시스템에서 hairline 시스템으로 전환되는 첫 슬라이드. -->
+</body>
+</html>

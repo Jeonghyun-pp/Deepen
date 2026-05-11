@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>기술 아키텍처 — Deepen D2SF Pitch</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100vh; background: #0a0a0a; overflow: hidden; position: relative; }
+        .slide { width: 1920px; height: 1080px; transform-origin: 0 0; position: absolute; top: 50%; left: 50%; overflow: hidden; border-radius: 4px; box-shadow: 0 20px 80px rgba(0,0,0,0.6); }
+    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        function scaleSlide() {
+            const slide = document.querySelector('.slide');
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const scale = Math.min(vw / 1920, vh / 1080) * 0.92;
+            const sw = 1920 * scale, sh = 1080 * scale;
+            slide.style.transform = `translate(${-sw / 2}px, ${-sh / 2}px) scale(${scale})`;
+        }
+        window.addEventListener('resize', scaleSlide);
+        window.addEventListener('load', scaleSlide);
+    </script>
+</head>
+<body>
+    <div class="slide">
+        <div class="slide-frame">
+            <div class="top-zone">
+                <div>
+                    <div class="overline">기술 아키텍처</div>
+                    <h1 class="action-title">
+                        <span class="blue">"LLM이 제안하고, 코드가 검증한다"</span> —<br>
+                        진단의 신뢰성을 <span class="accent">확률적으로 두지 않는다.</span>
+                    </h1>
+                    <div class="body-text">
+                        채점·숙련도·결손 진단 같은 <em>학습의 핵심 약속</em>을 LLM에 맡기면 확률적 결과가 됩니다. 결정론적 코드가 <span class="em">최종 판정권</span>을 가져야 합니다.
+                    </div>
+                </div>
+                <div class="section-tag">Resolution</div>
+            </div>
+
+            <div class="middle-zone">
+                <div class="col-45">
+                    <div style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.16em; color:var(--text-subtle); text-transform:uppercase; margin-bottom:10px;">책임 분리 · 3-tier</div>
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <div style="background:var(--bg-card); border:1.5px solid var(--gray); border-radius:12px; padding:16px 22px;">
+                            <div style="display:flex; gap:12px; align-items:baseline; margin-bottom:4px;">
+                                <span style="font-family:'Outfit',sans-serif; font-size:12px; font-weight:800; letter-spacing:0.12em; color:var(--gray); text-transform:uppercase;">LLM</span>
+                                <span style="font-size:17px; font-weight:700; color:var(--text);">Untrusted Worker</span>
+                            </div>
+                            <div style="font-size:15px; line-height:1.45; color:var(--text-muted);">노드 추출, 엣지 후보, 오답 원인 추정, 코치 대화 — <strong>제안만</strong></div>
+                        </div>
+
+                        <div style="text-align:center; color:var(--text-subtle); font-size:14px; line-height:1;">↓</div>
+
+                        <div style="background:var(--blue-soft); border:1.5px solid var(--blue); border-radius:12px; padding:16px 22px;">
+                            <div style="display:flex; gap:12px; align-items:baseline; margin-bottom:4px;">
+                                <span style="font-family:'Outfit',sans-serif; font-size:12px; font-weight:800; letter-spacing:0.12em; color:var(--blue); text-transform:uppercase;">Code</span>
+                                <span style="font-size:17px; font-weight:700; color:var(--text);">Trusted Judge</span>
+                            </div>
+                            <div style="font-size:15px; line-height:1.45; color:var(--text);">DAG cycle 감지, 커버리지 집합 연산, mastery 상태 머신 — <strong>최종 판정권</strong></div>
+                        </div>
+
+                        <div style="text-align:center; color:var(--text-subtle); font-size:14px; line-height:1;">↓</div>
+
+                        <div style="background:var(--accent-soft); border:1.5px solid var(--accent); border-radius:12px; padding:16px 22px;">
+                            <div style="display:flex; gap:12px; align-items:baseline; margin-bottom:4px;">
+                                <span style="font-family:'Outfit',sans-serif; font-size:12px; font-weight:800; letter-spacing:0.12em; color:var(--accent); text-transform:uppercase;">DB</span>
+                                <span style="font-size:17px; font-weight:700; color:var(--text);">Invariant Guard</span>
+                            </div>
+                            <div style="font-size:15px; line-height:1.45; color:var(--text);">RLS · 불변식 제약 — <strong>약속의 무게가 코드로 강제됨</strong></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-55" style="gap:14px;">
+                    <div>
+                        <div style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.16em; color:var(--text-subtle); text-transform:uppercase; margin-bottom:8px;">시스템 스택 · 8 레이어</div>
+                        <table class="stack-table" style="font-size:16px;">
+                            <tr><td class="layer" style="font-size:15px; padding:9px 14px;">Frontend</td><td class="tech" style="font-size:15px; padding:9px 14px;">Next.js 16 (App Router) · React 19 · Tailwind 4</td></tr>
+                            <tr><td class="layer" style="font-size:15px; padding:9px 14px;">Graph Viz</td><td class="tech" style="font-size:15px; padding:9px 14px;">Reagraph + @xyflow/react + dagre</td></tr>
+                            <tr><td class="layer" style="font-size:15px; padding:9px 14px;">State</td><td class="tech" style="font-size:15px; padding:9px 14px;">Zustand</td></tr>
+                            <tr><td class="layer" style="font-size:15px; padding:9px 14px;">Backend</td><td class="tech" style="font-size:15px; padding:9px 14px;">Next.js API Routes / Edge Functions</td></tr>
+                            <tr><td class="layer" style="font-size:15px; padding:9px 14px;">LLM</td><td class="tech" style="font-size:15px; padding:9px 14px;">Anthropic Claude (Sonnet 4.6) + OpenAI 보조</td></tr>
+                            <tr><td class="layer" style="font-size:15px; padding:9px 14px;">DB</td><td class="tech" style="font-size:15px; padding:9px 14px;">Postgres (Supabase) + Drizzle ORM + RLS</td></tr>
+                            <tr><td class="layer" style="font-size:15px; padding:9px 14px;">Pipeline</td><td class="tech" style="font-size:15px; padding:9px 14px;">unpdf + 자체 (parse → group → extract → dedup → filter)</td></tr>
+                            <tr><td class="layer" style="font-size:15px; padding:9px 14px;">Auth</td><td class="tech" style="font-size:15px; padding:9px 14px;">Supabase Auth + Row-Level Security</td></tr>
+                        </table>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1.4fr; gap:14px;">
+                        <div class="hero" style="background:rgba(217,119,6,0.06); border-color:var(--accent); padding:14px 18px;">
+                            <div class="hero-number" style="font-size:64px;">+13.8<span class="unit">%p</span></div>
+                            <div class="hero-label" style="font-size:15px; margin-top:2px;">Precision 개선</div>
+                            <div class="hero-compare" style="font-size:13px;">60.5% → 74.3% (재무관리 검증)</div>
+                        </div>
+                        <div class="insight-box" style="font-size:15px; padding:14px 18px; line-height:1.45;">
+                            <span class="label">진행 상태</span>
+                            노이즈 감소 4-layer 중 <strong>정규식 필터 ship 완료</strong>. 다음: LLM-Judge → 한국어/영어 동시 지원 검증.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-zone">
+                <div class="callout-bar">
+                    <span class="label">데이터 해자</span>
+                    풀이 1건마다 <strong>(개념 × 유형 × 선행 × 시간 × 힌트 × 자신감 × 헷갈림) 7차원 데이터</strong>가 누적됩니다 — 사용자가 늘수록 그래프 자체가 정확해집니다.
+                </div>
+            </div>
+
+            <div class="source">측정 — Deepen 내부 (Phase 0 baseline / Phase 1 정규식 필터 적용 후, 2026)</div>
+
+            <div class="brand-sig">
+                <div class="brand-sig-dots">
+                    <div class="brand-sig-dot c"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot p"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot i"></div>
+                </div>
+                <div class="brand-sig-name">Deepen</div>
+            </div>
+        </div>
+    </div>
+    <!-- notes: 기술 아키텍처. 좌측 LLM/Code/DB 책임 분리 다이어그램, 우측 8레이어 스택 + 검증 데이터 (precision +13.8%p). -->
+</body>
+</html>

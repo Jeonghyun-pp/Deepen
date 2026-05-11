@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hook — Deepen D2SF Pitch</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100vh; background: #0a0a0a; overflow: hidden; position: relative; }
+        .slide { width: 1920px; height: 1080px; transform-origin: 0 0; position: absolute; top: 50%; left: 50%; overflow: hidden; border-radius: 4px; box-shadow: 0 20px 80px rgba(0,0,0,0.6); }
+    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        function scaleSlide() {
+            const slide = document.querySelector('.slide');
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const scale = Math.min(vw / 1920, vh / 1080) * 0.92;
+            const sw = 1920 * scale, sh = 1080 * scale;
+            slide.style.transform = `translate(${-sw / 2}px, ${-sh / 2}px) scale(${scale})`;
+        }
+        window.addEventListener('resize', scaleSlide);
+        window.addEventListener('load', scaleSlide);
+    </script>
+</head>
+<body>
+    <div class="slide">
+        <div class="slide-frame">
+            <div class="top-zone">
+                <div class="overline">현장에서 본 한 장면</div>
+                <div class="section-tag">Situation</div>
+            </div>
+
+            <div class="middle-zone" style="align-items:center;">
+                <div class="col-60" style="justify-content:center;">
+                    <div class="quote">
+                        EBS를 수십 번 돌려도<br>
+                        안 풀리던 개념이,<br>
+                        강사 <span class="accent">5분</span>이면 풀린다.
+                    </div>
+                    <div class="body-text" style="font-size:24px; margin-top:24px; max-width:960px;">
+                        그 5분을 <span class="em">살 수 있는 학생</span>과 <span class="em">없는 학생</span>이 매일 갈라집니다.<br>
+                        이 격차는 단순한 <em>이해 속도</em> 의 차이로 끝나지 않습니다.
+                    </div>
+                    <div style="font-size:14px; color:var(--text-subtle); letter-spacing:0.04em; margin-top:18px;">
+                        — 팀원 과외 현장 관찰
+                    </div>
+                </div>
+
+                <div class="col-40" style="justify-content:center; gap:16px;">
+                    <div class="card gray" style="padding:32px;">
+                        <div style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.16em; color:var(--text-subtle); text-transform:uppercase;">A 학생</div>
+                        <div class="card-title" style="font-size:28px; margin-top:6px;">EBS 강의 · 30회 반복</div>
+                        <div class="card-body" style="font-size:20px;">같은 개념을 반복해서 보지만 막힌 지점에서 계속 막힌다</div>
+                    </div>
+                    <div style="text-align:center; font-size:28px; color:var(--text-subtle); font-weight:700;">↓</div>
+                    <div class="card accent" style="padding:32px;">
+                        <div style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.16em; color:var(--accent); text-transform:uppercase;">B 학생</div>
+                        <div class="card-title" style="font-size:28px; margin-top:6px;">강사 · 5분 설명</div>
+                        <div class="card-body" style="font-size:20px; color:var(--text);">막힌 지점이 정확히 짚어지자, 즉시 풀린다</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-zone">
+                <div class="callout-bar">
+                    <span class="label">Insight</span>
+                    그 <strong>5분짜리 정확한 진단</strong>이 가능한 학생과 그렇지 않은 학생 사이에서, 학습 격차는 매일 누적됩니다.
+                </div>
+            </div>
+
+            <div class="brand-sig">
+                <div class="brand-sig-dots">
+                    <div class="brand-sig-dot c"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot p"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot i"></div>
+                </div>
+                <div class="brand-sig-name">Deepen</div>
+            </div>
+        </div>
+    </div>
+    <!-- notes: Hook 슬라이드. 발표의 감정적 anchor — 후반 클로징(슬라이드 17)에서 다시 호출. 두 학생의 대비 + 좌측 큰 인용. -->
+</body>
+</html>

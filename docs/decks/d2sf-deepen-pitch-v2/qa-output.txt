@@ -1,0 +1,474 @@
+[CHECK] Checking 16 slides...
+
+=== Slide 1 (slide-1.html) 收收收
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div > div
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.cover-meta-v1 > div.cover-meta-item > span.label
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.cover-meta-v1 > div.cover-meta-item > span.label
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.cover-meta-v1 > div.cover-meta-item > span.label
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.cover-meta-v1 > div.cover-meta-item > span.label
+  [WARN] [small-font-long-text] 53 chars at 14px - hard to read
+     -> div > div
+
+=== Slide 2 (slide-2.html) 收收收
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div.frame > div.top-zone > div.overline
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.frame > div.top-zone > div.section-tag
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.frame > div.middle-zone > div.col-60 > div
+  [WARN] [low-contrast] Low contrast ratio 2.90:1 (needs 4.5:1)
+     -> div.middle-zone > div.col-40 > div.card.gray > div
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div.middle-zone > div.col-40 > div.card.accent > div
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div.frame > div.bottom-zone > div.callout-bar > span.label
+  [WARN] [low-contrast] Low contrast ratio 3.95:1 (needs 4.5:1)
+     -> div.frame > div.brand-sig > div.brand-sig-name
+
+=== Slide 3 (slide-3.html) 收收收
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div.frame > div.top-zone > div > div.overline
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.frame > div.top-zone > div.section-tag
+  [WARN] [low-contrast] Low contrast ratio 2.90:1 (needs 4.5:1)
+     -> div.middle-zone > div.col-50 > div.card.gray > div
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.frame > div.middle-zone > div > div
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div.frame > div.middle-zone > div > div
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div.middle-zone > div.col-50 > div.card.accent > div
+  [WARN] [low-contrast] Low contrast ratio 4.39:1 (needs 4.5:1)
+     -> div.col-50 > div.card.accent > div > div
+  [WARN] [low-contrast] Low contrast ratio 2.82:1 (needs 4.5:1)
+     -> div.bottom-zone > div.impact-row > div.impact-cell > div.impact-label
+  [WARN] [low-contrast] Low contrast ratio 2.82:1 (needs 4.5:1)
+     -> div.bottom-zone > div.impact-row > div.impact-cell > div.impact-label
+  [WARN] [low-contrast] Low contrast ratio 2.82:1 (needs 4.5:1)
+     -> div.bottom-zone > div.impact-row > div.impact-cell > div.impact-label
+  [WARN] [low-contrast] Low contrast ratio 3.95:1 (needs 4.5:1)
+     -> div.frame > div.brand-sig > div.brand-sig-name
+
+=== Slide 4 (slide-4.html) 收收收
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div.frame > div.top-zone > div > div.overline
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.frame > div.top-zone > div.section-tag
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.frame > div.middle-zone > div.col-60 > div
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.frame > div.middle-zone > div.col-60 > div
+  [WARN] [low-contrast] Low contrast ratio 2.82:1 (needs 3:1)
+     -> div.middle-zone > div.col-40 > div.hero-card > div.hero-card-num
+  [WARN] [low-contrast] Low contrast ratio 2.82:1 (needs 3:1)
+     -> div.col-40 > div.hero-card > div.hero-card-num > span.unit
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 3:1)
+     -> div.middle-zone > div.col-40 > div.hero-card > div.hero-card-num
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 3:1)
+     -> div.col-40 > div.hero-card > div.hero-card-num > span.unit
+  [WARN] [low-contrast] Low contrast ratio 2.00:1 (needs 4.5:1)
+     -> div.middle-zone > div.col-40 > div.hero-card > div.hero-card-compare
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div.frame > div.bottom-zone > div.callout-bar > span.label
+  [WARN] [low-contrast] Low contrast ratio 3.95:1 (needs 4.5:1)
+     -> div.frame > div.brand-sig > div.brand-sig-name
+
+=== Slide 5 (slide-5.html) 收收收
+  [ERROR] [sibling-overlap] Siblings overlap by 122px昌 area
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div.frame > div.top-zone > div > div.overline
+  [WARN] [low-contrast] Low contrast ratio 2.94:1 (needs 3:1)
+     -> div.top-zone > div > h1.action-title > span.strike
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.frame > div.top-zone > div.section-tag
+  [WARN] [low-contrast] Low contrast ratio 2.90:1 (needs 4.5:1)
+     -> div.middle-zone > div.col-45 > div.card.gray > div
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div.middle-zone > div.col-45 > div.card.accent > div
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 3:1)
+     -> div.col-45 > div.card.accent > div.card-title > span
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.frame > div.middle-zone > div.col-55 > div
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div.col-55 > div > div.node.pattern > span.grade-tag
+  [WARN] [low-contrast] Low contrast ratio 1.58:1 (needs 4.5:1)
+     -> div.col-55 > div > div.node.pattern > span
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.middle-zone > div.col-55 > div > div.arrow-down
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div.col-55 > div > div.node.concept > span
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.middle-zone > div.col-55 > div > div.arrow-down
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div.col-55 > div > div.node.concept > span
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.middle-zone > div.col-55 > div > div.arrow-down
+  [WARN] [low-contrast] Low contrast ratio 1.58:1 (needs 3:1)
+     -> div.col-55 > div > div.node.weak > span
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.middle-zone > div.col-55 > div > div.arrow-down
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div.col-55 > div > div.node.concept > span
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div.frame > div.bottom-zone > div.callout-bar > span.label
+  [WARN] [low-contrast] Low contrast ratio 3.95:1 (needs 4.5:1)
+     -> div.frame > div.brand-sig > div.brand-sig-name
+
+=== Slide 6 (slide-6.html) 收收收
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div.frame > div.top-zone > div > div.overline
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.frame > div.top-zone > div.section-tag
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 3:1)
+     -> div.col-40 > div.step-list > div.step-list-item.highlight > div.step-marker
+  [WARN] [low-contrast] Low contrast ratio 2.90:1 (needs 4.5:1)
+     -> div.middle-zone > div.col-60 > div > div
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div.col-60 > div > div.node.concept > span
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div > div > div.node.mastered > span
+  [WARN] [low-contrast] Low contrast ratio 3.29:1 (needs 4.5:1)
+     -> div > div > div.node.mastered > span
+  [WARN] [low-contrast] Low contrast ratio 1.16:1 (needs 4.5:1)
+     -> div > div.node.mastered > span > span
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div > div > div.node.weak > span
+  [WARN] [low-contrast] Low contrast ratio 1.58:1 (needs 4.5:1)
+     -> div > div > div.node.weak > span
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div > div.node.weak > span > span
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div > div > div.node.mastered > span
+  [WARN] [low-contrast] Low contrast ratio 3.29:1 (needs 4.5:1)
+     -> div > div > div.node.mastered > span
+  [WARN] [low-contrast] Low contrast ratio 1.16:1 (needs 4.5:1)
+     -> div > div.node.mastered > span > span
+  [WARN] [low-contrast] Low contrast ratio 2.25:1 (needs 4.5:1)
+     -> div > div > div.node.item > span
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div.col-60 > div > div > div
+  [WARN] [low-contrast] Low contrast ratio 1.58:1 (needs 4.5:1)
+     -> div > div > div.node.weak > span
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div > div > div > span
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div > div > div.node.weak > span.grade-tag
+  [WARN] [low-contrast] Low contrast ratio 1.58:1 (needs 4.5:1)
+     -> div > div > div.node.weak > span
+  [WARN] [low-contrast] Low contrast ratio 2.82:1 (needs 4.5:1)
+     -> div.middle-zone > div.col-60 > div > span
+  [WARN] [low-contrast] Low contrast ratio 2.82:1 (needs 4.5:1)
+     -> div.bottom-zone > div.impact-row > div.impact-cell > div.impact-label
+  [WARN] [low-contrast] Low contrast ratio 3.95:1 (needs 4.5:1)
+     -> div.frame > div.brand-sig > div.brand-sig-name
+  [WARN] [font-small] Font size 12px is below 14px recommendation
+     -> div > div > div.node.mastered > span
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div > div.node.mastered > span > span
+  [WARN] [font-small] Font size 12px is below 14px recommendation
+     -> div > div > div.node.weak > span
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div > div.node.weak > span > span
+  [WARN] [font-small] Font size 12px is below 14px recommendation
+     -> div > div > div.node.mastered > span
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div > div.node.mastered > span > span
+  [WARN] [font-small] Font size 12px is below 14px recommendation
+     -> div > div > div.node.item > span
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div > div.node.item > span > span
+
+=== Slide 7 (slide-7.html) 收收收
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div.frame > div.top-zone > div > div.overline
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.frame > div.top-zone > div.section-tag
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 3:1)
+     -> div.col-55 > div > div.node.concept > span
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div > div > div.node.pattern > span.grade-tag
+  [WARN] [low-contrast] Low contrast ratio 1.58:1 (needs 4.5:1)
+     -> div > div > div.node.pattern > span
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div > div > div.node.pattern > span.grade-tag
+  [WARN] [low-contrast] Low contrast ratio 1.58:1 (needs 4.5:1)
+     -> div > div > div.node.pattern > span
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div > div > div.node.pattern > span.grade-tag
+  [WARN] [low-contrast] Low contrast ratio 1.58:1 (needs 4.5:1)
+     -> div > div > div.node.pattern > span
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div.col-45 > div.card.blue > div > span
+  [WARN] [low-contrast] Low contrast ratio 2.07:1 (needs 3:1)
+     -> div.middle-zone > div.col-45 > div.card.blue > div.card-title
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 3:1)
+     -> div.col-45 > div.card.blue > div.card-title > span
+  [WARN] [low-contrast] Low contrast ratio 1.37:1 (needs 4.5:1)
+     -> div.middle-zone > div.col-45 > div.card.blue > div.card-body
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div.col-45 > div.card.accent > div > span
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 3:1)
+     -> div.col-45 > div.card.accent > div.card-title > span.inline-accent
+  [WARN] [low-contrast] Low contrast ratio 2.90:1 (needs 4.5:1)
+     -> div.col-45 > div.card.gray > div > span
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div.frame > div.bottom-zone > div.callout-bar > span.label
+  [WARN] [low-contrast] Low contrast ratio 3.95:1 (needs 4.5:1)
+     -> div.frame > div.brand-sig > div.brand-sig-name
+
+=== Slide 8 (slide-8.html) 收收收
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div.frame > div.top-zone > div > div.overline
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.frame > div.top-zone > div.section-tag
+  [WARN] [low-contrast] Low contrast ratio 2.90:1 (needs 4.5:1)
+     -> div.frame > div.middle-zone > div.col-60 > div
+  [WARN] [low-contrast] Low contrast ratio 2.90:1 (needs 4.5:1)
+     -> div.col-60 > div > div > div
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div.col-60 > div > div > div
+  [WARN] [low-contrast] Low contrast ratio 1.58:1 (needs 4.5:1)
+     -> div.col-60 > div > div > div
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div.col-60 > div > div > div
+  [WARN] [low-contrast] Low contrast ratio 1.58:1 (needs 4.5:1)
+     -> div.col-60 > div > div > div
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div.col-60 > div > div > div
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div.col-60 > div > div > div
+  [WARN] [low-contrast] Low contrast ratio 3.19:1 (needs 4.5:1)
+     -> div > div > div > span
+  [WARN] [low-contrast] Low contrast ratio 1.58:1 (needs 4.5:1)
+     -> div > div > div > span
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.frame > div.middle-zone > div.col-40 > div
+  [WARN] [low-contrast] Low contrast ratio 3.95:1 (needs 4.5:1)
+     -> div.frame > div.brand-sig > div.brand-sig-name
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div > div > div > span
+
+=== Slide 9 (slide-9.html) 收收收
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div.frame > div.top-zone > div > div.overline
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.frame > div.top-zone > div.section-tag
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.frame > div.middle-zone > div.col-50 > div
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 3:1)
+     -> div.col-50 > div.step-list > div.step-list-item.highlight > div.step-marker
+  [WARN] [low-contrast] Low contrast ratio 3.13:1 (needs 4.5:1)
+     -> div.frame > div.middle-zone > div.col-50 > div
+  [WARN] [low-contrast] Low contrast ratio 3.19:1 (needs 4.5:1)
+     -> div > div > div > span
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div.col-50 > div > div > span
+  [WARN] [low-contrast] Low contrast ratio 3.27:1 (needs 4.5:1)
+     -> div.col-50 > div > div > div
+  [WARN] [low-contrast] Low contrast ratio 3.27:1 (needs 4.5:1)
+     -> div.col-50 > div > div > div
+  [WARN] [low-contrast] Low contrast ratio 3.27:1 (needs 4.5:1)
+     -> div.col-50 > div > div > div
+  [WARN] [low-contrast] Low contrast ratio 3.27:1 (needs 4.5:1)
+     -> div.col-50 > div > div > span
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div.frame > div.bottom-zone > div.callout-bar > span.label
+  [WARN] [low-contrast] Low contrast ratio 3.95:1 (needs 4.5:1)
+     -> div.frame > div.brand-sig > div.brand-sig-name
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div > div > div > span
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div.col-50 > div > div > span
+
+=== Slide 10 (slide-10.html) 收收收
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div.page-index > span
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div.page-index > span > span.accent
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div.frame > div.split-45-55 > div > div.eyebrow
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div > div > div > span
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 3:1)
+     -> div > div > div > span
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div.frame > div.split-45-55 > div > div.eyebrow
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div > div > div > span
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div > div > div > span
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div > div > div > span
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div > div > div > span
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div > div > div > span
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div > div > div > span
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div > div > div > span
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div > div > div > span
+
+=== Slide 11 (slide-11.html) 收收收
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div.page-index > span
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div.page-index > span > span.accent
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div.frame > div.footnote
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div.frame > div.footnote
+  [WARN] [small-font-long-text] 77 chars at 13px - hard to read
+     -> div.frame > div.footnote
+
+=== Slide 12 (slide-12.html) 收收收
+  [ERROR] [sibling-overlap] Siblings overlap by 9830px昌 area
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div.page-index > span
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div.page-index > span > span.accent
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div.frame > div.split-40-60 > div > div.eyebrow
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 3:1)
+     -> div.split-40-60 > div > div > div
+  [WARN] [low-contrast] Low contrast ratio 1.00:1 (needs 4.5:1)
+     -> div > div > div > div
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div.split-40-60 > div > div > span.t-accent
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div.frame > div.split-40-60 > div > div.eyebrow
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div.frame > div.footnote
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div.frame > div.footnote
+
+=== Slide 13 (slide-13.html) 收收收
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div.page-index > span
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div.page-index > span > span.accent
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div.frame > div.split-45-55 > div > div.eyebrow
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div > div > div > div
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div.frame > div.split-45-55 > div > div.eyebrow
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div > div > div > div
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div.split-45-55 > div > div > div.eyebrow
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div > div > div > strong
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div.frame > div.footnote
+  [WARN] [small-font-long-text] 157 chars at 14px - hard to read
+     -> div.frame > div.split-45-55 > div > div.disclaimer
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div.frame > div.footnote
+  [WARN] [small-font-long-text] 52 chars at 13px - hard to read
+     -> div.frame > div.footnote
+
+=== Slide 14 (slide-14.html) 收收收
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div.page-index > span
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div.page-index > span > span.accent
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div > div > div > div.eyebrow
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div > div > div > div.eyebrow
+  [WARN] [low-contrast] Low contrast ratio 3.19:1 (needs 4.5:1)
+     -> div > div > div > div
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div > div > div > div.eyebrow.accent
+  [WARN] [low-contrast] Low contrast ratio 3.19:1 (needs 4.5:1)
+     -> div > div > div > div
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div > div > div > div.eyebrow.accent
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div > div > div > div.eyebrow
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div.frame > div.footnote.italic
+  [WARN] [small-font-long-text] 77 chars at 13px - hard to read
+     -> div.frame > div.footnote.italic
+
+=== Slide 15 (slide-15.html) 收收收
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div.page-index > span
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div.page-index > span > span.accent
+  [WARN] [low-contrast] Low contrast ratio 2.82:1 (needs 4.5:1)
+     -> div.frame > div > div > div
+  [WARN] [low-contrast] Low contrast ratio 2.82:1 (needs 4.5:1)
+     -> div > div > div > strong
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div.frame > div > div > div
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div.frame > div > div > div
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div.frame > div > div > div
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div.frame > div > div > div
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div.frame > div > strong
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div.frame > div > div > div
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div.frame > div > div > div
+  [WARN] [small-font-long-text] 192 chars at 13px - hard to read
+     -> div.frame > div > div > div
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div > div > div > strong
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div > div > div > strong
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div.frame > div > div > div
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div.frame > div > div > div
+  [WARN] [small-font-long-text] 95 chars at 13px - hard to read
+     -> div.frame > div > div > div
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div > div > div > strong
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div.frame > div > div > div
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div.frame > div > div > div
+  [WARN] [small-font-long-text] 71 chars at 13px - hard to read
+     -> div.frame > div > div > div
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div.frame > div > div > div
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div.frame > div > div > div
+  [WARN] [small-font-long-text] 100 chars at 13px - hard to read
+     -> div.frame > div > div > div
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div.frame > div > div > div
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div.frame > div > div > div
+  [WARN] [small-font-long-text] 86 chars at 13px - hard to read
+     -> div.frame > div > div > div
+  [WARN] [font-small] Font size 13px is below 14px recommendation
+     -> div > div > div > strong
+
+=== Slide 16 (slide-16.html) 收收收
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div.page-index > span
+  [WARN] [low-contrast] Low contrast ratio 2.43:1 (needs 4.5:1)
+     -> div.split-65-35 > div > div
+  [WARN] [low-contrast] Low contrast ratio 3.05:1 (needs 4.5:1)
+     -> div.split-65-35 > div > div
+
+=======================================
+[SUMMARY] Results: 16 slides checked
+   [ERROR] Errors:   2
+   [WARN] Warnings: 215
+   [SLIDES] Problem slides: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
+=======================================
+
+[FILE] Full report saved to qa-report.json

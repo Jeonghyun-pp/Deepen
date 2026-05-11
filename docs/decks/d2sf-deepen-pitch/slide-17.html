@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>닫는 말 — Deepen D2SF Pitch</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100vh; background: #0a0a0a; overflow: hidden; position: relative; }
+        .slide { width: 1920px; height: 1080px; transform-origin: 0 0; position: absolute; top: 50%; left: 50%; overflow: hidden; border-radius: 4px; box-shadow: 0 20px 80px rgba(0,0,0,0.6); }
+    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        function scaleSlide() {
+            const slide = document.querySelector('.slide');
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const scale = Math.min(vw / 1920, vh / 1080) * 0.92;
+            const sw = 1920 * scale, sh = 1080 * scale;
+            slide.style.transform = `translate(${-sw / 2}px, ${-sh / 2}px) scale(${scale})`;
+        }
+        window.addEventListener('resize', scaleSlide);
+        window.addEventListener('load', scaleSlide);
+    </script>
+</head>
+<body>
+    <div class="slide">
+        <div class="slide-frame">
+            <div class="top-zone">
+                <div class="overline">닫는 말 · Call to Action</div>
+                <div class="section-tag">Resolution</div>
+            </div>
+
+            <div class="middle-zone" style="align-items:flex-start;">
+                <div class="col-55" style="justify-content:center;">
+                    <div class="quote">
+                        기술이 <span class="accent">5분의 격차</span>를<br>
+                        메울 수 있는 시점에 와 있다.<br>
+                        <span style="font-size:0.65em; font-weight:600; color:var(--text-muted);">D2SF와 함께 증명하고 싶다.</span>
+                    </div>
+
+                    <div class="body-text" style="font-size:24px; margin-top:36px; max-width:920px;">
+                        Deepen은 <em>"어떤 문제를 풀어야 하는지"</em>가 아니라 <span class="em">"왜 그 문제를 못 푸는지"</span>를 아는 첫 한국형 입시 학습 코치입니다.
+                    </div>
+                    <div class="body-text" style="font-size:22px; margin-top:14px; max-width:920px;">
+                        5분짜리 강사 설명을 살 수 있는 학생만 받던 진단을, <strong style="color:var(--accent);">모든 학생에게 동일 비용으로</strong> 제공하는 것이 저희의 미션입니다.
+                    </div>
+                </div>
+
+                <div class="col-45" style="justify-content:center; gap:14px;">
+                    <div style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.16em; color:var(--text-subtle); text-transform:uppercase; margin-bottom:6px;">D2SF에 기대하는 것 · 3가지</div>
+
+                    <div class="card blue" style="padding:22px 26px;">
+                        <div style="display:flex; gap:14px; align-items:baseline; margin-bottom:6px;">
+                            <span style="font-family:'Outfit',sans-serif; font-size:24px; font-weight:900; color:var(--blue);">01</span>
+                            <span style="font-size:21px; font-weight:800; color:var(--text);">기술 검증</span>
+                        </div>
+                        <div style="font-size:17px; line-height:1.5; color:var(--text-muted);">HyperCLOVA X · 네이버 ML 인프라와의 결합으로 <strong>LLM 비용·품질 동시 최적화</strong></div>
+                    </div>
+
+                    <div class="card accent" style="padding:22px 26px;">
+                        <div style="display:flex; gap:14px; align-items:baseline; margin-bottom:6px;">
+                            <span style="font-family:'Outfit',sans-serif; font-size:24px; font-weight:900; color:var(--accent);">02</span>
+                            <span style="font-size:21px; font-weight:800; color:var(--text);">도메인 파트너십</span>
+                        </div>
+                        <div style="font-size:17px; line-height:1.5; color:var(--text);">네이버 생태계 내 <strong>교육 콘텐츠·데이터 파트너 연결</strong>로 콜드스타트 단축</div>
+                    </div>
+
+                    <div class="card" style="padding:22px 26px; border-left:4px solid var(--text);">
+                        <div style="display:flex; gap:14px; align-items:baseline; margin-bottom:6px;">
+                            <span style="font-family:'Outfit',sans-serif; font-size:24px; font-weight:900; color:var(--text);">03</span>
+                            <span style="font-size:21px; font-weight:800; color:var(--text);">장기 관점의 시간</span>
+                        </div>
+                        <div style="font-size:17px; line-height:1.5; color:var(--text-muted);">단기 KPI에 휘둘리지 않고 <strong>학습 격차를 실제로 줄이는</strong> 제품 설계</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-zone">
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; padding:24px 0; border-top:2px solid var(--text);">
+                    <div>
+                        <div style="font-family:'Outfit',sans-serif; font-size:60px; font-weight:900; letter-spacing:-0.04em; color:var(--text);">
+                            Deepen<span style="color:var(--accent);">.</span>
+                        </div>
+                        <div style="font-size:16px; color:var(--text-muted); margin-top:6px;">유형 단위 약점 추적 + 이전 학년 결손 역추적</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-family:'Outfit',sans-serif; font-size:11px; font-weight:800; letter-spacing:0.18em; color:var(--text-subtle); text-transform:uppercase; margin-bottom:8px;">Contact · Founder</div>
+                        <div style="font-size:24px; font-weight:800; color:var(--text);">박정현</div>
+                        <div style="font-family:'Outfit',sans-serif; font-size:22px; font-weight:600; color:var(--accent); margin-top:4px;">pjhice0331@gmail.com</div>
+                        <div style="font-size:14px; color:var(--text-muted); margin-top:8px;">기술 데모·미팅 요청 환영합니다</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="brand-sig">
+                <div class="brand-sig-dots">
+                    <div class="brand-sig-dot c"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot p"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot i"></div>
+                </div>
+                <div class="brand-sig-name">Deepen</div>
+            </div>
+        </div>
+    </div>
+    <!-- notes: 클로징. 좌측 인용문 (5분의 격차 다시 호출), 우측 D2SF 기대 3가지 카드, 하단 컨택트. -->
+</body>
+</html>

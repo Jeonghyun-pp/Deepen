@@ -1,0 +1,1782 @@
+[
+  {
+    "slide": 1,
+    "file": "slide-1.html",
+    "errors": [],
+    "warnings": [
+      {
+        "check": "low-contrast",
+        "element": "div > div",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.cover-meta-v1 > div.cover-meta-item > span.label",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.cover-meta-v1 > div.cover-meta-item > span.label",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.cover-meta-v1 > div.cover-meta-item > span.label",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.cover-meta-v1 > div.cover-meta-item > span.label",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "small-font-long-text",
+        "element": "div > div",
+        "fontSize": 14,
+        "textLength": 53,
+        "message": "53 chars at 14px - hard to read"
+      }
+    ]
+  },
+  {
+    "slide": 2,
+    "file": "slide-2.html",
+    "errors": [],
+    "warnings": [
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.top-zone > div.overline",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 15,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.top-zone > div.section-tag",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.middle-zone > div.col-60 > div",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.middle-zone > div.col-40 > div.card.gray > div",
+        "ratio": 2.9,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 2.90:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.middle-zone > div.col-40 > div.card.accent > div",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.bottom-zone > div.callout-bar > span.label",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.brand-sig > div.brand-sig-name",
+        "ratio": 3.95,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 3.95:1 (needs 4.5:1)"
+      }
+    ]
+  },
+  {
+    "slide": 3,
+    "file": "slide-3.html",
+    "errors": [],
+    "warnings": [
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.top-zone > div > div.overline",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 15,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.top-zone > div.section-tag",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.middle-zone > div.col-50 > div.card.gray > div",
+        "ratio": 2.9,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 2.90:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.middle-zone > div > div",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.middle-zone > div > div",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.middle-zone > div.col-50 > div.card.accent > div",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-50 > div.card.accent > div > div",
+        "ratio": 4.39,
+        "required": 4.5,
+        "fontSize": 18,
+        "message": "Low contrast ratio 4.39:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.bottom-zone > div.impact-row > div.impact-cell > div.impact-label",
+        "ratio": 2.82,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 2.82:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.bottom-zone > div.impact-row > div.impact-cell > div.impact-label",
+        "ratio": 2.82,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 2.82:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.bottom-zone > div.impact-row > div.impact-cell > div.impact-label",
+        "ratio": 2.82,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 2.82:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.brand-sig > div.brand-sig-name",
+        "ratio": 3.95,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 3.95:1 (needs 4.5:1)"
+      }
+    ]
+  },
+  {
+    "slide": 4,
+    "file": "slide-4.html",
+    "errors": [],
+    "warnings": [
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.top-zone > div > div.overline",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 15,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.top-zone > div.section-tag",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.middle-zone > div.col-60 > div",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.middle-zone > div.col-60 > div",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.middle-zone > div.col-40 > div.hero-card > div.hero-card-num",
+        "ratio": 2.82,
+        "required": 3,
+        "fontSize": 72,
+        "message": "Low contrast ratio 2.82:1 (needs 3:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-40 > div.hero-card > div.hero-card-num > span.unit",
+        "ratio": 2.82,
+        "required": 3,
+        "fontSize": 30,
+        "message": "Low contrast ratio 2.82:1 (needs 3:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.middle-zone > div.col-40 > div.hero-card > div.hero-card-num",
+        "ratio": 1,
+        "required": 3,
+        "fontSize": 72,
+        "message": "Low contrast ratio 1.00:1 (needs 3:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-40 > div.hero-card > div.hero-card-num > span.unit",
+        "ratio": 1,
+        "required": 3,
+        "fontSize": 30,
+        "message": "Low contrast ratio 1.00:1 (needs 3:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.middle-zone > div.col-40 > div.hero-card > div.hero-card-compare",
+        "ratio": 2,
+        "required": 4.5,
+        "fontSize": 15,
+        "message": "Low contrast ratio 2.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.bottom-zone > div.callout-bar > span.label",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.brand-sig > div.brand-sig-name",
+        "ratio": 3.95,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 3.95:1 (needs 4.5:1)"
+      }
+    ]
+  },
+  {
+    "slide": 5,
+    "file": "slide-5.html",
+    "errors": [
+      {
+        "check": "sibling-overlap",
+        "element1": "div.top-zone > div > h1.action-title > span.strike",
+        "element2": "div.top-zone > div > h1.action-title > span.accent",
+        "overlapArea": 122,
+        "message": "Siblings overlap by 122px² area"
+      }
+    ],
+    "warnings": [
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.top-zone > div > div.overline",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 15,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.top-zone > div > h1.action-title > span.strike",
+        "ratio": 2.94,
+        "required": 3,
+        "fontSize": 46,
+        "message": "Low contrast ratio 2.94:1 (needs 3:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.top-zone > div.section-tag",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.middle-zone > div.col-45 > div.card.gray > div",
+        "ratio": 2.9,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 2.90:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.middle-zone > div.col-45 > div.card.accent > div",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-45 > div.card.accent > div.card-title > span",
+        "ratio": 1,
+        "required": 3,
+        "fontSize": 23,
+        "message": "Low contrast ratio 1.00:1 (needs 3:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.middle-zone > div.col-55 > div",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-55 > div > div.node.pattern > span.grade-tag",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-55 > div > div.node.pattern > span",
+        "ratio": 1.58,
+        "required": 4.5,
+        "fontSize": 19,
+        "message": "Low contrast ratio 1.58:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.middle-zone > div.col-55 > div > div.arrow-down",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 22,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-55 > div > div.node.concept > span",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 19,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.middle-zone > div.col-55 > div > div.arrow-down",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 22,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-55 > div > div.node.concept > span",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 19,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.middle-zone > div.col-55 > div > div.arrow-down",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 22,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-55 > div > div.node.weak > span",
+        "ratio": 1.58,
+        "required": 3,
+        "fontSize": 19,
+        "message": "Low contrast ratio 1.58:1 (needs 3:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.middle-zone > div.col-55 > div > div.arrow-down",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 22,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-55 > div > div.node.concept > span",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 19,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.bottom-zone > div.callout-bar > span.label",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.brand-sig > div.brand-sig-name",
+        "ratio": 3.95,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 3.95:1 (needs 4.5:1)"
+      }
+    ]
+  },
+  {
+    "slide": 6,
+    "file": "slide-6.html",
+    "errors": [],
+    "warnings": [
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.top-zone > div > div.overline",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 15,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.top-zone > div.section-tag",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-40 > div.step-list > div.step-list-item.highlight > div.step-marker",
+        "ratio": 1,
+        "required": 3,
+        "fontSize": 22,
+        "message": "Low contrast ratio 1.00:1 (needs 3:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.middle-zone > div.col-60 > div > div",
+        "ratio": 2.9,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 2.90:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-60 > div > div.node.concept > span",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 18,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div.node.mastered > span",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div.node.mastered > span",
+        "ratio": 3.29,
+        "required": 4.5,
+        "fontSize": 16,
+        "message": "Low contrast ratio 3.29:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div.node.mastered > span > span",
+        "ratio": 1.16,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 1.16:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div.node.weak > span",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div.node.weak > span",
+        "ratio": 1.58,
+        "required": 4.5,
+        "fontSize": 16,
+        "message": "Low contrast ratio 1.58:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div.node.weak > span > span",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div.node.mastered > span",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div.node.mastered > span",
+        "ratio": 3.29,
+        "required": 4.5,
+        "fontSize": 16,
+        "message": "Low contrast ratio 3.29:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div.node.mastered > span > span",
+        "ratio": 1.16,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 1.16:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div.node.item > span",
+        "ratio": 2.25,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 2.25:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-60 > div > div > div",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 11,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div.node.weak > span",
+        "ratio": 1.58,
+        "required": 4.5,
+        "fontSize": 15,
+        "message": "Low contrast ratio 1.58:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > span",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 18,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div.node.weak > span.grade-tag",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div.node.weak > span",
+        "ratio": 1.58,
+        "required": 4.5,
+        "fontSize": 15,
+        "message": "Low contrast ratio 1.58:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.middle-zone > div.col-60 > div > span",
+        "ratio": 2.82,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 2.82:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.bottom-zone > div.impact-row > div.impact-cell > div.impact-label",
+        "ratio": 2.82,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 2.82:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.brand-sig > div.brand-sig-name",
+        "ratio": 3.95,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 3.95:1 (needs 4.5:1)"
+      },
+      {
+        "check": "font-small",
+        "element": "div > div > div.node.mastered > span",
+        "fontSize": 12,
+        "message": "Font size 12px is below 14px recommendation"
+      },
+      {
+        "check": "font-small",
+        "element": "div > div.node.mastered > span > span",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      },
+      {
+        "check": "font-small",
+        "element": "div > div > div.node.weak > span",
+        "fontSize": 12,
+        "message": "Font size 12px is below 14px recommendation"
+      },
+      {
+        "check": "font-small",
+        "element": "div > div.node.weak > span > span",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      },
+      {
+        "check": "font-small",
+        "element": "div > div > div.node.mastered > span",
+        "fontSize": 12,
+        "message": "Font size 12px is below 14px recommendation"
+      },
+      {
+        "check": "font-small",
+        "element": "div > div.node.mastered > span > span",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      },
+      {
+        "check": "font-small",
+        "element": "div > div > div.node.item > span",
+        "fontSize": 12,
+        "message": "Font size 12px is below 14px recommendation"
+      },
+      {
+        "check": "font-small",
+        "element": "div > div.node.item > span > span",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      }
+    ]
+  },
+  {
+    "slide": 7,
+    "file": "slide-7.html",
+    "errors": [],
+    "warnings": [
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.top-zone > div > div.overline",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 15,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.top-zone > div.section-tag",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-55 > div > div.node.concept > span",
+        "ratio": 1,
+        "required": 3,
+        "fontSize": 24,
+        "message": "Low contrast ratio 1.00:1 (needs 3:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div.node.pattern > span.grade-tag",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div.node.pattern > span",
+        "ratio": 1.58,
+        "required": 4.5,
+        "fontSize": 17,
+        "message": "Low contrast ratio 1.58:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div.node.pattern > span.grade-tag",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div.node.pattern > span",
+        "ratio": 1.58,
+        "required": 4.5,
+        "fontSize": 17,
+        "message": "Low contrast ratio 1.58:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div.node.pattern > span.grade-tag",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div.node.pattern > span",
+        "ratio": 1.58,
+        "required": 4.5,
+        "fontSize": 17,
+        "message": "Low contrast ratio 1.58:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-45 > div.card.blue > div > span",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.middle-zone > div.col-45 > div.card.blue > div.card-title",
+        "ratio": 2.07,
+        "required": 3,
+        "fontSize": 24,
+        "message": "Low contrast ratio 2.07:1 (needs 3:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-45 > div.card.blue > div.card-title > span",
+        "ratio": 1,
+        "required": 3,
+        "fontSize": 24,
+        "message": "Low contrast ratio 1.00:1 (needs 3:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.middle-zone > div.col-45 > div.card.blue > div.card-body",
+        "ratio": 1.37,
+        "required": 4.5,
+        "fontSize": 18,
+        "message": "Low contrast ratio 1.37:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-45 > div.card.accent > div > span",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-45 > div.card.accent > div.card-title > span.inline-accent",
+        "ratio": 1,
+        "required": 3,
+        "fontSize": 24,
+        "message": "Low contrast ratio 1.00:1 (needs 3:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-45 > div.card.gray > div > span",
+        "ratio": 2.9,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 2.90:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.bottom-zone > div.callout-bar > span.label",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.brand-sig > div.brand-sig-name",
+        "ratio": 3.95,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 3.95:1 (needs 4.5:1)"
+      }
+    ]
+  },
+  {
+    "slide": 8,
+    "file": "slide-8.html",
+    "errors": [],
+    "warnings": [
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.top-zone > div > div.overline",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 15,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.top-zone > div.section-tag",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.middle-zone > div.col-60 > div",
+        "ratio": 2.9,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 2.90:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-60 > div > div > div",
+        "ratio": 2.9,
+        "required": 4.5,
+        "fontSize": 18,
+        "message": "Low contrast ratio 2.90:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-60 > div > div > div",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 18,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-60 > div > div > div",
+        "ratio": 1.58,
+        "required": 4.5,
+        "fontSize": 16,
+        "message": "Low contrast ratio 1.58:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-60 > div > div > div",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 16,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-60 > div > div > div",
+        "ratio": 1.58,
+        "required": 4.5,
+        "fontSize": 15,
+        "message": "Low contrast ratio 1.58:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-60 > div > div > div",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 15,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-60 > div > div > div",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 11,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > span",
+        "ratio": 3.19,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.19:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > span",
+        "ratio": 1.58,
+        "required": 4.5,
+        "fontSize": 16,
+        "message": "Low contrast ratio 1.58:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.middle-zone > div.col-40 > div",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.brand-sig > div.brand-sig-name",
+        "ratio": 3.95,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 3.95:1 (needs 4.5:1)"
+      },
+      {
+        "check": "font-small",
+        "element": "div > div > div > span",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      }
+    ]
+  },
+  {
+    "slide": 9,
+    "file": "slide-9.html",
+    "errors": [],
+    "warnings": [
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.top-zone > div > div.overline",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 15,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.top-zone > div.section-tag",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.middle-zone > div.col-50 > div",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-50 > div.step-list > div.step-list-item.highlight > div.step-marker",
+        "ratio": 1,
+        "required": 3,
+        "fontSize": 22,
+        "message": "Low contrast ratio 1.00:1 (needs 3:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.middle-zone > div.col-50 > div",
+        "ratio": 3.13,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.13:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > span",
+        "ratio": 3.19,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.19:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-50 > div > div > span",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-50 > div > div > div",
+        "ratio": 3.27,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.27:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-50 > div > div > div",
+        "ratio": 3.27,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.27:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-50 > div > div > div",
+        "ratio": 3.27,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.27:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.col-50 > div > div > span",
+        "ratio": 3.27,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.27:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.bottom-zone > div.callout-bar > span.label",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.brand-sig > div.brand-sig-name",
+        "ratio": 3.95,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 3.95:1 (needs 4.5:1)"
+      },
+      {
+        "check": "font-small",
+        "element": "div > div > div > span",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      },
+      {
+        "check": "font-small",
+        "element": "div.col-50 > div > div > span",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      }
+    ]
+  },
+  {
+    "slide": 10,
+    "file": "slide-10.html",
+    "errors": [],
+    "warnings": [
+      {
+        "check": "low-contrast",
+        "element": "div.page-index > span",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.page-index > span > span.accent",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.split-45-55 > div > div.eyebrow",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > span",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > span",
+        "ratio": 1,
+        "required": 3,
+        "fontSize": 26,
+        "message": "Low contrast ratio 1.00:1 (needs 3:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.split-45-55 > div > div.eyebrow",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > span",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > span",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > span",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > span",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > span",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > span",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > span",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > span",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      }
+    ]
+  },
+  {
+    "slide": 11,
+    "file": "slide-11.html",
+    "errors": [],
+    "warnings": [
+      {
+        "check": "low-contrast",
+        "element": "div.page-index > span",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.page-index > span > span.accent",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.footnote",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "font-small",
+        "element": "div.frame > div.footnote",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      },
+      {
+        "check": "small-font-long-text",
+        "element": "div.frame > div.footnote",
+        "fontSize": 13,
+        "textLength": 77,
+        "message": "77 chars at 13px - hard to read"
+      }
+    ]
+  },
+  {
+    "slide": 12,
+    "file": "slide-12.html",
+    "errors": [
+      {
+        "check": "sibling-overlap",
+        "element1": "div > div > div > strong",
+        "element2": "div > div > div > span.t-em",
+        "overlapArea": 9830,
+        "message": "Siblings overlap by 9830px² area"
+      }
+    ],
+    "warnings": [
+      {
+        "check": "low-contrast",
+        "element": "div.page-index > span",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.page-index > span > span.accent",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.split-40-60 > div > div.eyebrow",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.split-40-60 > div > div > div",
+        "ratio": 2.43,
+        "required": 3,
+        "fontSize": 24,
+        "message": "Low contrast ratio 2.43:1 (needs 3:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > div",
+        "ratio": 1,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 1.00:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.split-40-60 > div > div > span.t-accent",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 18,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.split-40-60 > div > div.eyebrow",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.footnote",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "font-small",
+        "element": "div.frame > div.footnote",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      }
+    ]
+  },
+  {
+    "slide": 13,
+    "file": "slide-13.html",
+    "errors": [],
+    "warnings": [
+      {
+        "check": "low-contrast",
+        "element": "div.page-index > span",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.page-index > span > span.accent",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.split-45-55 > div > div.eyebrow",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > div",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.split-45-55 > div > div.eyebrow",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > div",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.split-45-55 > div > div > div.eyebrow",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > strong",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 18,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div.footnote",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "small-font-long-text",
+        "element": "div.frame > div.split-45-55 > div > div.disclaimer",
+        "fontSize": 14,
+        "textLength": 157,
+        "message": "157 chars at 14px - hard to read"
+      },
+      {
+        "check": "font-small",
+        "element": "div.frame > div.footnote",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      },
+      {
+        "check": "small-font-long-text",
+        "element": "div.frame > div.footnote",
+        "fontSize": 13,
+        "textLength": 52,
+        "message": "52 chars at 13px - hard to read"
+      }
+    ]
+  },
+  {
+    "slide": 14,
+    "file": "slide-14.html",
+    "errors": [],
+    "warnings": [
+      {
+        "check": "low-contrast",
+        "element": "div.page-index > span",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.page-index > span > span.accent",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > div.eyebrow",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > div.eyebrow",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > div",
+        "ratio": 3.19,
+        "required": 4.5,
+        "fontSize": 18,
+        "message": "Low contrast ratio 3.19:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > div.eyebrow.accent",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > div",
+        "ratio": 3.19,
+        "required": 4.5,
+        "fontSize": 18,
+        "message": "Low contrast ratio 3.19:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > div.eyebrow.accent",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > div.eyebrow",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 12,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "font-small",
+        "element": "div.frame > div.footnote.italic",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      },
+      {
+        "check": "small-font-long-text",
+        "element": "div.frame > div.footnote.italic",
+        "fontSize": 13,
+        "textLength": 77,
+        "message": "77 chars at 13px - hard to read"
+      }
+    ]
+  },
+  {
+    "slide": 15,
+    "file": "slide-15.html",
+    "errors": [],
+    "warnings": [
+      {
+        "check": "low-contrast",
+        "element": "div.page-index > span",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.page-index > span > span.accent",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div > div > div",
+        "ratio": 2.82,
+        "required": 4.5,
+        "fontSize": 11,
+        "message": "Low contrast ratio 2.82:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div > div > div > strong",
+        "ratio": 2.82,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 2.82:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div > div > div",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 11,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div > div > div",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 11,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div > div > div",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 11,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div > div > div",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 11,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.frame > div > strong",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 23,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      },
+      {
+        "check": "font-small",
+        "element": "div.frame > div > div > div",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      },
+      {
+        "check": "font-small",
+        "element": "div.frame > div > div > div",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      },
+      {
+        "check": "small-font-long-text",
+        "element": "div.frame > div > div > div",
+        "fontSize": 13,
+        "textLength": 192,
+        "message": "192 chars at 13px - hard to read"
+      },
+      {
+        "check": "font-small",
+        "element": "div > div > div > strong",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      },
+      {
+        "check": "font-small",
+        "element": "div > div > div > strong",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      },
+      {
+        "check": "font-small",
+        "element": "div.frame > div > div > div",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      },
+      {
+        "check": "font-small",
+        "element": "div.frame > div > div > div",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      },
+      {
+        "check": "small-font-long-text",
+        "element": "div.frame > div > div > div",
+        "fontSize": 13,
+        "textLength": 95,
+        "message": "95 chars at 13px - hard to read"
+      },
+      {
+        "check": "font-small",
+        "element": "div > div > div > strong",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      },
+      {
+        "check": "font-small",
+        "element": "div.frame > div > div > div",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      },
+      {
+        "check": "font-small",
+        "element": "div.frame > div > div > div",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      },
+      {
+        "check": "small-font-long-text",
+        "element": "div.frame > div > div > div",
+        "fontSize": 13,
+        "textLength": 71,
+        "message": "71 chars at 13px - hard to read"
+      },
+      {
+        "check": "font-small",
+        "element": "div.frame > div > div > div",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      },
+      {
+        "check": "font-small",
+        "element": "div.frame > div > div > div",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      },
+      {
+        "check": "small-font-long-text",
+        "element": "div.frame > div > div > div",
+        "fontSize": 13,
+        "textLength": 100,
+        "message": "100 chars at 13px - hard to read"
+      },
+      {
+        "check": "font-small",
+        "element": "div.frame > div > div > div",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      },
+      {
+        "check": "font-small",
+        "element": "div.frame > div > div > div",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      },
+      {
+        "check": "small-font-long-text",
+        "element": "div.frame > div > div > div",
+        "fontSize": 13,
+        "textLength": 86,
+        "message": "86 chars at 13px - hard to read"
+      },
+      {
+        "check": "font-small",
+        "element": "div > div > div > strong",
+        "fontSize": 13,
+        "message": "Font size 13px is below 14px recommendation"
+      }
+    ]
+  },
+  {
+    "slide": 16,
+    "file": "slide-16.html",
+    "errors": [],
+    "warnings": [
+      {
+        "check": "low-contrast",
+        "element": "div.page-index > span",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 13,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.split-65-35 > div > div",
+        "ratio": 2.43,
+        "required": 4.5,
+        "fontSize": 14,
+        "message": "Low contrast ratio 2.43:1 (needs 4.5:1)"
+      },
+      {
+        "check": "low-contrast",
+        "element": "div.split-65-35 > div > div",
+        "ratio": 3.05,
+        "required": 4.5,
+        "fontSize": 22,
+        "message": "Low contrast ratio 3.05:1 (needs 4.5:1)"
+      }
+    ]
+  }
+]

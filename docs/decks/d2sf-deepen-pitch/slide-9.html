@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>선행 결손 역추적 — Deepen D2SF Pitch</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100vh; background: #0a0a0a; overflow: hidden; position: relative; }
+        .slide { width: 1920px; height: 1080px; transform-origin: 0 0; position: absolute; top: 50%; left: 50%; overflow: hidden; border-radius: 4px; box-shadow: 0 20px 80px rgba(0,0,0,0.6); }
+    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        function scaleSlide() {
+            const slide = document.querySelector('.slide');
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const scale = Math.min(vw / 1920, vh / 1080) * 0.92;
+            const sw = 1920 * scale, sh = 1080 * scale;
+            slide.style.transform = `translate(${-sw / 2}px, ${-sh / 2}px) scale(${scale})`;
+        }
+        window.addEventListener('resize', scaleSlide);
+        window.addEventListener('load', scaleSlide);
+    </script>
+</head>
+<body>
+    <div class="slide">
+        <div class="slide-frame">
+            <div class="top-zone">
+                <div>
+                    <div class="overline">Prerequisite DAG 역추적</div>
+                    <h1 class="action-title">
+                        현재 유형이 막히면, prerequisite DAG를 거꾸로 타고<br>
+                        <span class="accent">진짜 결손</span>을 찾아낸다.
+                    </h1>
+                    <div class="body-text">
+                        이전 학년 단원 전체를 다시 듣게 하지 않습니다. 현재 문제 해결에 필요한 <span class="em">최소 개념만 1~3분 안에</span> 복구합니다.
+                    </div>
+                </div>
+                <div class="section-tag">Resolution</div>
+            </div>
+
+            <div class="middle-zone">
+                <div class="col-50">
+                    <div style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.16em; color:var(--text-subtle); text-transform:uppercase; margin-bottom:6px;">한 사이클 · 4단계</div>
+                    <div class="step-list">
+                        <div class="step-list-item">
+                            <div class="step-marker">01</div>
+                            <div class="step-body">
+                                <span class="em">학생이 곡선 밖 접선 문제 오답</span><br>
+                                <span style="font-size:17px; color:var(--text-muted);">"이 문제는 미분이 약해서 그런가?" 학생도 강사도 모름</span>
+                            </div>
+                        </div>
+                        <div class="step-list-item">
+                            <div class="step-marker">02</div>
+                            <div class="step-body">
+                                <span class="em">Deepen이 prerequisite DAG 역추적</span><br>
+                                <span style="font-size:17px; color:var(--text-muted);">과거 풀이·오답·AI 질문 이력 + 풀이 시간 패턴 결합</span>
+                            </div>
+                        </div>
+                        <div class="step-list-item highlight">
+                            <div class="step-marker">03</div>
+                            <div class="step-body">
+                                <span class="em">진짜 결손 = 중3 판별식</span><br>
+                                <span style="font-size:17px; color:var(--text);">D=0 조건 활용 미숙 → 접선과 중근 조건 연결 실패</span>
+                            </div>
+                        </div>
+                        <div class="step-list-item">
+                            <div class="step-marker">04</div>
+                            <div class="step-body">
+                                <span class="em">1~3분 리캡 카드 → 원래 문제 재도전</span><br>
+                                <span style="font-size:17px; color:var(--text-muted);">단원 전체를 다시 듣지 않음. 막힌 한 점만 복구</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-50">
+                    <div style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.16em; color:var(--text-subtle); text-transform:uppercase; margin-bottom:6px;">리캡 카드 · 실제 구성</div>
+                    <div style="background:white; border:1.5px solid var(--accent); border-radius:14px; padding:30px; box-shadow:0 4px 0 var(--accent-soft);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <span style="padding:6px 12px; background:var(--accent); color:white; border-radius:5px; font-size:13px; font-weight:800; letter-spacing:0.06em;">중3</span>
+                                <span style="font-size:22px; font-weight:800; color:var(--text);">이차방정식의 판별식</span>
+                            </div>
+                            <span style="font-family:'Outfit',sans-serif; font-size:14px; font-weight:700; color:var(--accent); background:var(--accent-soft); padding:5px 12px; border-radius:20px;">2분</span>
+                        </div>
+
+                        <div style="margin-bottom:14px;">
+                            <div style="font-size:13px; font-weight:700; letter-spacing:0.12em; color:var(--text-subtle); text-transform:uppercase; margin-bottom:6px;">왜 필요한가</div>
+                            <div style="font-size:18px; line-height:1.5; color:var(--text);">곡선 밖의 점에서 접선을 그을 때 곡선과 직선이 한 점에서만 만나야 하므로 <strong>중근 조건</strong>을 사용한다.</div>
+                        </div>
+
+                        <div style="margin-bottom:14px;">
+                            <div style="font-size:13px; font-weight:700; letter-spacing:0.12em; color:var(--text-subtle); text-transform:uppercase; margin-bottom:6px;">3줄 핵심</div>
+                            <div style="font-size:17px; line-height:1.5; color:var(--text-muted);">• ax² + bx + c = 0의 판별식 <strong style="color:var(--text);">D = b² - 4ac</strong><br>• <strong style="color:var(--text);">D = 0</strong> 이면 중근 (서로 같은 두 실근)<br>• 접선 조건에서 D = 0을 활용</div>
+                        </div>
+
+                        <div style="margin-bottom:14px;">
+                            <div style="font-size:13px; font-weight:700; letter-spacing:0.12em; color:var(--text-subtle); text-transform:uppercase; margin-bottom:6px;">확인 퀴즈 1개</div>
+                            <div style="font-size:17px; line-height:1.5; color:var(--text); padding:12px 16px; background:var(--bg-card); border-radius:8px;">x² - 2kx + 9 = 0 이 중근을 가지려면 k는?</div>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; padding-top:14px; border-top:1px solid var(--line);">
+                            <button style="background:var(--text); color:white; border:none; padding:10px 20px; border-radius:6px; font-size:14px; font-weight:700; font-family:inherit;">원래 문제로 돌아가기 →</button>
+                            <span style="font-size:13px; color:var(--text-subtle); align-self:center;">통과 시 자동 복귀</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-zone">
+                <div class="callout-bar">
+                    <span class="label">차별점</span>
+                    <strong>NotebookLM · 콴다 · 메가스터디</strong> 어디도 하지 않는 진단입니다 — 이전 학년 결손 역추적은 <strong>입시 도메인 그래프</strong>가 있어야만 가능합니다.
+                </div>
+            </div>
+
+            <div class="brand-sig">
+                <div class="brand-sig-dots">
+                    <div class="brand-sig-dot c"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot p"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot i"></div>
+                </div>
+                <div class="brand-sig-name">Deepen</div>
+            </div>
+        </div>
+    </div>
+    <!-- notes: 선행 결손 역추적. 좌측 4단계 시퀀스, 우측 실제 리캡 카드 모양. 카드 모양은 시각적으로 차별화. -->
+</body>
+</html>

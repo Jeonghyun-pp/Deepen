@@ -1,0 +1,199 @@
+{
+  "slides": [
+    {
+      "cards": 0,
+      "callouts": 0,
+      "heroes": 2,
+      "overlines": 0,
+      "accentMoments": 2,
+      "title": "Cover \u2014 Deepen D2SF v2",
+      "slide": 1,
+      "file": "slide-1.html",
+      "tier": "?"
+    },
+    {
+      "cards": 0,
+      "callouts": 0,
+      "heroes": 0,
+      "overlines": 0,
+      "accentMoments": 2,
+      "title": "Hook \u2014 Deepen D2SF v2",
+      "slide": 2,
+      "file": "slide-2.html",
+      "tier": "?"
+    },
+    {
+      "cards": 0,
+      "callouts": 0,
+      "heroes": 0,
+      "overlines": 0,
+      "accentMoments": 8,
+      "title": "\uc2dc\uc2a4\ud15c \uacb0\uacfc \u2014 Deepen D2SF v2",
+      "slide": 3,
+      "file": "slide-3.html",
+      "tier": "?"
+    },
+    {
+      "cards": 0,
+      "callouts": 0,
+      "heroes": 1,
+      "overlines": 0,
+      "accentMoments": 7,
+      "title": "\ud559\uc2b5\uad8c \uaca9\ucc28 \u2014 Deepen D2SF v2",
+      "slide": 4,
+      "file": "slide-4.html",
+      "tier": "?"
+    },
+    {
+      "cards": 0,
+      "callouts": 0,
+      "heroes": 0,
+      "overlines": 0,
+      "accentMoments": 13,
+      "title": "\uc9c4\ub2e8\uc758 \ud55c\uacc4 \u2014 Deepen D2SF v2",
+      "slide": 5,
+      "file": "slide-5.html",
+      "tier": "?"
+    },
+    {
+      "cards": 0,
+      "callouts": 0,
+      "heroes": 1,
+      "overlines": 0,
+      "accentMoments": 2,
+      "title": "II. \uc194\ub8e8\uc158 \u2014 Deepen D2SF v2",
+      "slide": 6,
+      "file": "slide-6.html",
+      "tier": "?"
+    },
+    {
+      "cards": 0,
+      "callouts": 0,
+      "heroes": 0,
+      "overlines": 0,
+      "accentMoments": 15,
+      "title": "3\uacc4\uce35 \u2014 Deepen D2SF v2",
+      "slide": 7,
+      "file": "slide-7.html",
+      "tier": "?"
+    },
+    {
+      "cards": 0,
+      "callouts": 0,
+      "heroes": 0,
+      "overlines": 0,
+      "accentMoments": 9,
+      "title": "7\uac00\uc9c0 \ucc28\ubcc4\uc810 \u2014 Deepen D2SF v2",
+      "slide": 8,
+      "file": "slide-8.html",
+      "tier": "?"
+    },
+    {
+      "cards": 0,
+      "callouts": 0,
+      "heroes": 0,
+      "overlines": 0,
+      "accentMoments": 24,
+      "title": "\ud559\uc2b5 \uc0c1\ud0dc \uc2dc\uac01\ud654 \u2014 Deepen D2SF v2",
+      "slide": 9,
+      "file": "slide-9.html",
+      "tier": "?"
+    },
+    {
+      "cards": 1,
+      "callouts": 0,
+      "heroes": 0,
+      "overlines": 0,
+      "accentMoments": 8,
+      "title": "\uc5ed\ucd94\uc801 \u2014 Deepen D2SF v2",
+      "slide": 10,
+      "file": "slide-10.html",
+      "tier": "?"
+    },
+    {
+      "cards": 0,
+      "callouts": 0,
+      "heroes": 0,
+      "overlines": 0,
+      "accentMoments": 16,
+      "title": "3\ubd84\uae30 \ucc44\uc810 \u2014 Deepen D2SF v2",
+      "slide": 11,
+      "file": "slide-11.html",
+      "tier": "?"
+    },
+    {
+      "cards": 0,
+      "callouts": 0,
+      "heroes": 1,
+      "overlines": 0,
+      "accentMoments": 6,
+      "title": "\uac80\uc99d \uac00\ub2a5\ud55c \uc9c4\ub2e8 \u2014 Deepen D2SF v2",
+      "slide": 12,
+      "file": "slide-12.html",
+      "tier": "\uc544\ub2c8\ub77c"
+    },
+    {
+      "cards": 0,
+      "callouts": 0,
+      "heroes": 1,
+      "overlines": 0,
+      "accentMoments": 8,
+      "title": "\uc2dc\uc7a5 + BM \u2014 Deepen D2SF v2",
+      "slide": 13,
+      "file": "slide-13.html",
+      "tier": "?"
+    },
+    {
+      "cards": 0,
+      "callouts": 0,
+      "heroes": 0,
+      "overlines": 0,
+      "accentMoments": 6,
+      "title": "\ub85c\ub4dc\ub9f5 \u2014 Deepen D2SF v2",
+      "slide": 14,
+      "file": "slide-14.html",
+      "tier": "?"
+    },
+    {
+      "cards": 1,
+      "callouts": 0,
+      "heroes": 0,
+      "overlines": 0,
+      "accentMoments": 6,
+      "title": "\ud300 \u2014 Deepen D2SF v2",
+      "slide": 15,
+      "file": "slide-15.html",
+      "tier": "?"
+    },
+    {
+      "cards": 0,
+      "callouts": 0,
+      "heroes": 2,
+      "overlines": 0,
+      "accentMoments": 3,
+      "title": "\ub2eb\ub294 \ub9d0 \u2014 Deepen D2SF v2",
+      "slide": 16,
+      "file": "slide-16.html",
+      "tier": "\uac01"
+    }
+  ],
+  "tier_seq": "????????????????",
+  "violations": [
+    "Hero numbers on 6 slides (quota: \u22643)",
+    "No Breath slide in the first half of the deck",
+    "No Breath slide in the second half of the deck",
+    "Slide 3: 8 accent-colour moments (quota: \u22642)",
+    "Slide 4: 7 accent-colour moments (quota: \u22642)",
+    "Slide 5: 13 accent-colour moments (quota: \u22642)",
+    "Slide 7: 15 accent-colour moments (quota: \u22642)",
+    "Slide 8: 9 accent-colour moments (quota: \u22642)",
+    "Slide 9: 24 accent-colour moments (quota: \u22642)",
+    "Slide 10: 8 accent-colour moments (quota: \u22642)",
+    "Slide 11: 16 accent-colour moments (quota: \u22642)",
+    "Slide 12: 6 accent-colour moments (quota: \u22642)",
+    "Slide 13: 8 accent-colour moments (quota: \u22642)",
+    "Slide 14: 6 accent-colour moments (quota: \u22642)",
+    "Slide 15: 6 accent-colour moments (quota: \u22642)",
+    "Slide 16: 3 accent-colour moments (quota: \u22642)"
+  ]
+}

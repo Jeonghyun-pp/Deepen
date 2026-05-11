@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학습 루프 — Deepen D2SF Pitch</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100vh; background: #0a0a0a; overflow: hidden; position: relative; }
+        .slide { width: 1920px; height: 1080px; transform-origin: 0 0; position: absolute; top: 50%; left: 50%; overflow: hidden; border-radius: 4px; box-shadow: 0 20px 80px rgba(0,0,0,0.6); }
+    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        function scaleSlide() {
+            const slide = document.querySelector('.slide');
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const scale = Math.min(vw / 1920, vh / 1080) * 0.92;
+            const sw = 1920 * scale, sh = 1080 * scale;
+            slide.style.transform = `translate(${-sw / 2}px, ${-sh / 2}px) scale(${scale})`;
+        }
+        window.addEventListener('resize', scaleSlide);
+        window.addEventListener('load', scaleSlide);
+    </script>
+</head>
+<body>
+    <div class="slide">
+        <div class="slide-frame">
+            <div class="top-zone">
+                <div>
+                    <div class="overline">학습 루프 · 3분기 채점</div>
+                    <h1 class="action-title">
+                        채점은 '맞음/틀림'이 아니라<br>
+                        <span class="accent">'정답 / 오답 / 정답이지만 헷갈림'</span> 3분기다.
+                    </h1>
+                    <div class="body-text">
+                        입시에서는 <span class="em">맞았지만 불안정한 문제</span>가 시험에서 다시 틀릴 위험이 가장 큽니다. 어떤 서비스도 이를 별도 분류하지 않습니다.
+                    </div>
+                </div>
+                <div class="section-tag">Resolution</div>
+            </div>
+
+            <div class="middle-zone">
+                <div class="col-55">
+                    <div style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.16em; color:var(--text-subtle); text-transform:uppercase; margin-bottom:10px;">학습 루프 · 8단계</div>
+                    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px;">
+                        <div class="flow-step" style="min-height:74px; padding:11px 16px;">
+                            <span class="step-num">01</span>
+                            <span class="step-title">유형 선택</span>
+                            <span class="step-desc">그래프에서 노드 클릭</span>
+                        </div>
+                        <div class="flow-step" style="min-height:74px; padding:11px 16px;">
+                            <span class="step-num">02</span>
+                            <span class="step-title">결손 진단</span>
+                            <span class="step-desc">선행 개념 점검</span>
+                        </div>
+                        <div class="flow-step" style="min-height:74px; padding:11px 16px;">
+                            <span class="step-num">03</span>
+                            <span class="step-title">리캡 (필요시)</span>
+                            <span class="step-desc">1~3분 미니 복구</span>
+                        </div>
+                        <div class="flow-step" style="min-height:74px; padding:11px 16px;">
+                            <span class="step-num">04</span>
+                            <span class="step-title">문제 풀이</span>
+                            <span class="step-desc">5가지 모드 선택</span>
+                        </div>
+                        <div class="flow-step" style="border-color:var(--accent); background:rgba(217,119,6,0.05); min-height:74px; padding:11px 16px;">
+                            <span class="step-num">05</span>
+                            <span class="step-title" style="color:var(--accent);">3분기 채점 ★</span>
+                            <span class="step-desc">정답/오답/헷갈림</span>
+                        </div>
+                        <div class="flow-step" style="min-height:74px; padding:11px 16px;">
+                            <span class="step-num">06</span>
+                            <span class="step-title">원인 분석</span>
+                            <span class="step-desc">8가지 분석 기준</span>
+                        </div>
+                        <div class="flow-step" style="min-height:74px; padding:11px 16px;">
+                            <span class="step-num">07</span>
+                            <span class="step-title">상태 업데이트</span>
+                            <span class="step-desc">Concept/Pattern/Item</span>
+                        </div>
+                        <div class="flow-step" style="min-height:74px; padding:11px 16px;">
+                            <span class="step-num">08</span>
+                            <span class="step-title">다음 액션 추천</span>
+                            <span class="step-desc">→ 다시 01로</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:10px; padding:12px 16px; background:var(--bg-card); border-radius:8px;">
+                        <div style="font-size:13px; font-weight:700; letter-spacing:0.12em; color:var(--text-subtle); text-transform:uppercase; margin-bottom:4px;">8가지 오답 원인 분석 기준</div>
+                        <div style="font-size:14px; color:var(--text); line-height:1.5;">현재 개념 부족 · 유형 인식 실패 · 접근 방향 오류 · 계산 실수 · 조건 해석 오류 · 그래프 해석 오류 · 풀이 논리 비약 · 이전 학년 선행 결손</div>
+                    </div>
+                </div>
+
+                <div class="col-45">
+                    <div style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.16em; color:var(--text-subtle); text-transform:uppercase; margin-bottom:10px;">3분기 채점 · 분기점</div>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div class="card" style="padding:16px 22px; border-left:4px solid var(--emerald); background:rgba(4,120,87,0.04); gap:6px;">
+                            <div style="display:flex; gap:12px; align-items:center; margin-bottom:2px;">
+                                <span style="padding:4px 10px; background:var(--emerald); color:white; border-radius:5px; font-size:12px; font-weight:800; letter-spacing:0.06em;">12-A</span>
+                                <span style="font-size:20px; font-weight:800; color:var(--emerald);">정답</span>
+                            </div>
+                            <div style="font-size:16px; line-height:1.5; color:var(--text);">다음 문제로. 단, 풀이 시간·힌트·자신감을 함께 반영해 숙련도 갱신.</div>
+                        </div>
+
+                        <div class="card" style="padding:16px 22px; border-left:4px solid #DC2626; background:rgba(220,38,38,0.04); gap:6px;">
+                            <div style="display:flex; gap:12px; align-items:center; margin-bottom:2px;">
+                                <span style="padding:4px 10px; background:#DC2626; color:white; border-radius:5px; font-size:12px; font-weight:800; letter-spacing:0.06em;">12-B</span>
+                                <span style="font-size:20px; font-weight:800; color:#DC2626;">오답</span>
+                            </div>
+                            <div style="font-size:16px; line-height:1.5; color:var(--text);">8가지 분석 기준으로 원인 추적. 단순 해설이 아니라 <strong>어디서 막혔는지</strong> 추적.</div>
+                        </div>
+
+                        <div class="card accent" style="padding:16px 22px; gap:6px;">
+                            <div style="display:flex; gap:12px; align-items:center; margin-bottom:2px;">
+                                <span style="padding:4px 10px; background:var(--accent); color:white; border-radius:5px; font-size:12px; font-weight:800; letter-spacing:0.06em;">12-C</span>
+                                <span style="font-size:20px; font-weight:800; color:var(--accent);">정답이지만 헷갈림 ★</span>
+                            </div>
+                            <div style="font-size:16px; line-height:1.5; color:var(--text);"><strong>약점 후보</strong>로 별도 저장. 입시 변별력의 핵심. 시험에서 다시 틀릴 위험이 가장 큰 영역.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-zone">
+                <div class="callout-bar">
+                    <span class="label">왜 중요한가</span>
+                    <strong>'정답이지만 헷갈림'</strong> 분류 하나가 실제 시험 변별력을 결정합니다 — Deepen만이 이를 별도 추적합니다.
+                </div>
+            </div>
+
+            <div class="brand-sig">
+                <div class="brand-sig-dots">
+                    <div class="brand-sig-dot c"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot p"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot i"></div>
+                </div>
+                <div class="brand-sig-name">Deepen</div>
+            </div>
+        </div>
+    </div>
+    <!-- notes: 학습 루프. 좌측 8단계 그리드 + 8가지 오답 분석 기준. 우측 3분기 채점 카드 (정답/오답/헷갈림). 헷갈림이 핵심. -->
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>팀 — Deepen D2SF v2</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100vh; background: #0a0a0a; overflow: hidden; position: relative; }
+        .slide { width: 1920px; height: 1080px; transform-origin: 0 0; position: absolute; top: 50%; left: 50%; overflow: hidden; border-radius: 4px; box-shadow: 0 20px 80px rgba(0,0,0,0.6); }
+    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        function scaleSlide() {
+            const slide = document.querySelector('.slide');
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const scale = Math.min(vw / 1920, vh / 1080) * 0.92;
+            const sw = 1920 * scale, sh = 1080 * scale;
+            slide.style.transform = `translate(${-sw / 2}px, ${-sh / 2}px) scale(${scale})`;
+        }
+        window.addEventListener('resize', scaleSlide);
+        window.addEventListener('load', scaleSlide);
+    </script>
+</head>
+<body>
+    <div class="slide">
+        <div class="page-index">
+            <span class="deck-name">Naver D2SF · 2026</span>
+            <span>14 / 15 · <span class="accent">II</span></span>
+        </div>
+
+        <div class="frame">
+            <h1 class="action-title" style="max-width:1700px;">
+                <span class="serif">연세대 산업공학 학부생 5인</span> —<br>
+                입시 도메인 + LLM 풀스택 + <span class="accent">출하 경험.</span>
+            </h1>
+
+            <div class="rule" style="margin:24px 0 36px;"></div>
+
+            <!-- 5인 그리드 — 박정현 1.4x -->
+            <div style="display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr 1fr; gap:18px; flex:1;">
+
+                <!-- 박정현 (Founder) — 카드 강조 -->
+                <div style="padding:22px 26px; background:var(--bg-warm); border-left:4px solid var(--accent); display:flex; flex-direction:column; gap:6px;">
+                    <div style="font-family:'Outfit',sans-serif; font-size:11px; font-weight:800; letter-spacing:0.16em; color:var(--accent); text-transform:uppercase;">FOUNDER · CEO</div>
+                    <div style="font-family:'Pretendard',sans-serif; font-size:24px; font-weight:800; color:var(--text); line-height:1.1; margin-top:4px;">박정현</div>
+                    <div style="font-size:13px; color:var(--text-muted); margin-bottom:10px;">학사 3학년</div>
+                    <div style="font-size:13px; line-height:1.6; color:var(--text);">
+                        · Creai+it AI 창업학회 4·5기<br>
+                        · Creai+it × AiNOS 산학 <strong>최우수상</strong><br>
+                        · Luminary 창업 (LLM 인박스)<br>
+                        · SMOM 랩 Researcher<br>
+                        · <strong style="color:var(--accent);">Megastudy Thailand AX</strong> (LLM 성적분석 UX)<br>
+                        · 미래에셋 HyperCLOVA X<br>
+                        · YBIGTA Data Engineering<br>
+                        · 공대 동연 비대위원장
+                    </div>
+                </div>
+
+                <!-- 남건우 -->
+                <div style="padding:20px 22px; border-top:1px solid var(--rule); display:flex; flex-direction:column; gap:6px;">
+                    <div style="font-family:'Outfit',sans-serif; font-size:11px; font-weight:800; letter-spacing:0.16em; color:var(--text-faint); text-transform:uppercase;">MEMBER</div>
+                    <div style="font-family:'Pretendard',sans-serif; font-size:22px; font-weight:800; color:var(--text); line-height:1.1; margin-top:4px;">남건우</div>
+                    <div style="font-size:13px; color:var(--text-muted); margin-bottom:10px;">학사 3학년</div>
+                    <div style="font-size:13px; line-height:1.6; color:var(--text);">
+                        · <strong style="color:var(--accent);">에이젠글로벌 ABACUS팀 매니저</strong> (산업기능요원)<br>
+                        · 비프로컴퍼니 풋볼사이언스팀 인턴<br>
+                        · K리그×서울시립대 AI 경진대회 <strong>금상</strong><br>
+                        · YBIGTA Data Analysis
+                    </div>
+                </div>
+
+                <!-- 남궁현종 -->
+                <div style="padding:20px 22px; border-top:1px solid var(--rule); display:flex; flex-direction:column; gap:6px;">
+                    <div style="font-family:'Outfit',sans-serif; font-size:11px; font-weight:800; letter-spacing:0.16em; color:var(--text-faint); text-transform:uppercase;">MEMBER</div>
+                    <div style="font-family:'Pretendard',sans-serif; font-size:22px; font-weight:800; color:var(--text); line-height:1.1; margin-top:4px;">남궁현종</div>
+                    <div style="font-size:13px; color:var(--text-muted); margin-bottom:10px;">학사 3학년</div>
+                    <div style="font-size:13px; line-height:1.6; color:var(--text);">
+                        · <strong style="color:var(--accent);">Transparent-Audit</strong> (RAG AI Agent 영수증 감사 시스템) 개발<br>
+                        · YBIGTA Data Analysis
+                    </div>
+                </div>
+
+                <!-- 문형서 -->
+                <div style="padding:20px 22px; border-top:1px solid var(--rule); display:flex; flex-direction:column; gap:6px;">
+                    <div style="font-family:'Outfit',sans-serif; font-size:11px; font-weight:800; letter-spacing:0.16em; color:var(--text-faint); text-transform:uppercase;">MEMBER</div>
+                    <div style="font-family:'Pretendard',sans-serif; font-size:22px; font-weight:800; color:var(--text); line-height:1.1; margin-top:4px;">문형서</div>
+                    <div style="font-size:13px; color:var(--text-muted); margin-bottom:10px;">학사 3학년</div>
+                    <div style="font-size:13px; line-height:1.6; color:var(--text);">
+                        · <strong style="color:var(--accent);">Knowledge Fusion AI Lab</strong> 학부 연구원<br>
+                        · 산공 학생회 학술부장 (제30대)<br>
+                        · 포천시청 표창장 (2025·청소년 보호)<br>
+                        · YBIGTA Data Science
+                    </div>
+                </div>
+
+                <!-- 한원석 -->
+                <div style="padding:20px 22px; border-top:1px solid var(--rule); display:flex; flex-direction:column; gap:6px;">
+                    <div style="font-family:'Outfit',sans-serif; font-size:11px; font-weight:800; letter-spacing:0.16em; color:var(--text-faint); text-transform:uppercase;">MEMBER</div>
+                    <div style="font-family:'Pretendard',sans-serif; font-size:22px; font-weight:800; color:var(--text); line-height:1.1; margin-top:4px;">한원석</div>
+                    <div style="font-size:13px; color:var(--text-muted); margin-bottom:10px;">학사 4학년</div>
+                    <div style="font-size:13px; line-height:1.6; color:var(--text);">
+                        · <strong style="color:var(--accent);">TheVC 산학협력프로젝트 서비스 런칭</strong><br>
+                        · SKY 산공 학술제 <strong>대상</strong><br>
+                        · USFK PMO Data Analyst<br>
+                        · YBIGTA Data Analysis
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top:36px; padding-top:24px; border-top:1px solid var(--rule); font-family:'Pretendard',sans-serif;  font-size:23px; color:var(--text); line-height:1.4;">
+                "팀의 출발점은 두 가지 — 직접 본 <strong style="color:var(--accent); font-weight:600;">5분의 격차</strong>, 그리고 학부생이 감수할 수 있는 창업 비용."
+            </div>
+        </div>
+    </div>
+    <!-- notes: Dense. 5인 그리드 - 박정현은 앰버 보더 + 1.4x 폭 강조. 나머지는 hairline top만. -->
+</body>
+</html>

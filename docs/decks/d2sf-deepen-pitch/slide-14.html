@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BM + 매출 가설 — Deepen D2SF Pitch</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100vh; background: #0a0a0a; overflow: hidden; position: relative; }
+        .slide { width: 1920px; height: 1080px; transform-origin: 0 0; position: absolute; top: 50%; left: 50%; overflow: hidden; border-radius: 4px; box-shadow: 0 20px 80px rgba(0,0,0,0.6); }
+    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        function scaleSlide() {
+            const slide = document.querySelector('.slide');
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const scale = Math.min(vw / 1920, vh / 1080) * 0.92;
+            const sw = 1920 * scale, sh = 1080 * scale;
+            slide.style.transform = `translate(${-sw / 2}px, ${-sh / 2}px) scale(${scale})`;
+        }
+        window.addEventListener('resize', scaleSlide);
+        window.addEventListener('load', scaleSlide);
+    </script>
+</head>
+<body>
+    <div class="slide">
+        <div class="slide-frame">
+            <div class="top-zone">
+                <div>
+                    <div class="overline">비즈니스 모델 · 24개월 매출 가설</div>
+                    <h1 class="action-title">
+                        B2C 구독 → 학원 SaaS → 데이터·플랫폼 3단계로<br>
+                        24개월 내 <span class="accent">ARR 50-70억 구간</span> 진입.
+                    </h1>
+                    <div class="body-text">
+                        B2C 구독으로 진입해 데이터를 쌓고, 그 데이터로 학원·인강 화이트라벨로 확장한 뒤, 누적 데이터 자체를 자산화합니다.
+                    </div>
+                </div>
+                <div class="section-tag">Resolution</div>
+            </div>
+
+            <div class="middle-zone" style="margin-top:14px; margin-bottom:10px; flex-direction:column; gap:14px;">
+                <!-- 3-Phase 카드 -->
+                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px;">
+                    <div class="card" style="padding:16px 22px; border-top:4px solid var(--blue); background:rgba(30,64,175,0.04); gap:6px;">
+                        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;">
+                            <span style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.12em; color:var(--blue); text-transform:uppercase;">Phase 1 · 0-12M</span>
+                            <span style="font-size:14px; color:var(--text-muted);">B2C</span>
+                        </div>
+                        <div style="font-size:21px; font-weight:800; color:var(--text); margin-bottom:6px;">구독 (Pro)</div>
+                        <div style="font-size:16px; line-height:1.5; color:var(--text-muted);">
+                            • Free · Pro 14,900원 · Pro+ 29,900원<br>
+                            • 타깃: 고2~고3 + N수생<br>
+                            • 가격 기준점: 유니브 AI 9,900원 위
+                        </div>
+                    </div>
+                    <div class="card" style="padding:16px 22px; border-top:4px solid var(--accent); background:rgba(217,119,6,0.04); gap:6px;">
+                        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;">
+                            <span style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.12em; color:var(--accent); text-transform:uppercase;">Phase 2 · 6-18M</span>
+                            <span style="font-size:14px; color:var(--text-muted);">B2B</span>
+                        </div>
+                        <div style="font-size:21px; font-weight:800; color:var(--text); margin-bottom:6px;">학원 SaaS · 화이트라벨</div>
+                        <div style="font-size:16px; line-height:1.5; color:var(--text-muted);">
+                            • 학원 SaaS: 1인당 5-8천원/월<br>
+                            • 인강 화이트라벨 라이선스<br>
+                            • 출판사 교재 번들 (QR 진입)
+                        </div>
+                    </div>
+                    <div class="card" style="padding:16px 22px; border-top:4px solid var(--text); background:var(--bg-card-strong); gap:6px;">
+                        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;">
+                            <span style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.12em; color:var(--text); text-transform:uppercase;">Phase 3 · 18M+</span>
+                            <span style="font-size:14px; color:var(--text-muted);">Data</span>
+                        </div>
+                        <div style="font-size:21px; font-weight:800; color:var(--text); margin-bottom:6px;">데이터 · 플랫폼</div>
+                        <div style="font-size:16px; line-height:1.5; color:var(--text-muted);">
+                            • 유형×결손 데이터 자산화<br>
+                            • 과탐·영어·국어 횡 확장<br>
+                            • CFA·의사국시·PSAT 이식
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 매출 가설 + Unit Econ -->
+                <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:24px;">
+                    <div style="background:var(--bg-card); border:1px solid var(--line); border-radius:14px; padding:14px 22px;">
+                        <div style="font-family:'Outfit',sans-serif; font-size:12px; font-weight:800; letter-spacing:0.16em; color:var(--text-subtle); text-transform:uppercase; margin-bottom:8px;">매출 가설 · M6 / M12 / M24</div>
+                        <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:18px; padding:0 8px;">
+                            <div style="text-align:center; flex:1;">
+                                <div style="font-family:'Outfit',sans-serif; font-size:12px; font-weight:800; color:var(--text-muted); letter-spacing:0.06em;">M6</div>
+                                <div style="background:var(--blue-soft); height:36px; border-radius:6px 6px 0 0; margin-top:4px; border:2px solid var(--blue); border-bottom:none;"></div>
+                                <div style="background:var(--blue); color:white; padding:6px 6px; border-radius:0 0 6px 6px;">
+                                    <div style="font-family:'Outfit',sans-serif; font-size:18px; font-weight:800;">15M</div>
+                                    <div style="font-size:12px; opacity:0.9;">MRR</div>
+                                </div>
+                                <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">유료 1,000명</div>
+                            </div>
+                            <div style="text-align:center; flex:1;">
+                                <div style="font-family:'Outfit',sans-serif; font-size:12px; font-weight:800; color:var(--text-muted); letter-spacing:0.06em;">M12</div>
+                                <div style="background:var(--blue-soft); height:78px; border-radius:6px 6px 0 0; margin-top:4px; border:2px solid var(--blue); border-bottom:none;"></div>
+                                <div style="background:var(--blue); color:white; padding:6px 6px; border-radius:0 0 6px 6px;">
+                                    <div style="font-family:'Outfit',sans-serif; font-size:18px; font-weight:800;">100M</div>
+                                    <div style="font-size:12px; opacity:0.9;">MRR</div>
+                                </div>
+                                <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">5,000 + 학원 30곳</div>
+                            </div>
+                            <div style="text-align:center; flex:1;">
+                                <div style="font-family:'Outfit',sans-serif; font-size:12px; font-weight:800; color:var(--accent); letter-spacing:0.06em;">M24</div>
+                                <div style="background:rgba(217,119,6,0.15); height:130px; border-radius:6px 6px 0 0; margin-top:4px; border:2px solid var(--accent); border-bottom:none;"></div>
+                                <div style="background:var(--accent); color:white; padding:6px 6px; border-radius:0 0 6px 6px;">
+                                    <div style="font-family:'Outfit',sans-serif; font-size:18px; font-weight:800;">50-70억</div>
+                                    <div style="font-size:12px; opacity:0.9;">ARR</div>
+                                </div>
+                                <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">20,000 + B2B</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background:var(--bg-card); border:1px solid var(--line); border-radius:14px; padding:14px 22px;">
+                        <div style="font-family:'Outfit',sans-serif; font-size:12px; font-weight:800; letter-spacing:0.16em; color:var(--text-subtle); text-transform:uppercase; margin-bottom:8px;">Unit Economics · 가설</div>
+                        <div style="display:flex; flex-direction:column; gap:6px; font-size:15px; color:var(--text);">
+                            <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--line);">
+                                <span>ARPU (Pro)</span>
+                                <span style="font-family:'Outfit',sans-serif; font-weight:800;">14,900원</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--line);">
+                                <span>Gross Margin</span>
+                                <span style="font-family:'Outfit',sans-serif; font-weight:800;">50% → 70%</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--line);">
+                                <span>CAC</span>
+                                <span style="font-family:'Outfit',sans-serif; font-weight:800;">2-3만원</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; padding:6px 0;">
+                                <span>Payback</span>
+                                <span style="font-family:'Outfit',sans-serif; font-weight:800; color:var(--accent);">~3개월</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-zone">
+                <div class="disclaimer-box">
+                    <span class="label">⚠ Forecast Disclaimer</span>
+                    본 슬라이드의 모든 매출·전환율·CAC·GM 수치는 <strong>출시 전 내부 가설(forecast)</strong>이며 실측 데이터에 기반하지 않습니다. Pro 전환율 4-6% · CAC 2-3만원 · 학원당 50명 가정은 첫 6개월 cohort 측정 후 재추정될 예정입니다. 본 자료는 투자 의사결정의 단독 근거로 사용될 수 없습니다.
+                </div>
+            </div>
+
+            <div class="brand-sig">
+                <div class="brand-sig-dots">
+                    <div class="brand-sig-dot c"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot p"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot i"></div>
+                </div>
+                <div class="brand-sig-name">Deepen</div>
+            </div>
+        </div>
+    </div>
+    <!-- notes: BM + 매출 가설. 3단계 카드 + M6/M12/M24 막대 + Unit Econ 표 + 강한 disclaimer 박스. -->
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>팀 — Deepen D2SF Pitch</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100vh; background: #0a0a0a; overflow: hidden; position: relative; }
+        .slide { width: 1920px; height: 1080px; transform-origin: 0 0; position: absolute; top: 50%; left: 50%; overflow: hidden; border-radius: 4px; box-shadow: 0 20px 80px rgba(0,0,0,0.6); }
+    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        function scaleSlide() {
+            const slide = document.querySelector('.slide');
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const scale = Math.min(vw / 1920, vh / 1080) * 0.92;
+            const sw = 1920 * scale, sh = 1080 * scale;
+            slide.style.transform = `translate(${-sw / 2}px, ${-sh / 2}px) scale(${scale})`;
+        }
+        window.addEventListener('resize', scaleSlide);
+        window.addEventListener('load', scaleSlide);
+    </script>
+</head>
+<body>
+    <div class="slide">
+        <div class="slide-frame">
+            <div class="top-zone">
+                <div>
+                    <div class="overline">팀 · 연세대 산업공학과 5인</div>
+                    <h1 class="action-title">
+                        데이터 · LLM · 창업학회 · 교육 도메인 경험을<br>
+                        <span class="accent">결합한 5인 팀</span>
+                    </h1>
+                    <div class="body-text">
+                        팀원 중에는 직접 고등학생 과외를 해온 멤버, 메가스터디 태국 AX에서 LLM 성적분석 UX를 검증한 멤버, RAG 에이전트·창업학회·산학협력에서 LLM 제품을 출하해본 멤버가 함께 합니다.
+                    </div>
+                </div>
+                <div class="section-tag">Resolution</div>
+            </div>
+
+            <div class="middle-zone" style="margin-top:14px; margin-bottom:14px;">
+                <div style="display:grid; grid-template-columns:1.25fr repeat(4, 1fr); gap:14px; width:100%;">
+
+                    <!-- 박정현 (Founder) -->
+                    <div style="background:rgba(217,119,6,0.06); border:2px solid var(--accent); border-radius:14px; padding:22px 24px; display:flex; flex-direction:column; gap:8px;">
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
+                            <span style="background:var(--accent); color:white; padding:4px 10px; border-radius:5px; font-family:'Outfit',sans-serif; font-size:11px; font-weight:800; letter-spacing:0.12em;">FOUNDER · CEO</span>
+                        </div>
+                        <div style="font-size:24px; font-weight:800; color:var(--text); line-height:1.1;">박정현</div>
+                        <div style="font-size:14px; color:var(--text-muted); margin-bottom:8px;">산공 3학년</div>
+                        <div style="font-size:14px; line-height:1.55; color:var(--text);">
+                            · Creai+it AI 창업학회 (4·5기)<br>
+                            · Creai+it × AiNOS <strong>최우수상</strong><br>
+                            · Luminary 창업 (LLM)<br>
+                            · SMOM 랩 Researcher<br>
+                            · <strong style="color:var(--accent);">Megastudy Thailand AX</strong> (LLM 성적분석 UX 검증)<br>
+                            · 미래에셋 HyperCLOVA X<br>
+                            · YBIGTA Data Engineering
+                        </div>
+                    </div>
+
+                    <!-- 남건우 -->
+                    <div style="background:var(--bg-card); border:1px solid var(--line); border-radius:14px; padding:22px 22px; display:flex; flex-direction:column; gap:8px;">
+                        <div style="font-family:'Outfit',sans-serif; font-size:11px; font-weight:800; letter-spacing:0.14em; color:var(--text-subtle); text-transform:uppercase; margin-bottom:4px;">MEMBER</div>
+                        <div style="font-size:22px; font-weight:800; color:var(--text);">남건우</div>
+                        <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">산공 3학년</div>
+                        <div style="font-size:13px; line-height:1.55; color:var(--text);">
+                            · 에이젠글로벌 ABACUS팀 매니저 (산업기능요원)<br>
+                            · 비프로컴퍼니 풋볼사이언스 인턴<br>
+                            · K리그×서울시립대 AI 경진대회 <strong>금상</strong><br>
+                            · YBIGTA Data Analysis
+                        </div>
+                    </div>
+
+                    <!-- 남궁현종 -->
+                    <div style="background:var(--bg-card); border:1px solid var(--line); border-radius:14px; padding:22px 22px; display:flex; flex-direction:column; gap:8px;">
+                        <div style="font-family:'Outfit',sans-serif; font-size:11px; font-weight:800; letter-spacing:0.14em; color:var(--text-subtle); text-transform:uppercase; margin-bottom:4px;">MEMBER</div>
+                        <div style="font-size:22px; font-weight:800; color:var(--text);">남궁현종</div>
+                        <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">산공 3학년</div>
+                        <div style="font-size:13px; line-height:1.55; color:var(--text);">
+                            · Transparent-Audit (RAG AI Agent 영수증 감사 시스템) 개발<br>
+                            · YBIGTA Data Analysis
+                        </div>
+                    </div>
+
+                    <!-- 문형서 -->
+                    <div style="background:var(--bg-card); border:1px solid var(--line); border-radius:14px; padding:22px 22px; display:flex; flex-direction:column; gap:8px;">
+                        <div style="font-family:'Outfit',sans-serif; font-size:11px; font-weight:800; letter-spacing:0.14em; color:var(--text-subtle); text-transform:uppercase; margin-bottom:4px;">MEMBER</div>
+                        <div style="font-size:22px; font-weight:800; color:var(--text);">문형서</div>
+                        <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">산공 3학년</div>
+                        <div style="font-size:13px; line-height:1.55; color:var(--text);">
+                            · Knowledge Fusion AI Lab 학부 연구원<br>
+                            · 산공 학생회 학술부장 (제30대)<br>
+                            · 포천시청 표창장 (2025·청소년 보호)<br>
+                            · YBIGTA Data Science
+                        </div>
+                    </div>
+
+                    <!-- 한원석 -->
+                    <div style="background:var(--bg-card); border:1px solid var(--line); border-radius:14px; padding:22px 22px; display:flex; flex-direction:column; gap:8px;">
+                        <div style="font-family:'Outfit',sans-serif; font-size:11px; font-weight:800; letter-spacing:0.14em; color:var(--text-subtle); text-transform:uppercase; margin-bottom:4px;">MEMBER</div>
+                        <div style="font-size:22px; font-weight:800; color:var(--text);">한원석</div>
+                        <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">산공 4학년</div>
+                        <div style="font-size:13px; line-height:1.55; color:var(--text);">
+                            · TheVC 산학협력프로젝트 서비스 런칭<br>
+                            · SKY 산공 학술제 <strong>대상</strong><br>
+                            · USFK PMO Data Analyst<br>
+                            · YBIGTA Data Analysis
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-zone">
+                <div style="display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:18px;">
+                    <div class="insight-box" style="padding:18px 22px;">
+                        <span class="label">창업·팀빌딩 배경</span>
+                        <div style="font-size:16px; line-height:1.5; margin-top:4px;">팀원이 직접 본 <strong>5분의 격차</strong> + 바이브코딩 시대로 학부생 창업 비용이 감수 가능한 수준으로 떨어진 시점.</div>
+                    </div>
+                    <div class="impact-cell" style="border-color:var(--accent);">
+                        <div class="impact-label">강점 ①</div>
+                        <div class="impact-text">입시 도메인 직접 경험 (과외·학원·메가스터디)</div>
+                    </div>
+                    <div class="impact-cell" style="border-color:var(--blue);">
+                        <div class="impact-label" style="color:var(--blue);">강점 ②</div>
+                        <div class="impact-text">LLM·데이터 풀스택 (RAG·창업학회·랩)</div>
+                    </div>
+                    <div class="impact-cell">
+                        <div class="impact-label">강점 ③</div>
+                        <div class="impact-text">수상·산학·공모전으로 출하 경험 누적</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="brand-sig">
+                <div class="brand-sig-dots">
+                    <div class="brand-sig-dot c"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot p"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot i"></div>
+                </div>
+                <div class="brand-sig-name">Deepen</div>
+            </div>
+        </div>
+    </div>
+    <!-- notes: 팀 5인. 박정현 대표는 좌측 큰 카드 + 앰버 보더로 강조. 나머지 4명은 균일한 카드. 하단 강점 3개. -->
+</body>
+</html>

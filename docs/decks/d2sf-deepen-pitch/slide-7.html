@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3계층 그래프 — Deepen D2SF Pitch</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100vh; background: #0a0a0a; overflow: hidden; position: relative; }
+        .slide { width: 1920px; height: 1080px; transform-origin: 0 0; position: absolute; top: 50%; left: 50%; overflow: hidden; border-radius: 4px; box-shadow: 0 20px 80px rgba(0,0,0,0.6); }
+    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        function scaleSlide() {
+            const slide = document.querySelector('.slide');
+            const vw = window.innerWidth, vh = window.innerHeight;
+            const scale = Math.min(vw / 1920, vh / 1080) * 0.92;
+            const sw = 1920 * scale, sh = 1080 * scale;
+            slide.style.transform = `translate(${-sw / 2}px, ${-sh / 2}px) scale(${scale})`;
+        }
+        window.addEventListener('resize', scaleSlide);
+        window.addEventListener('load', scaleSlide);
+    </script>
+</head>
+<body>
+    <div class="slide">
+        <div class="slide-frame">
+            <div class="top-zone">
+                <div>
+                    <div class="overline">3계층 지식 그래프</div>
+                    <h1 class="action-title">
+                        Concept – Pattern – Item 3계층 그래프가<br>
+                        <span class="blue">'단원 학습'</span>을 <span class="accent">'유형 학습'</span>으로 바꾼다.
+                    </h1>
+                    <div class="body-text">
+                        입시 수학에서는 같은 개념도 여러 유형으로 나뉩니다. 학생의 실력은 개념 단위가 아니라 <span class="em">유형 단위</span>로 추적되어야 합니다.
+                    </div>
+                </div>
+                <div class="section-tag">Resolution</div>
+            </div>
+
+            <div class="middle-zone">
+                <div class="col-55" style="justify-content:center; align-items:center; padding:20px;">
+                    <!-- 트리 다이어그램 -->
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:14px; width:100%;">
+                        <!-- Concept -->
+                        <div class="node concept" style="font-size:24px; padding:18px 32px; min-height:0;">
+                            <span class="grade-tag">Concept</span>
+                            <span>미분의 활용</span>
+                        </div>
+
+                        <!-- 분기선 -->
+                        <div style="position:relative; width:80%; height:30px;">
+                            <div style="position:absolute; top:0; left:50%; width:1.5px; height:14px; background:var(--text); opacity:0.4; transform:translateX(-50%);"></div>
+                            <div style="position:absolute; top:14px; left:16%; right:16%; height:1.5px; background:var(--text); opacity:0.4;"></div>
+                            <div style="position:absolute; top:14px; left:16%; width:1.5px; height:16px; background:var(--text); opacity:0.4;"></div>
+                            <div style="position:absolute; top:14px; left:50%; width:1.5px; height:16px; background:var(--text); opacity:0.4; transform:translateX(-50%);"></div>
+                            <div style="position:absolute; top:14px; right:16%; width:1.5px; height:16px; background:var(--text); opacity:0.4;"></div>
+                        </div>
+
+                        <!-- Patterns -->
+                        <div style="display:flex; gap:24px; width:100%; justify-content:center;">
+                            <div class="node pattern" style="font-size:17px; padding:12px 18px; min-height:0;">
+                                <span class="grade-tag" style="font-size:12px;">Pattern</span>
+                                <span>곡선 밖 접선</span>
+                            </div>
+                            <div class="node pattern" style="font-size:17px; padding:12px 18px; min-height:0;">
+                                <span class="grade-tag" style="font-size:12px;">Pattern</span>
+                                <span>극값 활용</span>
+                            </div>
+                            <div class="node pattern" style="font-size:17px; padding:12px 18px; min-height:0;">
+                                <span class="grade-tag" style="font-size:12px;">Pattern</span>
+                                <span>실근 개수 판단</span>
+                            </div>
+                        </div>
+
+                        <!-- 분기선 (Pattern → Item) -->
+                        <div style="position:relative; width:90%; height:24px;">
+                            <div style="position:absolute; top:0; left:18%; width:1.5px; height:24px; background:var(--text); opacity:0.3;"></div>
+                            <div style="position:absolute; top:0; left:30%; width:1.5px; height:24px; background:var(--text); opacity:0.3;"></div>
+                            <div style="position:absolute; top:0; left:50%; width:1.5px; height:24px; background:var(--text); opacity:0.3; transform:translateX(-50%);"></div>
+                            <div style="position:absolute; top:0; right:30%; width:1.5px; height:24px; background:var(--text); opacity:0.3;"></div>
+                            <div style="position:absolute; top:0; right:18%; width:1.5px; height:24px; background:var(--text); opacity:0.3;"></div>
+                        </div>
+
+                        <!-- Items -->
+                        <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:12px; width:100%;">
+                            <div class="node item" style="font-size:14px; padding:10px 12px; min-height:0; justify-content:center;">2025 수능</div>
+                            <div class="node item" style="font-size:14px; padding:10px 12px; min-height:0; justify-content:center;">2024 6모</div>
+                            <div class="node item" style="font-size:14px; padding:10px 12px; min-height:0; justify-content:center;">2024 9모</div>
+                            <div class="node item" style="font-size:14px; padding:10px 12px; min-height:0; justify-content:center;">2023 수능</div>
+                            <div class="node item" style="font-size:14px; padding:10px 12px; min-height:0; justify-content:center;">2023 9모</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-45" style="justify-content:center; gap:20px;">
+                    <div class="card blue" style="padding:26px 30px;">
+                        <div style="display:flex; align-items:center; gap:14px; margin-bottom:6px;">
+                            <span style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.16em; color:var(--blue); text-transform:uppercase;">Layer 1 · Concept</span>
+                        </div>
+                        <div class="card-title" style="font-size:24px;">교과서 단원의 <span style="color:var(--blue);">개념</span></div>
+                        <div class="card-body" style="font-size:18px;">기존 모든 학습 서비스가 다루는 단위. Deepen은 여기서 멈추지 않는다.</div>
+                    </div>
+                    <div class="card accent" style="padding:26px 30px;">
+                        <div style="display:flex; align-items:center; gap:14px; margin-bottom:6px;">
+                            <span style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.16em; color:var(--accent); text-transform:uppercase;">Layer 2 · Pattern</span>
+                        </div>
+                        <div class="card-title" style="font-size:24px;">시험에서 출제되는 <span class="inline-accent">풀이 유형</span></div>
+                        <div class="card-body" style="font-size:18px; color:var(--text);">같은 '미분의 활용'도 5개 유형으로 갈라진다. 학생은 유형마다 숙련도가 다르다.</div>
+                    </div>
+                    <div class="card gray" style="padding:26px 30px;">
+                        <div style="display:flex; align-items:center; gap:14px; margin-bottom:6px;">
+                            <span style="font-family:'Outfit',sans-serif; font-size:13px; font-weight:800; letter-spacing:0.16em; color:var(--text-subtle); text-transform:uppercase;">Layer 3 · Item</span>
+                        </div>
+                        <div class="card-title" style="font-size:24px; color:var(--text);">실제 기출/모의 <span style="color:var(--text-muted);">문제</span></div>
+                        <div class="card-body" style="font-size:18px;">모든 풀이 결과가 이 층에 누적되어 위 두 층의 숙련도를 갱신한다.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-zone">
+                <div class="callout-bar">
+                    <span class="label">결과</span>
+                    학습자 상태가 <strong>"미분 0.5"</strong> 가 아니라 <strong>"곡선 밖 접선 0.41 / 극값 활용 0.66"</strong> 으로 추적됩니다.
+                </div>
+            </div>
+
+            <div class="brand-sig">
+                <div class="brand-sig-dots">
+                    <div class="brand-sig-dot c"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot p"></div>
+                    <div class="brand-sig-line"></div>
+                    <div class="brand-sig-dot i"></div>
+                </div>
+                <div class="brand-sig-name">Deepen</div>
+            </div>
+        </div>
+    </div>
+    <!-- notes: 3계층 그래프. 좌측 트리 다이어그램(Concept 1 → Pattern 3 → Item 5), 우측 3개 계층 설명 카드. -->
+</body>
+</html>
