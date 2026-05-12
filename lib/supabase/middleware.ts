@@ -5,6 +5,11 @@ const PROTECTED_PREFIXES = ["/v2", "/admin", "/upload", "/documents"]
 // /v2 (정확) 은 public editorial 랜딩. /v2/* 은 보호.
 const PUBLIC_EXACT = new Set<string>(["/v2"])
 
+// 임시 로그인 우회 — env 둘 다 set 시 모든 보호 경로 통과.
+const AUTH_BYPASS = !!(
+  process.env.DEV_AUTH_BYPASS_USER_ID && process.env.DEV_AUTH_BYPASS_EMAIL
+)
+
 export async function updateSession(request: NextRequest) {
   // 기본 응답 — cookies setAll이 호출되면 아래에서 재생성된다
   let response = NextResponse.next({ request })
@@ -39,7 +44,7 @@ export async function updateSession(request: NextRequest) {
 
   // 루트 진입은 auth 상태에 따라 분기. 로그인 → 워크스페이스 진입점, 아니면 editorial 랜딩.
   if (path === "/") {
-    const target = user ? "/v2/home" : "/v2"
+    const target = AUTH_BYPASS || user ? "/v2/home" : "/v2"
     return NextResponse.redirect(new URL(target, request.url))
   }
 
@@ -49,7 +54,7 @@ export async function updateSession(request: NextRequest) {
       (prefix) => path === prefix || path.startsWith(prefix + "/"),
     )
 
-  if (isProtected && !user) {
+  if (isProtected && !user && !AUTH_BYPASS) {
     const loginUrl = request.nextUrl.clone()
     loginUrl.pathname = "/login"
     loginUrl.searchParams.set("redirect", path)
