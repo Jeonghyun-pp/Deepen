@@ -2,6 +2,8 @@ import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
 const PROTECTED_PREFIXES = ["/v2", "/admin", "/upload", "/documents"]
+// /v2 (정확) 은 public editorial 랜딩. /v2/* 은 보호.
+const PUBLIC_EXACT = new Set<string>(["/v2"])
 
 export async function updateSession(request: NextRequest) {
   // 기본 응답 — cookies setAll이 호출되면 아래에서 재생성된다
@@ -34,9 +36,18 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const path = request.nextUrl.pathname
-  const isProtected = PROTECTED_PREFIXES.some((prefix) =>
-    path === prefix || path.startsWith(prefix + "/")
-  )
+
+  // 루트 진입은 auth 상태에 따라 분기. 로그인 → 워크스페이스 진입점, 아니면 editorial 랜딩.
+  if (path === "/") {
+    const target = user ? "/v2/home" : "/v2"
+    return NextResponse.redirect(new URL(target, request.url))
+  }
+
+  const isProtected =
+    !PUBLIC_EXACT.has(path) &&
+    PROTECTED_PREFIXES.some(
+      (prefix) => path === prefix || path.startsWith(prefix + "/"),
+    )
 
   if (isProtected && !user) {
     const loginUrl = request.nextUrl.clone()
