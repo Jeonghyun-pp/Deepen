@@ -29,12 +29,15 @@ export default async function ExamPage({ params }: Props) {
   await params // unitId Q2 단일 가정으로 무시
   const { user } = await requireUser()
 
-  // cooling_window 적용 무작위 N개
+  // cooling_window 적용 무작위 N개.
+  // item_answer + item_choices NOT NULL — admin quick-create stub 제외 (workspace stub 가드와 동일 정책).
   const rows = (await db.execute(sql`
     SELECT n.id
     FROM ${nodes} n
     WHERE n.type = 'item'
       AND n.status = 'published'
+      AND n.item_answer IS NOT NULL
+      AND n.item_choices IS NOT NULL
       AND n.id NOT IN (
         SELECT item_id FROM user_item_history
         WHERE user_id = ${user.id}
@@ -48,12 +51,14 @@ export default async function ExamPage({ params }: Props) {
     LIMIT ${EXAM_BATCH_SIZE}
   `)) as unknown as { id: string }[]
 
-  // 부족하면 cooling/wrong filter 풀어서 재시도
+  // 부족하면 cooling/wrong filter 풀어서 재시도 (stub 가드는 유지)
   let items = rows
   if (items.length < EXAM_BATCH_SIZE) {
     const fallback = (await db.execute(sql`
       SELECT id FROM ${nodes}
       WHERE type = 'item' AND status = 'published'
+        AND item_answer IS NOT NULL
+        AND item_choices IS NOT NULL
       ORDER BY RANDOM()
       LIMIT ${EXAM_BATCH_SIZE}
     `)) as unknown as { id: string }[]

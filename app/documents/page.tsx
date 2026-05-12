@@ -43,11 +43,6 @@ export default function DocumentsPage() {
   const load = useCallback(async () => {
     try {
       const res = await fetch("/api/documents", { credentials: "include" })
-      if (res.status === 401) {
-        window.location.href =
-          "/login?redirect=" + encodeURIComponent("/documents")
-        return
-      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const raw = (await res.json()) as { documents: DocumentRow[] }
       setDocs(raw.documents)

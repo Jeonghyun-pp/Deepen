@@ -9,7 +9,7 @@
 
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import { and, count, eq } from "drizzle-orm"
+import { and, count, eq, isNotNull } from "drizzle-orm"
 import { requireUser } from "@/lib/auth/require-user"
 import { isAdminEmail } from "@/lib/auth/require-admin"
 import { db } from "@/lib/db"
@@ -21,7 +21,6 @@ import { getActiveTier, getUsageStat } from "@/lib/billing/quota"
 import { QuotaCard } from "@/app/v2/billing/_components/QuotaCard"
 import { DailyChallengeBadge } from "@/app/v2/_components/DailyChallengeBadge"
 import { LobbyHeader } from "@/app/v2/_components/LobbyHeader"
-import { LogoutButton } from "./LogoutButton"
 import { LectureStartButton } from "./LectureStartButton"
 
 export const dynamic = "force-dynamic"
@@ -56,12 +55,19 @@ export default async function HomePage({ searchParams }: Props) {
     .from(nodes)
     .where(and(eq(nodes.type, "item"), eq(nodes.status, "published")))
 
-  // E2E 수정: asc → desc. 가장 오래된 item 으로 가면 옛 시드 (PDF 미연결) 로 진입.
   // 가장 최근 published item 이 활성 시드일 가능성이 높음.
+  // itemAnswer + itemChoices 둘 다 채워진 item 만 — admin quick-create 로 만든 빈 stub 제외 (POST /api/attempts → item_missing_answer 차단).
   const [firstItem] = await db
     .select({ id: nodes.id })
     .from(nodes)
-    .where(and(eq(nodes.type, "item"), eq(nodes.status, "published")))
+    .where(
+      and(
+        eq(nodes.type, "item"),
+        eq(nodes.status, "published"),
+        isNotNull(nodes.itemAnswer),
+        isNotNull(nodes.itemChoices),
+      ),
+    )
     .orderBy(desc(nodes.createdAt))
     .limit(1)
 
@@ -102,7 +108,6 @@ export default async function HomePage({ searchParams }: Props) {
               variant="mini"
             />
             <span className="hidden max-w-[160px] truncate sm:inline">{user.email}</span>
-            <LogoutButton />
           </>
         }
       />

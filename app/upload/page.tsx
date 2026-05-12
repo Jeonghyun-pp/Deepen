@@ -1,9 +1,11 @@
-"use client"
-
 import Link from "next/link"
 import UploadPanel from "@/app/_components/UploadPanel"
+import { requireUser } from "@/lib/auth/require-user"
 
-export default function UploadPage() {
+export const dynamic = "force-dynamic"
+
+export default async function UploadPage() {
+  const { user } = await requireUser()
   return (
     <main className="min-h-screen bg-neutral-100">
       <div className="max-w-2xl mx-auto p-3 md:p-6 space-y-3">
@@ -15,7 +17,7 @@ export default function UploadPage() {
         </header>
 
         <div className="rounded-2xl shadow-sm bg-white px-6 py-6">
-          <UploadPanel />
+          <UploadPanel userId={user.id} />
         </div>
       </div>
     </main>

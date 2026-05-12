@@ -54,10 +54,10 @@ const schema = z.object({
   // OpenAlex (옛 PDF 메타데이터 보강 — 옵션). 검증 없이 통과 (구 product 잔재).
   OPENALEX_EMAIL: z.string().optional(),
 
-  // 임시 로그인 우회 — preview 배포에서 인증 friction 제거용. 둘 다 set 돼야 활성.
-  // production 에는 절대 set 금지. 나중에 정식 로그인 복귀 시 env 만 unset.
-  DEV_AUTH_BYPASS_USER_ID: z.string().uuid().optional(),
-  DEV_AUTH_BYPASS_EMAIL: z.string().email().optional(),
+  // 로그인 프로세스 제거 — 모든 server/route handler 가 이 user 로 작동.
+  // .env.local 에 본인 user_id + email 을 세팅. ADMIN_EMAILS 매칭 시 admin 통과.
+  DEV_AUTH_BYPASS_USER_ID: z.string().uuid(),
+  DEV_AUTH_BYPASS_EMAIL: z.string().email(),
 })
 
 export type Env = z.infer<typeof schema>
@@ -91,6 +91,4 @@ export const features = {
   pdfExtraction: !!env.OPENAI_API_KEY,
   adminConfigured: env.ADMIN_EMAILS.split(",").map((s) => s.trim()).filter(Boolean).length > 0,
   tossLive: !!(env.TOSS_CLIENT_KEY && env.TOSS_SECRET_KEY),
-  /** 임시 로그인 우회 — 두 env 모두 set 시에만 활성. */
-  authBypass: !!(env.DEV_AUTH_BYPASS_USER_ID && env.DEV_AUTH_BYPASS_EMAIL),
 } as const

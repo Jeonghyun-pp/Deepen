@@ -34,11 +34,8 @@ function Nav() {
           DEEPEN<span className="opacity-40">.LAB</span>
         </Link>
         <div className="flex items-center gap-1 text-xs">
-          <Link href="/login" className="text-black/55 hover:text-black/85 px-3 py-1.5 transition">
-            로그인
-          </Link>
           <Link
-            href="/v2/onboard/profile"
+            href="/v2/home"
             className="text-[#15803D] hover:underline px-3 py-1.5 font-medium transition"
           >
             시작하기 →

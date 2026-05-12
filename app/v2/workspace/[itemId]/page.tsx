@@ -83,6 +83,11 @@ export default async function WorkspacePage({ params, searchParams }: Props) {
     )
     .limit(1)
   if (!item) notFound()
+  // 빈 stub item (어드민 quick-create 후 published 된 채로 답·선택지 미입력) 가드.
+  // 진입 시점에 home 으로 보내 새 redirect 후보를 받게 한다.
+  if (!item.itemAnswer || !item.itemChoices) {
+    redirect("/v2/home")
+  }
 
   const patternRows = await db
     .select({ patternId: edges.sourceNodeId })

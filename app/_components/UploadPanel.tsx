@@ -26,9 +26,11 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 export default function UploadPanel({
+  userId,
   compact = false,
   onDocumentReady,
 }: {
+  userId: string
   compact?: boolean
   /** 문서 하나가 처음으로 ready 상태가 됐을 때 호출 — 그래프 refetch 훅 */
   onDocumentReady?: (doc: Document) => void
@@ -39,11 +41,6 @@ export default function UploadPanel({
   const refresh = useCallback(async () => {
     try {
       const res = await fetch("/api/documents", { credentials: "include" })
-      if (res.status === 401) {
-        window.location.href =
-          "/login?redirect=" + encodeURIComponent(window.location.pathname)
-        return
-      }
       if (!res.ok) return
       const data = await res.json()
       setDocs((prev) => {
@@ -69,36 +66,27 @@ export default function UploadPanel({
   // Supabase Realtime: documents 테이블 변경을 실시간 수신 (UPDATE/INSERT/DELETE)
   useEffect(() => {
     const supabase = createSupabaseBrowserClient()
-    let cancelled = false
-    let channel: ReturnType<typeof supabase.channel> | null = null
-    ;(async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      if (!user || cancelled) return
-      // Strict Mode 더블-마운트 시 같은 topic 으로 .on() after .subscribe() 충돌이 나지 않도록 topic 에 인스턴스 suffix.
-      const topic = `documents:${user.id}:${Math.random().toString(36).slice(2, 10)}`
-      channel = supabase
-        .channel(topic)
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "documents",
-            filter: `user_id=eq.${user.id}`,
-          },
-          () => {
-            refresh()
-          },
-        )
-        .subscribe()
-    })()
+    // Strict Mode 더블-마운트 시 같은 topic 으로 .on() after .subscribe() 충돌이 나지 않도록 topic 에 인스턴스 suffix.
+    const topic = `documents:${userId}:${Math.random().toString(36).slice(2, 10)}`
+    const channel = supabase
+      .channel(topic)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "documents",
+          filter: `user_id=eq.${userId}`,
+        },
+        () => {
+          refresh()
+        },
+      )
+      .subscribe()
     return () => {
-      cancelled = true
-      if (channel) supabase.removeChannel(channel)
+      supabase.removeChannel(channel)
     }
-  }, [refresh])
+  }, [userId, refresh])
 
   // Fallback polling — in-flight 문서 있을 때만, 느린 주기로
   useEffect(() => {
