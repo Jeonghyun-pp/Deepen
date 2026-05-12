@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
-const PROTECTED_PREFIXES = ["/graph", "/upload"]
+const PROTECTED_PREFIXES = ["/v2", "/admin", "/upload", "/documents"]
 
 export async function updateSession(request: NextRequest) {
   // 기본 응답 — cookies setAll이 호출되면 아래에서 재생성된다

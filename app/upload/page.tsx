@@ -9,8 +9,8 @@ export default function UploadPage() {
       <div className="max-w-2xl mx-auto p-3 md:p-6 space-y-3">
         <header className="rounded-2xl shadow-sm bg-white px-6 py-4 flex items-center justify-between">
           <h1 className="text-base font-semibold">문서 업로드</h1>
-          <Link href="/graph" className="text-sm text-neutral-600 underline">
-            그래프로 돌아가기
+          <Link href="/v2/home" className="text-sm text-neutral-600 underline">
+            홈으로
           </Link>
         </header>
 

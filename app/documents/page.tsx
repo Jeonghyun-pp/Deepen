@@ -114,8 +114,8 @@ export default function DocumentsPage() {
             <Link href="/upload" className="text-neutral-700 underline">
               업로드
             </Link>
-            <Link href="/graph" className="text-neutral-600 underline">
-              그래프
+            <Link href="/v2/home" className="text-neutral-600 underline">
+              홈
             </Link>
           </div>
         </header>
