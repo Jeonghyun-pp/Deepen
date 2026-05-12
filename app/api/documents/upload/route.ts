@@ -9,7 +9,7 @@ import { processNextDocumentJob } from "@/lib/pipeline/document-job-runner"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
-export const maxDuration = 300 // Vercel 배포 시 백그라운드 여유
+export const maxDuration = 60 // Vercel Hobby 한도 (Pro 시 300 복원 가능)
 
 const MAX_FILE_BYTES = 30 * 1024 * 1024 // 30 MB
 

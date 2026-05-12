@@ -1,10 +1,7 @@
 {
+  "regions": ["icn1"],
   "crons": [
-    { "path": "/api/cron/embed-items", "schedule": "0 * * * *" },
     { "path": "/api/cron/daily-challenge", "schedule": "30 15 * * *" },
-    { "path": "/api/cron/weekly-snapshot", "schedule": "0 14 * * 6" },
-    { "path": "/api/cron/parent-report", "schedule": "0 0 * * 0" },
-    { "path": "/api/cron/billing-renewal", "schedule": "0 18 * * *" },
-    { "path": "/api/cron/document-jobs", "schedule": "*/10 * * * *" }
+    { "path": "/api/cron/document-jobs", "schedule": "0 18 * * *" }
   ]
 }

@@ -18,7 +18,7 @@ import { checkCronAuth } from "@/lib/api/cron-auth"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
-export const maxDuration = 300
+export const maxDuration = 60
 
 const BATCH_LIMIT = 10
 

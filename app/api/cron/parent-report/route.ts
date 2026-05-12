@@ -20,7 +20,7 @@ import { sendEmail } from "@/lib/email/send"
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 // 보호자 사용자별 데이터 build + Resend 이메일 발송. 사용자 수에 비례. 5분.
-export const maxDuration = 300
+export const maxDuration = 60
 
 const ONE_WEEK_MS = 7 * 24 * 3600 * 1000
 
